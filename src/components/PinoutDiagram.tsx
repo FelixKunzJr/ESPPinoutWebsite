@@ -1,45 +1,45 @@
 import { useApp } from '../context/AppContext'
 import { filterPins } from '../utils/filterPins'
-import type { Pin } from '../types/chip'
+import type { Pin, Chip } from '../types/chip'
 
-const ROW_H = 28
+const ROW_H = 26
 
-// Badge background + text color per function name
 function getBadge(name: string): { bg: string; text: string } {
   const u = name.toUpperCase()
-  if (u === 'GND')                                             return { bg: '#374151', text: '#9ca3af' }
-  if (/^3V3$|^VCC$|^VIN$|^VBUS$/.test(u))                    return { bg: '#7f1d1d', text: '#fca5a5' }
-  if (/^EN$|^RST$|^RESET$/.test(u))                          return { bg: '#134e4a', text: '#5eead4' }
-  if (/^ADC1_/.test(u))                                       return { bg: '#7c2d12', text: '#fed7aa' }
-  if (/^ADC2_/.test(u))                                       return { bg: '#92400e', text: '#fde68a' }
-  if (/^DAC/.test(u))                                         return { bg: '#713f12', text: '#fde047' }
-  if (/^TOUCH/.test(u))                                       return { bg: '#164e63', text: '#67e8f9' }
-  if (/^MT(DI|CK|MS|DO)$/.test(u))                           return { bg: '#292524', text: '#78716c' }
-  if (/^(VSPI|HSPI|V_SPI)|MOSI$|MISO$|^SCK$/.test(u))       return { bg: '#1e3a8a', text: '#93c5fd' }
-  if (/SDA$|SCL$/.test(u))                                    return { bg: '#1e40af', text: '#bfdbfe' }
-  if (/^U[0-2](TXD|RXD|RTS|CTS)/.test(u))                   return { bg: '#14532d', text: '#86efac' }
-  if (/^GPIO/.test(u))                                        return { bg: '#3b0764', text: '#d8b4fe' }
-  if (/^SD_/.test(u))                                         return { bg: '#4a1d96', text: '#c4b5fd' }
-  if (/USB|JTAG/.test(u))                                     return { bg: '#831843', text: '#f9a8d4' }
-  if (/CLK|XTAL/.test(u))                                     return { bg: '#0c4a6e', text: '#7dd3fc' }
-  return                                                              { bg: '#1f2937', text: '#9ca3af' }
+  if (u === 'GND')                                                          return { bg: '#111827', text: '#9ca3af' }
+  if (/^3V3$|^VCC$|^3\.3V$/.test(u))                                      return { bg: '#dc2626', text: '#fff' }
+  if (/^VIN$|^VBUS$|^5V$|^POWER$/.test(u))                                return { bg: '#b91c1c', text: '#fff' }
+  if (/^EN$|^RST$|^RESET$|^ENABLE$/.test(u))                              return { bg: '#374151', text: '#e5e7eb' }
+  if (/^ADC1/.test(u))                                                      return { bg: '#ea580c', text: '#fff' }
+  if (/^ADC2/.test(u))                                                      return { bg: '#d97706', text: '#fff' }
+  if (/^DAC\d?$/.test(u))                                                   return { bg: '#ca8a04', text: '#fff' }
+  if (/^TOUCH/.test(u))                                                     return { bg: '#16a34a', text: '#fff' }
+  if (/^RTC/.test(u))                                                       return { bg: '#0f766e', text: '#fff' }
+  if (/MOSI$|MISO$|^SCK$|VSPI|HSPI/.test(u))                              return { bg: '#2563eb', text: '#fff' }
+  if (/SDA$|SCL$/.test(u))                                                  return { bg: '#7c3aed', text: '#fff' }
+  if (/^U[0-9]?(TXD?|RXD?|CTS|RTS)$|^TX\d?$|^RX\d?$/.test(u))          return { bg: '#0891b2', text: '#fff' }
+  if (/^GPIO\d/.test(u))                                                    return { bg: '#6d28d9', text: '#fff' }
+  if (/^SD_/.test(u))                                                       return { bg: '#4338ca', text: '#fff' }
+  if (/USB|JTAG/.test(u))                                                   return { bg: '#be185d', text: '#fff' }
+  if (/CLK|XTAL/.test(u))                                                   return { bg: '#0369a1', text: '#fff' }
+  if (/^MT(DI|CK|MS|DO)$/.test(u))                                         return { bg: '#292524', text: '#a8a29e' }
+  if (/^VP$|^VN$/.test(u))                                                  return { bg: '#374151', text: '#d1d5db' }
+  return                                                                            { bg: '#374151', text: '#9ca3af' }
 }
 
-// Dot + line color by primary capability
 function connectorColor(pin: Pin): string {
-  if (!pin.isUsable || pin.constraints.some(c => c.severity === 'danger')) return '#4b5563'
+  if (!pin.isUsable || pin.constraints.some(c => c.severity === 'danger')) return '#374151'
   if (pin.capabilities.includes('adc1'))   return '#ea580c'
-  if (pin.capabilities.includes('adc2'))   return '#f97316'
+  if (pin.capabilities.includes('adc2'))   return '#d97706'
   if (pin.capabilities.includes('dac'))    return '#ca8a04'
-  if (pin.capabilities.includes('touch'))  return '#0891b2'
-  if (pin.capabilities.includes('i2c'))    return '#3b82f6'
-  if (pin.capabilities.includes('spi'))    return '#6366f1'
-  if (pin.capabilities.includes('uart'))   return '#22c55e'
+  if (pin.capabilities.includes('touch'))  return '#16a34a'
+  if (pin.capabilities.includes('i2c'))    return '#7c3aed'
+  if (pin.capabilities.includes('spi'))    return '#2563eb'
+  if (pin.capabilities.includes('uart'))   return '#0891b2'
   if (pin.constraints.some(c => c.id === 'strapping_pin')) return '#eab308'
   return '#6b7280'
 }
 
-// Put GPIO badge closest to chip (last on left, first on right)
 function sortedNames(names: string[], side: 'left' | 'right'): string[] {
   const gpio = names.filter(n => /^GPIO\d/.test(n))
   const other = names.filter(n => !/^GPIO\d/.test(n))
@@ -49,22 +49,23 @@ function sortedNames(names: string[], side: 'left' | 'right'): string[] {
 interface PinRowProps {
   pin: Pin
   side: 'left' | 'right'
+  pinIndex: number
   isSelected: boolean
   isFiltered: boolean
   mappingLabel?: string
   onClick: () => void
 }
 
-function PinRow({ pin, side, isSelected, isFiltered, mappingLabel, onClick }: PinRowProps) {
+function PinRow({ pin, side, pinIndex, isSelected, isFiltered, mappingLabel, onClick }: PinRowProps) {
   const color = connectorColor(pin)
   const names = sortedNames(pin.names, side)
 
-  const badgeContent = (
+  const badgeList = (
     <>
       {mappingLabel && (
         <span
-          className="font-mono text-[9px] font-semibold px-1.5 flex-shrink-0 rounded"
-          style={{ background: 'rgba(59,130,246,0.25)', color: '#93c5fd', lineHeight: '16px', height: 16 }}
+          className="font-mono font-bold rounded-sm flex-shrink-0"
+          style={{ background: 'rgba(99,102,241,0.4)', color: '#a5b4fc', fontSize: 9, lineHeight: '15px', height: 15, padding: '0 5px' }}
         >
           {mappingLabel}
         </span>
@@ -74,8 +75,8 @@ function PinRow({ pin, side, isSelected, isFiltered, mappingLabel, onClick }: Pi
         return (
           <span
             key={name}
-            className="font-mono text-[9px] font-semibold px-1.5 flex-shrink-0 rounded"
-            style={{ background: bg, color: text, lineHeight: '16px', height: 16 }}
+            className="font-mono font-bold rounded-sm flex-shrink-0"
+            style={{ background: bg, color: text, fontSize: 9, lineHeight: '15px', height: 15, padding: '0 5px' }}
           >
             {name}
           </span>
@@ -84,40 +85,53 @@ function PinRow({ pin, side, isSelected, isFiltered, mappingLabel, onClick }: Pi
     </>
   )
 
-  const dot = (
+  const pinNumBox = (
+    <div
+      className="flex-shrink-0 flex items-center justify-center font-mono"
+      style={{ width: 16, height: 16, background: '#0d1520', border: '1px solid #1e2d40', borderRadius: 2, fontSize: 7, fontWeight: 700, color: '#3d5068' }}
+    >
+      {pinIndex}
+    </div>
+  )
+
+  const solderDot = (
     <div
       className="flex-shrink-0 rounded-full"
-      style={{ width: 8, height: 8, background: color }}
+      style={{ width: 8, height: 8, background: color, boxShadow: `0 0 4px ${color}80` }}
     />
   )
 
-  const line = (
-    <div className="flex-shrink-0" style={{ width: 14, height: 1, background: '#374151' }} />
+  const connLine = (
+    <div className="flex-shrink-0" style={{ width: 12, height: 1.5, background: color + '80' }} />
   )
 
   return (
     <div
       onClick={onClick}
-      className={`flex items-center cursor-pointer transition-colors select-none
-        ${isFiltered ? '' : 'opacity-[0.1]'}
-        ${isSelected ? 'bg-green-950/40' : 'hover:bg-white/[0.04]'}
+      className={`flex items-center cursor-pointer select-none transition-colors
+        ${isFiltered ? '' : 'opacity-[0.07]'}
+        ${isSelected ? 'bg-violet-950/40' : 'hover:bg-white/[0.03]'}
       `}
-      style={{ height: ROW_H, borderBottom: '1px solid #0f172a' }}
+      style={{ height: ROW_H, borderBottom: '1px solid #050a10' }}
     >
       {side === 'left' ? (
         <>
-          <div className="flex-1 flex items-center justify-end gap-1 min-w-0 overflow-hidden pr-1.5">
-            {badgeContent}
+          <div className="flex-1 flex items-center justify-end gap-[3px] min-w-0 overflow-hidden pr-1.5">
+            {badgeList}
           </div>
-          {line}
-          {dot}
+          {connLine}
+          {pinNumBox}
+          <div style={{ width: 4, flexShrink: 0 }} />
+          {solderDot}
         </>
       ) : (
         <>
-          {dot}
-          {line}
-          <div className="flex-1 flex items-center justify-start gap-1 min-w-0 overflow-hidden pl-1.5">
-            {badgeContent}
+          {solderDot}
+          <div style={{ width: 4, flexShrink: 0 }} />
+          {pinNumBox}
+          {connLine}
+          <div className="flex-1 flex items-center justify-start gap-[3px] min-w-0 overflow-hidden pl-1.5">
+            {badgeList}
           </div>
         </>
       )}
@@ -125,85 +139,89 @@ function PinRow({ pin, side, isSelected, isFiltered, mappingLabel, onClick }: Pi
   )
 }
 
-function ChipBody({ family }: { family: string }) {
-  // Antenna comb: alternating heights for a PCB trace look
-  const combHeights = [8, 14, 8, 18, 8, 14, 8, 18, 8, 14, 8]
+function ChipBody({ chip }: { chip: Chip }) {
+  const combs = [5, 10, 5, 16, 5, 12, 5, 18, 5, 12, 5, 16, 5, 10, 5]
+  const radioLabel = [chip.hasWifi && 'Wi-Fi', chip.hasBle && 'BLE', chip.hasBluetooth && 'BT'].filter(Boolean).join(' · ')
 
   return (
     <div
       className="flex-shrink-0 self-stretch flex flex-col"
-      style={{ width: 116, background: '#090e14', border: '2px solid #2d3748', borderRadius: 3 }}
+      style={{ width: 172, background: '#0c1117', border: '1.5px solid #1e3050', borderRadius: 4 }}
     >
-      {/* Antenna section */}
+      {/* PCB antenna comb */}
       <div
-        className="flex justify-center items-end gap-[2px] flex-shrink-0"
-        style={{ paddingTop: 8, paddingBottom: 6, borderBottom: '1px solid #1f2937' }}
+        className="flex-shrink-0 flex justify-center items-end gap-[2px]"
+        style={{ padding: '8px 14px 5px', background: '#0e1825', borderBottom: '1px solid #18283c' }}
       >
-        {combHeights.map((h, i) => (
-          <div key={i} style={{ width: 3, height: h, background: '#2d3748', borderRadius: 1 }} />
+        {combs.map((h, i) => (
+          <div
+            key={i}
+            style={{ width: 3.5, height: h, background: i % 2 === 0 ? '#1e3050' : '#263d60', borderRadius: '1px 1px 0 0' }}
+          />
         ))}
       </div>
 
-      {/* Main body content */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-2 px-3">
+      {/* Module body */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-4">
         {/* Wi-Fi arcs */}
-        <div className="relative flex items-end justify-center" style={{ width: 36, height: 22 }}>
-          <div
-            className="absolute rounded-full"
-            style={{ width: 5, height: 5, background: '#374151', bottom: 0, left: '50%', transform: 'translateX(-50%)' }}
-          />
-          {[14, 24, 34].map((w, i) => (
+        <div className="relative flex items-end justify-center" style={{ width: 32, height: 22 }}>
+          <div className="absolute rounded-full" style={{ width: 4, height: 4, background: '#1e3050', bottom: 0, left: '50%', transform: 'translateX(-50%)' }} />
+          {[8, 16, 24].map((w, i) => (
             <div
               key={i}
               className="absolute"
               style={{
                 width: w, height: w / 2,
-                borderTop: `2px solid ${i === 2 ? '#1f2937' : '#374151'}`,
-                borderRadius: '50% 50% 0 0',
-                bottom: 3,
+                border: `1.5px solid ${['#2d4a6e', '#1e3558', '#162845'][i]}`,
+                borderBottom: 'none',
+                borderRadius: `${w}px ${w}px 0 0`,
+                bottom: 2, left: '50%', transform: 'translateX(-50%)',
               }}
             />
           ))}
         </div>
 
-        {/* Chip text */}
-        <div className="text-center leading-tight">
-          <div className="font-mono text-[7px] tracking-widest mb-1" style={{ color: '#4b5563' }}>
-            Wi-Fi · BT · BLE
-          </div>
-          <div className="font-mono font-bold tracking-wide" style={{ fontSize: 10, color: '#6b7280' }}>
-            {family}
-          </div>
-          <div className="font-mono text-[6px] mt-1" style={{ color: '#374151', letterSpacing: '0.1em' }}>
+        {/* Branding */}
+        <div className="text-center" style={{ lineHeight: 1.5 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: '#4a6580', letterSpacing: '0.2em', fontFamily: 'monospace' }}>
             ESPRESSIF
           </div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#5a7a96', letterSpacing: '0.06em', fontFamily: 'monospace', marginTop: 4 }}>
+            {chip.family}
+          </div>
+          {radioLabel && (
+            <div style={{ fontSize: 7, color: '#1e3050', fontFamily: 'monospace', marginTop: 3, letterSpacing: '0.05em' }}>
+              {radioLabel}
+            </div>
+          )}
         </div>
 
-        <div className="font-mono text-[6px]" style={{ color: '#1f2937' }}>
+        <div style={{ fontSize: 7, color: '#18283c', fontFamily: 'monospace', letterSpacing: '0.08em' }}>
           FCC ID: 2AC7Z
         </div>
       </div>
 
-      {/* Ground thermal pad */}
-      <div className="flex justify-center flex-shrink-0 pb-2">
-        <div style={{ width: 56, height: 10, background: '#111827', border: '1px solid #1f2937', borderRadius: 1 }} />
+      {/* GND thermal pad */}
+      <div className="flex-shrink-0 flex justify-center pb-2 pt-1" style={{ borderTop: '1px solid #18283c' }}>
+        <div style={{ width: 64, height: 8, background: '#080e14', border: '1px solid #1e3050', borderRadius: 1 }} />
       </div>
     </div>
   )
 }
 
 const LEGEND = [
-  { bg: '#7f1d1d', text: '#fca5a5', label: 'Power' },
-  { bg: '#374151', text: '#9ca3af', label: 'GND' },
-  { bg: '#7c2d12', text: '#fed7aa', label: 'ADC1 (WiFi-safe)' },
-  { bg: '#92400e', text: '#fde68a', label: 'ADC2 (WiFi conflict)' },
-  { bg: '#713f12', text: '#fde047', label: 'DAC' },
-  { bg: '#164e63', text: '#67e8f9', label: 'Touch' },
-  { bg: '#3b0764', text: '#d8b4fe', label: 'GPIO' },
-  { bg: '#1e3a8a', text: '#93c5fd', label: 'SPI' },
-  { bg: '#1e40af', text: '#bfdbfe', label: 'I2C' },
-  { bg: '#14532d', text: '#86efac', label: 'UART' },
-  { bg: '#0c4a6e', text: '#7dd3fc', label: 'Clock' },
+  { bg: '#dc2626', text: '#fff', label: 'Power' },
+  { bg: '#111827', text: '#9ca3af', label: 'GND' },
+  { bg: '#ea580c', text: '#fff', label: 'ADC1 (WiFi-safe)' },
+  { bg: '#d97706', text: '#fff', label: 'ADC2 (WiFi conflict)' },
+  { bg: '#ca8a04', text: '#fff', label: 'DAC' },
+  { bg: '#16a34a', text: '#fff', label: 'Touch' },
+  { bg: '#6d28d9', text: '#fff', label: 'GPIO' },
+  { bg: '#2563eb', text: '#fff', label: 'SPI' },
+  { bg: '#7c3aed', text: '#fff', label: 'I2C' },
+  { bg: '#0891b2', text: '#fff', label: 'UART' },
+  { bg: '#0369a1', text: '#fff', label: 'Clock' },
+  { bg: '#374151', text: '#e5e7eb', label: 'EN/RST' },
 ] as const
 
 export function PinoutDiagram() {
@@ -219,21 +237,18 @@ export function PinoutDiagram() {
     setSelectedPin(selectedPin?.gpio === pin.gpio ? null : pin)
 
   return (
-    <div
-      className="rounded-xl border overflow-hidden"
-      style={{ background: '#060b10', borderColor: '#1f2937' }}
-    >
-      {/* Diagram */}
+    <div className="rounded-xl border overflow-hidden" style={{ background: '#060b12', borderColor: '#1a2535' }}>
       <div className="p-4 pb-3 overflow-x-auto">
         <div className="flex items-stretch justify-center min-w-fit mx-auto">
 
           {/* Left pin bank */}
           <div className="flex flex-col">
-            {leftPins.map(pin => (
+            {leftPins.map((pin, i) => (
               <PinRow
                 key={pin.gpio}
                 pin={pin}
                 side="left"
+                pinIndex={i + 1}
                 isSelected={selectedPin?.gpio === pin.gpio}
                 isFiltered={filteredSet.has(pin.gpio)}
                 mappingLabel={mapping.find(a => a.gpio === pin.gpio)?.label}
@@ -242,16 +257,17 @@ export function PinoutDiagram() {
             ))}
           </div>
 
-          {/* IC body */}
-          <ChipBody family={chip.family} />
+          {/* IC module body */}
+          <ChipBody chip={chip} />
 
           {/* Right pin bank */}
           <div className="flex flex-col">
-            {rightPins.map(pin => (
+            {rightPins.map((pin, i) => (
               <PinRow
                 key={pin.gpio}
                 pin={pin}
                 side="right"
+                pinIndex={leftPins.length + i + 1}
                 isSelected={selectedPin?.gpio === pin.gpio}
                 isFiltered={filteredSet.has(pin.gpio)}
                 mappingLabel={mapping.find(a => a.gpio === pin.gpio)?.label}
@@ -264,15 +280,12 @@ export function PinoutDiagram() {
       </div>
 
       {/* Legend */}
-      <div
-        className="px-4 py-2.5 flex flex-wrap gap-x-4 gap-y-1.5"
-        style={{ borderTop: '1px solid #1f2937' }}
-      >
+      <div className="px-4 py-2.5 flex flex-wrap gap-x-4 gap-y-1.5" style={{ borderTop: '1px solid #1a2535' }}>
         {LEGEND.map(({ bg, text, label }) => (
           <span key={label} className="flex items-center gap-1.5" style={{ fontSize: 10 }}>
             <span
-              className="font-mono text-[8px] font-semibold px-1.5 rounded flex-shrink-0"
-              style={{ background: bg, color: text, lineHeight: '14px', height: 14 }}
+              className="font-mono font-bold rounded-sm flex-shrink-0"
+              style={{ background: bg, color: text, fontSize: 8, lineHeight: '14px', height: 14, padding: '0 4px' }}
             >
               {label.split(' ')[0]}
             </span>
