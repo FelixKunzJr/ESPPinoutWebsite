@@ -36,6 +36,55 @@ const BOOT_FLOAT = {
   description: 'This pin must not be driven LOW or HIGH by external circuitry at boot or the ESP32 may enter an unexpected boot mode.',
 }
 
+// ESP-WROOM-32 / WROOM-32D / WROOM-32U 38-pad castellated package
+const WROOM32_LAYOUT = {
+  name: 'ESP-WROOM-32',
+  left: [
+    { pinNumber:  1, label: 'GND' },
+    { pinNumber:  2, label: '3V3' },
+    { pinNumber:  3, label: 'EN'  },
+    { pinNumber:  4, gpio: 36 },
+    { pinNumber:  5, gpio: 39 },
+    { pinNumber:  6, gpio: 34 },
+    { pinNumber:  7, gpio: 35 },
+    { pinNumber:  8, gpio: 32 },
+    { pinNumber:  9, gpio: 33 },
+    { pinNumber: 10, gpio: 25 },
+    { pinNumber: 11, gpio: 26 },
+    { pinNumber: 12, gpio: 27 },
+    { pinNumber: 13, gpio: 14 },
+    { pinNumber: 14, gpio: 12 },
+  ],
+  bottom: [
+    { pinNumber: 15, label: 'GND' },
+    { pinNumber: 16, gpio: 13 },
+    { pinNumber: 17, gpio:  9 },
+    { pinNumber: 18, gpio: 10 },
+    { pinNumber: 19, gpio: 11 },
+    { pinNumber: 20, gpio:  6 },
+    { pinNumber: 21, gpio:  7 },
+    { pinNumber: 22, gpio:  8 },
+    { pinNumber: 23, gpio: 15 },
+    { pinNumber: 24, gpio:  2 },
+  ],
+  right: [
+    { pinNumber: 38, label: 'GND' },
+    { pinNumber: 37, gpio: 23 },
+    { pinNumber: 36, gpio: 22 },
+    { pinNumber: 35, gpio:  1 },
+    { pinNumber: 34, gpio:  3 },
+    { pinNumber: 33, gpio: 21 },
+    { pinNumber: 32, label: 'NC' },
+    { pinNumber: 31, gpio: 19 },
+    { pinNumber: 30, gpio: 18 },
+    { pinNumber: 29, gpio:  5 },
+    { pinNumber: 28, gpio: 17 },
+    { pinNumber: 27, gpio: 16 },
+    { pinNumber: 26, gpio:  4 },
+    { pinNumber: 25, gpio:  0 },
+  ],
+}
+
 export const esp32: Chip = {
   id: 'esp32',
   name: 'ESP32 (WROOM / WROVER / DevKitC)',
@@ -54,6 +103,7 @@ export const esp32: Chip = {
     'GPIO12 (MTDI) must be LOW at boot for 3.3 V flash; if pulled HIGH the ESP32 configures 1.8 V flash and may not start.',
     'GPIO15 (MTDO) must be HIGH at boot to suppress startup log on UART0.',
   ],
+  packageLayout: WROOM32_LAYOUT,
   pins: [
     {
       gpio: 0,

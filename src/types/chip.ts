@@ -46,6 +46,7 @@ export interface Chip {
   datasheetUrl: string
   notes: string[]            // chip-level gotchas
   pins: Pin[]
+  packageLayout?: PackageLayout
 }
 
 export type MappingRole =
@@ -59,6 +60,22 @@ export interface PinAssignment {
   role: MappingRole
   label: string
 }
+
+// Physical package layout — maps castellated pads to GPIO / special names
+export interface LayoutPin {
+  pinNumber: number     // physical pad number (e.g. 1–38 on WROOM-32)
+  gpio?: number         // present for GPIO pads
+  label?: string        // 'GND' | '3V3' | 'EN' | 'NC' for non-GPIO pads
+}
+
+export interface PackageLayout {
+  name: string          // e.g. 'ESP-WROOM-32'
+  left:   LayoutPin[]   // top → bottom
+  right:  LayoutPin[]   // top → bottom (pin 38 first for WROOM-32)
+  bottom: LayoutPin[]   // left → right
+}
+
+// Add packageLayout?: PackageLayout to Chip (optional; falls back to 50/50 split)
 
 export type FilterKey =
   | 'all'
