@@ -11,6 +11,7 @@ export type ConstraintId =
   | 'input_only'
   | 'strapping_pin'
   | 'flash_reserved'
+  | 'psram_reserved'
   | 'boot_must_float'
   | 'boot_must_high'
   | 'boot_must_low'
