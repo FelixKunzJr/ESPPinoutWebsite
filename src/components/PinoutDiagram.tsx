@@ -263,6 +263,58 @@ function BottomPinCol({ layoutPin, pin, colWidth, isSelected, isFiltered, onClic
   )
 }
 
+// ─── Top pin column (mirror of bottom — MINI modules have a top GND ring) ──────
+
+function TopPinCol({ layoutPin, pin, colWidth, isSelected, isFiltered, onClick }: BottomPinColProps) {
+  const color = pin ? connectorColor(pin) : '#4b5563'
+  const shortLabel = pin
+    ? (pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0] ?? `${pin.gpio}`)
+    : (layoutPin.label ?? 'NC')
+
+  const { bg, text } = getBadge(pin ? shortLabel : (layoutPin.label ?? 'NC'))
+
+  const hasDanger  = !!pin?.constraints.some(c => c.severity === 'danger')
+  const hasWarning = !hasDanger && !!pin?.constraints.length
+
+  const isActive = isFiltered || !pin
+
+  return (
+    <div
+      onClick={onClick}
+      className={`flex flex-col items-center cursor-pointer select-none transition-colors
+        ${isActive ? '' : 'opacity-[0.07]'}
+        ${isSelected ? 'bg-violet-950/40 rounded' : 'hover:bg-white/[0.03] rounded'}
+      `}
+      style={{ width: colWidth, paddingTop: 4 }}
+    >
+      <span
+        className="font-mono font-bold rounded-sm"
+        style={{
+          background: bg, color: text,
+          fontSize: 8, padding: '2px 3px', marginBottom: 2,
+          writingMode: 'vertical-rl', maxHeight: 56, overflow: 'hidden', lineHeight: 1.1,
+        }}
+      >
+        {shortLabel}
+      </span>
+      {hasDanger && (
+        <div className="font-mono font-bold rounded flex items-center justify-center flex-shrink-0"
+          style={{ background: '#7f1d1d', color: '#fca5a5', fontSize: 11, width: 18, height: 18, border: '1px solid #ef4444', marginBottom: 2 }}>✕</div>
+      )}
+      {hasWarning && (
+        <div className="font-mono font-bold rounded flex items-center justify-center flex-shrink-0"
+          style={{ background: '#78350f', color: '#fde68a', fontSize: 11, width: 18, height: 18, border: '1px solid #f59e0b', marginBottom: 2 }}>⚠</div>
+      )}
+      {!hasDanger && !hasWarning && <div style={{ height: 20 }} />}
+      <div className="font-mono" style={{ fontSize: 7, fontWeight: 700, color: '#3d5068', marginBottom: 2 }}>
+        {layoutPin.pinNumber}
+      </div>
+      <div className="rounded-full" style={{ width: 8, height: 8, background: color, boxShadow: `0 0 4px ${color}60` }} />
+      <div style={{ width: 1.5, height: 14, background: color + '70' }} />
+    </div>
+  )
+}
+
 // ─── SVG Chip body ────────────────────────────────────────────────────────────
 
 // Default module identity for chips that don't declare one yet.
@@ -309,12 +361,12 @@ function dataMatrix(seed: string, x: number, y: number, cell: number): ReactNode
   return <g opacity="0.85">{cells}</g>
 }
 
-function ChipBody({ chip, sideHeight, bottomCount }: { chip: Chip; sideHeight: number; bottomCount: number }) {
+function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHeight: number; bottomCount: number; width: number }) {
   const m = resolveModule(chip)
   const isMini = m.form === 'mini'
   const uid = chip.id
 
-  const W = isMini ? 190 : Math.max(220, bottomCount * 26)
+  const W = width
   const H = sideHeight
   const cx = W / 2
 
@@ -472,11 +524,13 @@ export function PinoutDiagram() {
   let leftLayout:   LayoutPin[]
   let rightLayout:  LayoutPin[]
   let bottomLayout: LayoutPin[]
+  let topLayout:    LayoutPin[]
 
   if (chip.packageLayout) {
     leftLayout   = chip.packageLayout.left
     rightLayout  = chip.packageLayout.right
     bottomLayout = chip.packageLayout.bottom
+    topLayout    = chip.packageLayout.top ?? []
   } else {
     const sorted = [...chip.pins].sort((a, b) => a.gpio - b.gpio)
     const mid = Math.ceil(sorted.length / 2)
@@ -484,18 +538,41 @@ export function PinoutDiagram() {
     leftLayout   = sorted.slice(0, mid).map(p => ({ pinNumber: ++n, gpio: p.gpio }))
     rightLayout  = sorted.slice(mid).map(p  => ({ pinNumber: ++n, gpio: p.gpio }))
     bottomLayout = []
+    topLayout    = []
   }
 
   const sideHeight = Math.max(leftLayout.length, rightLayout.length) * ROW_H
-  const chipWidth  = Math.max(220, bottomLayout.length * 26)
+  const padCount   = Math.max(bottomLayout.length, topLayout.length, 1)
+  const chipWidth  = Math.max(220, padCount * 26)
   const colWidth   = bottomLayout.length > 0 ? chipWidth / bottomLayout.length : 26
+  const topColWidth = topLayout.length > 0 ? chipWidth / topLayout.length : 26
 
   return (
     <div className="rounded-xl border overflow-hidden" style={{ background: '#060b12', borderColor: '#1a2535' }}>
       <div className="p-4 pb-2 overflow-x-auto">
         <div className="flex flex-col items-center min-w-fit mx-auto">
 
-          {/* ── Top row: left pins + chip body + right pins ── */}
+          {/* ── Top pin row (MINI modules: GND ring along the top edge) ── */}
+          {topLayout.length > 0 && (
+            <div className="flex" style={{ width: chipWidth }}>
+              {topLayout.map(lp => {
+                const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
+                return (
+                  <TopPinCol
+                    key={lp.pinNumber}
+                    layoutPin={lp}
+                    pin={pin}
+                    colWidth={topColWidth}
+                    isSelected={!!pin && selectedPin?.gpio === pin.gpio}
+                    isFiltered={!pin || filteredSet.has(pin.gpio)}
+                    onClick={() => toggle(pin)}
+                  />
+                )
+              })}
+            </div>
+          )}
+
+          {/* ── Middle row: left pins + chip body + right pins ── */}
           <div className="flex items-start">
 
             {/* Left pin bank */}
@@ -518,7 +595,7 @@ export function PinoutDiagram() {
             </div>
 
             {/* IC body */}
-            <ChipBody chip={chip} sideHeight={sideHeight} bottomCount={bottomLayout.length || 10} />
+            <ChipBody chip={chip} sideHeight={sideHeight} bottomCount={bottomLayout.length || 10} width={chipWidth} />
 
             {/* Right pin bank */}
             <div className="flex flex-col">

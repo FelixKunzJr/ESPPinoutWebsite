@@ -91,6 +91,7 @@ export interface PackageLayout {
   left:   LayoutPin[]   // top → bottom
   right:  LayoutPin[]   // top → bottom (pin 38 first for WROOM-32)
   bottom: LayoutPin[]   // left → right
+  top?:   LayoutPin[]   // left → right (MINI modules have a GND ring on the top edge too)
 }
 
 // Add packageLayout?: PackageLayout to Chip (optional; falls back to 50/50 split)
