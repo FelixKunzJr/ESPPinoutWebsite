@@ -40,7 +40,7 @@ export interface Pin {
 //   'wroom'  → rectangular metal can, full-width meander PCB antenna (WROOM-32, S2/S3-WROOM-1)
 //   'wrover' → same width but taller, black PCB, extra PSRAM (WROVER)
 //   'mini'   → small module, antenna on a notched keep-out tab off the top corner (C3/C6/H2-MINI-1)
-export type ModuleForm = 'wroom' | 'wrover' | 'mini'
+export type ModuleForm = 'wroom' | 'wrover' | 'mini' | 'board'
 
 export interface ModuleInfo {
   name: string               // silkscreen label, e.g. 'ESP32-S3-WROOM-1'

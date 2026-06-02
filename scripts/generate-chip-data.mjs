@@ -33,7 +33,7 @@ function fpPads(f) {
 }
 const specialLabel = name => {
   const u = (name || '').toUpperCase()
-  if (/CHIP[_/]?PU|RESET|^EN$/.test(u)) return 'EN'
+  if (/CHIP[_/]?PU|RESET|^EN$|^RST$/.test(u)) return 'EN'
   if (/3V3|3\.3V|VDD3P3/.test(u)) return '3V3'
   if (/VBUS|^5V|^VIN/.test(u)) return '5V'
   if (/VBAT/.test(u)) return 'VBAT'
@@ -139,6 +139,11 @@ const MODULES = [
   { prefix: 'C5_WROOM_1', name: 'ESP32-C5-WROOM-1', sym: 'ESP32-C5-WROOM-1', fp: 'ESP32-C5-WROOM-1', fam: 'c5' },
   { prefix: 'C5_MINI_1', name: 'ESP32-C5-MINI-1', sym: 'ESP32-C5-MINI-1', fp: 'ESP32-C5-MINI-1', fam: 'c5' },
   { prefix: 'H2_MINI_1', name: 'ESP32-H2-MINI-1', sym: 'ESP32-H2-MINI-1', fp: 'ESP32-H2-MINI-1', fam: 'h2' },
+  // Common development boards (two breakout header rows)
+  { prefix: 'ESP32_DEVKITC', name: 'ESP32-DevKitC', sym: 'ESP32-DevKitC', fp: 'ESP32-DevKitC', fam: 'esp32' },
+  { prefix: 'S3_DEVKITC', name: 'ESP32-S3-DevKitC-1', sym: 'ESP32-S3-DevKitC', fp: 'ESP32-S3-DevKitC', fam: 's3' },
+  { prefix: 'C3_DEVKITM', name: 'ESP32-C3-DevKitM-1', sym: 'ESP32-C3-DevKitM-1', fp: 'ESP32-C3-DevKitM-1', fam: 'c3' },
+  { prefix: 'C6_DEVKITC', name: 'ESP32-C6-DevKitC-1', sym: 'ESP32-C6-DevKitC-1', fp: 'ESP32-C6-DevKitC-1', fam: 'c6' },
 ]
 
 function fmtPin(p) {

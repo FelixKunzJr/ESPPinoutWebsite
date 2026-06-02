@@ -145,6 +145,11 @@ const MODULES: ModuleSpec[] = [
   { id: 'esp32c5mini1',   fam: 'c5', name: 'ESP32-C5-MINI-1',  form: 'mini',  pcb: 'black', prefix: 'C5_MINI_1' },
   // ESP32-H2
   { id: 'esp32h2',        fam: 'h2', name: 'ESP32-H2-MINI-1',  form: 'mini',  pcb: 'black', prefix: 'H2_MINI_1' },
+  // Development boards
+  { id: 'esp32devkitc',   fam: 'esp32', name: 'ESP32-DevKitC',       form: 'board', pcb: 'black', prefix: 'ESP32_DEVKITC', arch: 'Dev board · ESP32-WROOM-32' },
+  { id: 'esp32s3devkitc', fam: 's3',    name: 'ESP32-S3-DevKitC-1',  form: 'board', pcb: 'black', prefix: 'S3_DEVKITC',    arch: 'Dev board · ESP32-S3-WROOM-1' },
+  { id: 'esp32c3devkitm', fam: 'c3',    name: 'ESP32-C3-DevKitM-1',  form: 'board', pcb: 'black', prefix: 'C3_DEVKITM',    arch: 'Dev board · ESP32-C3-MINI-1' },
+  { id: 'esp32c6devkitc', fam: 'c6',    name: 'ESP32-C6-DevKitC-1',  form: 'board', pcb: 'black', prefix: 'C6_DEVKITC',    arch: 'Dev board · ESP32-C6-WROOM-1' },
 ]
 
 function build(spec: ModuleSpec): Chip {
@@ -197,6 +202,11 @@ export const CHIPS: Chip[] = [
   byId('esp32c5wroom1'),
   byId('esp32c5mini1'),
   byId('esp32h2'),
+  // Dev boards
+  byId('esp32devkitc'),
+  byId('esp32s3devkitc'),
+  byId('esp32c3devkitm'),
+  byId('esp32c6devkitc'),
 ]
 
 export function getChip(id: string): Chip | undefined {
