@@ -299,7 +299,7 @@ export const ESP32_BASE_PINS = [
 
 export const esp32: Chip = {
   id: 'esp32',
-  name: 'ESP32 (WROOM / WROVER / DevKitC)',
+  name: 'ESP32-WROOM-32',
   family: 'ESP32',
   totalGpio: 34,
   hasWifi: true,

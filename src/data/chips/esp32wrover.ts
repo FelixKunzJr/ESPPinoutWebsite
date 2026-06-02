@@ -15,7 +15,7 @@ const WROVER_LAYOUT = {
 
 export const esp32wrover: Chip = {
   id: 'esp32wrover',
-  name: 'ESP32-WROVER-32',
+  name: 'ESP32-WROVER-E',
   family: 'ESP32',
   totalGpio: 32,
   hasWifi: true,

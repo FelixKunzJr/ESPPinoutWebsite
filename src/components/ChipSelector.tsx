@@ -7,6 +7,7 @@ const FAMILY_COLORS: Record<string, string> = {
   'ESP32-S3': 'border-green-500 text-green-400',
   'ESP32-C3': 'border-yellow-500 text-yellow-400',
   'ESP32-C6': 'border-orange-500 text-orange-400',
+  'ESP32-C5': 'border-teal-500 text-teal-400',
   'ESP32-H2': 'border-pink-500 text-pink-400',
 }
 
