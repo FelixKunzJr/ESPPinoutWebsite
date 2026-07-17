@@ -120,6 +120,11 @@ function rowSegments(row: SchemRow, mappingLabel?: string): Seg[] {
     if (shown.has(n.toUpperCase())) continue
     segs.push({ text: n, color: fnColor(n) })
   }
+  // A bare pin is not a useless pin - it is a fully free one. Say so instead
+  // of leaving it blank (the GPIO matrix routes I2C/UART/PWM/SPI/... anywhere).
+  if (segs.length === 0 && pin.isUsable) {
+    segs.push({ text: '✓ routes any peripheral', color: '#4f7d53' })
+  }
   return segs
 }
 

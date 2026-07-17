@@ -68,8 +68,10 @@ export function RoutingCard() {
       )}
 
       <p className="text-[10px] text-gray-600 leading-relaxed">
-        Advanced: the GPIO matrix can even loop a peripheral output back into another peripheral's
-        input on-chip, without using any pin at all - see the Technical Reference Manual.
+        Advanced (TRM): the matrix can invert any routed signal, feed a peripheral input a constant
+        0/1 without using a pin, glitch-filter inputs, and loop a peripheral output back into another
+        peripheral on-chip. Every pad also has configurable drive strength, a hold latch that freezes
+        its state through resets and deep sleep, and RTC-domain pins keep working while the chip sleeps.
       </p>
     </div>
   )
