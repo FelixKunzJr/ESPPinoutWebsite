@@ -211,10 +211,10 @@ export function SchematicDiagram() {
     setSelectedPin(selectedPin?.gpio === pin.gpio ? null : pin)
   }
 
-  // Default is 1:1 with the scroll centered on the symbol body - a fitted
-  // sheet is unreadable on phones. Fit stays available as an overview toggle.
+  // Default to fit-width (whole sheet visible); 1:1 stays available as a
+  // zoom-in toggle and starts the scroll centered on the symbol body.
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [fit, setFit] = useState(false)
+  const [fit, setFit] = useState(true)
 
   useEffect(() => {
     const el = scrollRef.current

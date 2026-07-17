@@ -39,20 +39,14 @@ export default function App() {
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
           {/* Left: diagram + filter + table */}
           <div className="space-y-4">
-            {/* Chip notes banner - collapsed by default on phones to keep the diagram above the fold */}
+            {/* Chip notes banner */}
             {chip.notes.length > 0 && (
-              <details
-                key={chip.id}
-                open={typeof window === 'undefined' || window.innerWidth >= 768}
-                className="rounded-xl bg-yellow-950/30 border border-yellow-700/50 px-4 py-3"
-              >
-                <summary className="text-xs font-semibold text-yellow-400 cursor-pointer select-none">
-                  ⚠️ {chip.name} - Known Gotchas ({chip.notes.length})
-                </summary>
-                <ul className="text-xs text-yellow-300/80 space-y-0.5 list-disc pl-4 mt-1.5">
+              <div className="rounded-xl bg-yellow-950/30 border border-yellow-700/50 px-4 py-3">
+                <p className="text-xs font-semibold text-yellow-400 mb-1">⚠️ {chip.name} - Known Gotchas</p>
+                <ul className="text-xs text-yellow-300/80 space-y-0.5 list-disc pl-4">
                   {chip.notes.map((n, i) => <li key={i}>{n}</li>)}
                 </ul>
-              </details>
+              </div>
             )}
 
             <div id="pinout-diagram-export">
