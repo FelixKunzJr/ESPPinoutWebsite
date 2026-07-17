@@ -17,9 +17,121 @@
     <meta name="twitter:title" content="ESP32 Pinout Studio" />
     <meta name="twitter:description" content="Interactive pinout diagrams with real Espressif schematic symbols and pick-the-wrong-pin warnings for every ESP32 family." />
     <meta name="twitter:image" content="https://esp32pin.com/og.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://esp32pin.com/#org",
+          "name": "ESP32 Pinout Studio",
+          "url": "https://esp32pin.com/",
+          "logo": "https://esp32pin.com/og.png",
+          "sameAs": ["https://github.com/FelixKunzJr/ESPPinoutWebsite"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://esp32pin.com/#website",
+          "url": "https://esp32pin.com/",
+          "name": "ESP32 Pinout Studio",
+          "description": "Interactive pinout reference for the ESP32 family with per-pin constraint warnings.",
+          "publisher": { "@id": "https://esp32pin.com/#org" }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "ESP32 Pinout Studio",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Web browser",
+          "url": "https://esp32pin.com/",
+          "description": "Free interactive pinout diagrams for ESP32, S2, S3, C3, C5, C6 and H2 modules and dev boards, with strapping-pin and ADC2/Wi-Fi warnings, a pin mapping builder, and Arduino code export. Pin data is generated from Espressif's official KiCad libraries.",
+          "isAccessibleForFree": true,
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "license": "https://opensource.org/licenses/MIT"
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://esp32pin.com/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Why doesn't ADC2 work when Wi-Fi is on with the ESP32?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "On the classic ESP32, ADC2 is used by the Wi-Fi driver, so any analogRead() on an ADC2 pin (GPIO0, 2, 4, 12-15, 25-27) returns an error while Wi-Fi is active. Use an ADC1 pin (GPIO32-39) for analog readings when Wi-Fi is on. The ESP32-S3, C3, C5, C6 and H2 do not have this conflict."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I use GPIO12 on the ESP32?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "GPIO12 (MTDI) is a strapping pin on the classic ESP32. It is sampled at boot to select the flash voltage and must be LOW at boot for 3.3 V flash. If an external pull-up or device drives GPIO12 HIGH at boot, the chip can fail to access flash and will not start. You can use GPIO12 as a normal GPIO after boot, but never hold it HIGH during reset."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which ESP32 pins are safe to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "On the classic ESP32, avoid GPIO6-11 (wired to internal SPI flash - using them crashes the chip), treat GPIO0, 2, 12 and 15 as strapping pins (avoid driving them at boot), and remember GPIO34, 35, 36 and 39 are input-only (no output, no pull-up/down). The generally safe general-purpose output pins are GPIO4, 5, 13, 14, 16-19, 21-23, 25-27, 32 and 33. If Wi-Fi is on, use ADC1 (GPIO32-39) for analog reads, not ADC2."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which ESP32 pins are input-only?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "On the classic ESP32, GPIO34, 35, 36 and 39 are input-only. They have no output driver and no internal pull-up or pull-down resistor, so they can only be used as digital or analog inputs."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why can't I use GPIO6 to GPIO11 on the ESP32?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "GPIO6-11 are connected to the ESP32's internal SPI flash chip. Using them for anything else interferes with code execution and crashes the ESP32. On modules with embedded flash they are usually not broken out; never repurpose them."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main style="max-width:820px;margin:0 auto;padding:2rem 1.25rem;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55;color:#111">
+        <h1>ESP32 Pinout Studio</h1>
+        <p>Free interactive pinout reference for the whole ESP32 family. Every pin carries its real-world constraints - strapping pins, ADC2/Wi-Fi conflicts, flash-reserved GPIOs, input-only pins, and USB/JTAG lines - so you don't pick a pin that stops your project from booting. Pin names, physical pad layouts, and schematic symbols are generated from Espressif's official KiCad libraries.</p>
+
+        <h2>Pick a module</h2>
+        <ul>
+          <li><a href="/esp32">ESP32-WROOM-32 pinout</a></li>
+          <li><a href="/esp32wrover">ESP32-WROVER-E pinout</a></li>
+          <li><a href="/esp32s2">ESP32-S2 pinout</a></li>
+          <li><a href="/esp32s3">ESP32-S3-WROOM-1 pinout</a></li>
+          <li><a href="/esp32c3">ESP32-C3 pinout</a></li>
+          <li><a href="/esp32c6">ESP32-C6 pinout</a></li>
+          <li><a href="/esp32c5wroom1">ESP32-C5 pinout</a></li>
+          <li><a href="/esp32h2">ESP32-H2 pinout</a></li>
+          <li><a href="/esp32devkitc">ESP32-DevKitC pinout</a></li>
+          <li><a href="/esp32s3devkitc">ESP32-S3-DevKitC-1 pinout</a></li>
+        </ul>
+
+        <h2>Common ESP32 pin questions</h2>
+
+        <h3>Why doesn't ADC2 work when Wi-Fi is on?</h3>
+        <p>On the classic ESP32, ADC2 is used by the Wi-Fi driver, so any <code>analogRead()</code> on an ADC2 pin (GPIO0, 2, 4, 12-15, 25-27) returns an error while Wi-Fi is active. Use an ADC1 pin (GPIO32-39) for analog readings when Wi-Fi is on. The ESP32-S3, C3, C5, C6 and H2 do not have this conflict.</p>
+
+        <h3>Can I use GPIO12 on the ESP32?</h3>
+        <p>GPIO12 (MTDI) is a strapping pin. It is sampled at boot to select flash voltage and must be LOW at boot for 3.3 V flash. If something drives it HIGH during reset, the chip can fail to access flash and won't start. It is usable as a normal GPIO after boot - just never hold it HIGH at reset.</p>
+
+        <h3>Which ESP32 pins are safe to use?</h3>
+        <p>Avoid GPIO6-11 (wired to internal SPI flash - using them crashes the chip), treat GPIO0, 2, 12 and 15 as strapping pins, and remember GPIO34, 35, 36 and 39 are input-only. The generally safe output pins are GPIO4, 5, 13, 14, 16-19, 21-23, 25-27, 32 and 33.</p>
+
+        <p style="margin-top:2rem;color:#555">Loading the interactive diagram... if it does not appear, enable JavaScript.</p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

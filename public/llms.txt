@@ -1,0 +1,79 @@
+# ESP32 Pinout Studio
+
+> Free interactive pinout reference for the whole ESP32 family. Every pin carries its real-world constraints (strapping pins, ADC2/Wi-Fi conflicts, flash-reserved GPIOs, input-only pins, USB/JTAG lines) so you don't pick a pin that stops your project from booting. Pin names, physical pad layouts, and schematic symbols are generated from Espressif's official KiCad libraries, not hand-copied from datasheets.
+
+Site: https://esp32pin.com
+License: MIT (open source). Data derives from Espressif's KiCad libraries (Apache 2.0). Not affiliated with or endorsed by Espressif.
+Always verify against the official datasheet before committing hardware.
+
+## What this site answers
+
+- Which ESP32 GPIO pins are safe to use, and which cause problems.
+- Why a specific pin (GPIO0, GPIO2, GPIO12, GPIO15, GPIO6-11, etc.) misbehaves.
+- Why ADC2 analog reads fail when Wi-Fi is on, and which ADC pins to use instead.
+- Which pins are strapping pins, input-only, flash-reserved, or USB/JTAG.
+- Differences in pin constraints across ESP32, S2, S3, C3, C5, C6, and H2.
+
+## Key facts (classic ESP32 / ESP32-WROOM-32)
+
+- ADC2 pins (GPIO0, 2, 4, 12-15, 25-27) cannot be read while Wi-Fi is active; the Wi-Fi driver owns ADC2. Use ADC1 pins (GPIO32-39) for analog reads when Wi-Fi is on.
+- GPIO6-11 connect to the internal SPI flash. Using them for anything else crashes the chip. Never use them.
+- GPIO34, 35, 36, 39 are input-only: no output drive and no internal pull-up/pull-down.
+- GPIO0 is a strapping pin: HIGH/floating at boot boots from flash; LOW enters the serial bootloader (download mode). Do not pull it LOW at boot with a sensor or resistor.
+- GPIO12 (MTDI) is a strapping pin: must be LOW at boot to select 3.3 V flash. Pulling it HIGH at boot can brick flash access.
+- GPIO15 (MTDO) is a strapping pin: HIGH at boot suppresses the boot log on UART0.
+- GPIO1 (TX0) and GPIO3 (RX0) are the default UART0 console; busy during programming.
+
+## Family differences (constraints that change per chip)
+
+- ESP32-S2: single-core, Wi-Fi only (no Bluetooth). Native USB OTG on GPIO19/20. GPIO46 input-only. GPIO0/45/46 are strapping pins. ADC2 has the same Wi-Fi conflict as the classic ESP32.
+- ESP32-S3: dual-core, Wi-Fi + BLE 5. No ADC2/Wi-Fi conflict (arbitration redesigned). GPIO19/20 are USB Serial/JTAG. GPIO0/3/45/46 are strapping pins. No DAC.
+- ESP32-C3: single-core RISC-V, Wi-Fi + BLE 5. All ADC is ADC1 (no ADC2/Wi-Fi conflict). GPIO18/19 are USB Serial/JTAG. GPIO2/8/9 are strapping pins. No touch, no DAC.
+- ESP32-C6: single-core RISC-V, Wi-Fi 6 + BLE 5 + 802.15.4 (Zigbee/Thread/Matter).
+- ESP32-C5: RISC-V, dual-band Wi-Fi 6.
+- ESP32-H2: RISC-V, BLE 5 + 802.15.4, no Wi-Fi.
+
+## Per-module pinout pages
+
+Each page shows the module's schematic symbol, physical pad layout, per-pin capabilities and constraints, and a pin-mapping builder with Arduino #define export.
+
+### ESP32 (classic, Xtensa LX6)
+- [ESP32-WROOM-32](https://esp32pin.com/esp32)
+- [ESP32-WROVER-E](https://esp32pin.com/esp32wrover)
+- [ESP32-WROOM-DA](https://esp32pin.com/esp32wroomda)
+- [ESP32-MINI-1](https://esp32pin.com/esp32mini1)
+- [ESP32-PICO-MINI-02](https://esp32pin.com/esp32pico)
+- [ESP32-DevKitC](https://esp32pin.com/esp32devkitc)
+
+### ESP32-S2 (Xtensa LX7, Wi-Fi only)
+- [ESP32-S2-WROOM](https://esp32pin.com/esp32s2)
+- [ESP32-S2-MINI-1](https://esp32pin.com/esp32s2mini1)
+- [ESP32-S2-SOLO](https://esp32pin.com/esp32s2solo)
+- [ESP32-S2-WROVER](https://esp32pin.com/esp32s2wrover)
+
+### ESP32-S3 (Xtensa LX7, Wi-Fi + BLE)
+- [ESP32-S3-WROOM-1](https://esp32pin.com/esp32s3)
+- [ESP32-S3-WROOM-2](https://esp32pin.com/esp32s3wroom2)
+- [ESP32-S3-MINI-1](https://esp32pin.com/esp32s3mini1)
+- [ESP32-S3-DevKitC-1](https://esp32pin.com/esp32s3devkitc)
+
+### ESP32-C3 (RISC-V, Wi-Fi + BLE)
+- [ESP32-C3-MINI-1](https://esp32pin.com/esp32c3)
+- [ESP32-C3-WROOM-02](https://esp32pin.com/esp32c3wroom02)
+- [ESP32-C3-DevKitM-1](https://esp32pin.com/esp32c3devkitm)
+
+### ESP32-C6 (RISC-V, Wi-Fi 6 + BLE + 802.15.4)
+- [ESP32-C6-MINI-1](https://esp32pin.com/esp32c6)
+- [ESP32-C6-WROOM-1](https://esp32pin.com/esp32c6wroom1)
+- [ESP32-C6-DevKitC-1](https://esp32pin.com/esp32c6devkitc)
+
+### ESP32-C5 (RISC-V, dual-band Wi-Fi 6)
+- [ESP32-C5-WROOM-1](https://esp32pin.com/esp32c5wroom1)
+- [ESP32-C5-MINI-1](https://esp32pin.com/esp32c5mini1)
+
+### ESP32-H2 (RISC-V, BLE + 802.15.4, no Wi-Fi)
+- [ESP32-H2-MINI-1](https://esp32pin.com/esp32h2)
+
+## Data provenance
+
+Pin data is generated from https://github.com/espressif/kicad-libraries via a build script; the schematic symbols shown are the official Espressif KiCad symbols. Family-level rules that KiCad does not encode (strapping pins, boot modes, ADC2/Wi-Fi arbitration, flash-bus rules) are maintained alongside the generator. Source: https://github.com/FelixKunzJr/ESPPinoutWebsite
