@@ -1,5 +1,5 @@
 import { useApp } from '../context/AppContext'
-import { MATRIX_PERIPHERALS, FAMILY_ROUTING_NOTE, resolveGroups } from '../data/routing'
+import { MATRIX_PERIPHERALS, FAMILY_ROUTING_NOTE, TRM_URLS, resolveGroups } from '../data/routing'
 
 // "Can I put I2C on pin X?" - the GPIO matrix / IO MUX explainer the diagram
 // alone cannot answer. Fixed-interface pin chips are clickable and open the
@@ -17,9 +17,22 @@ export function RoutingCard() {
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900/40 px-4 py-3 space-y-3">
       <div>
-        <p className="text-xs font-semibold text-gray-300 mb-1">
-          🔀 Peripheral routing - GPIO matrix &amp; IO MUX
-        </p>
+        <div className="flex items-baseline justify-between gap-2 mb-1">
+          <p className="text-xs font-semibold text-gray-300">
+            🔀 Peripheral routing - GPIO matrix &amp; IO MUX
+          </p>
+          {TRM_URLS[chip.family] && (
+            <a
+              href={TRM_URLS[chip.family]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-gray-500 hover:text-gray-300 transition-colors flex-shrink-0"
+              title={`${chip.family} Technical Reference Manual (see the IO MUX and GPIO Matrix chapter)`}
+            >
+              {chip.family} TRM ↗
+            </a>
+          )}
+        </div>
         <p className="text-xs text-gray-400 leading-relaxed">
           The {chip.family} routes most peripherals through its GPIO matrix, so these can use{' '}
           <span className="text-gray-200 font-medium">almost any free GPIO</span>:{' '}
@@ -69,9 +82,10 @@ export function RoutingCard() {
 
       <p className="text-[10px] text-gray-600 leading-relaxed">
         Advanced (TRM): the matrix can invert any routed signal, feed a peripheral input a constant
-        0/1 without using a pin, glitch-filter inputs, and loop a peripheral output back into another
-        peripheral on-chip. Every pad also has configurable drive strength, a hold latch that freezes
-        its state through resets and deep sleep, and RTC-domain pins keep working while the chip sleeps.
+        0/1 without using a pin, and loop a peripheral output back into another peripheral on-chip.
+        Every pad has configurable drive strength and a hold latch that freezes its state through
+        resets and deep sleep.
+        {chip.family !== 'ESP32' && ' Sigma-delta output channels can fake analog on any pin.'}
       </p>
     </div>
   )

@@ -142,15 +142,28 @@ export const MATRIX_PERIPHERALS = [
   'I2C', 'UART', 'PWM (LEDC)', 'SPI (up to ~26 MHz)', 'I2S', 'RMT', 'Pulse counter',
 ] as const
 
-// One-line family-specific footnote for the routing card.
+// One-line family-specific footnote for the routing card. Sleep-domain and
+// sigma-delta facts verified against each family's TRM (IO MUX chapter).
 export const FAMILY_ROUTING_NOTE: Record<string, string> = {
-  'ESP32':    'Analog (ADC/DAC/Touch) stays on its fixed pins; full-speed SPI, SD/MMC, Ethernet and JTAG are pin-bound (below).',
-  'ESP32-S2': 'Analog and touch stay on fixed pins; native USB is fixed on GPIO19/20.',
-  'ESP32-S3': 'Analog and touch stay on fixed pins; native USB is fixed on GPIO19/20. SD/MMC host on the S3 routes through the GPIO matrix, so any free pins work.',
-  'ESP32-C3': 'ADC stays on fixed pins; native USB Serial/JTAG is fixed on GPIO18/19.',
-  'ESP32-C5': 'ADC stays on fixed pins; native USB Serial/JTAG is fixed on GPIO13/14.',
-  'ESP32-C6': 'ADC stays on fixed pins; native USB Serial/JTAG is fixed on GPIO12/13.',
+  'ESP32':    'Analog (ADC/DAC/Touch) stays on its fixed pins; full-speed SPI, SD/MMC, Ethernet and JTAG are pin-bound (below). RTC-domain pins stay alive in deep sleep: outputs hold their level, inputs can wake the chip.',
+  'ESP32-S2': 'Analog and touch stay on fixed pins; native USB is fixed on GPIO19/20. RTC-domain pins stay alive in deep sleep.',
+  'ESP32-S3': 'Analog and touch stay on fixed pins; native USB is fixed on GPIO19/20. SD/MMC host on the S3 routes through the GPIO matrix, so any free pins work. RTC-domain pins stay alive in deep sleep.',
+  'ESP32-C3': 'ADC stays on fixed pins; native USB Serial/JTAG is fixed on GPIO18/19. Only GPIO0-5 can wake the chip from deep sleep.',
+  'ESP32-C5': 'ADC stays on fixed pins; native USB Serial/JTAG is fixed on GPIO13/14. LP-domain pins stay alive in deep sleep.',
+  'ESP32-C6': 'ADC stays on fixed pins; native USB Serial/JTAG is fixed on GPIO12/13. GPIO0-7 are LP pins that stay alive in deep sleep.',
   'ESP32-H2': 'ADC stays on fixed pins; native USB Serial/JTAG is fixed on GPIO26/27.',
+}
+
+// Per-family Technical Reference Manual (the IO MUX / GPIO matrix chapter is
+// the authoritative source for everything in this card).
+export const TRM_URLS: Record<string, string> = {
+  'ESP32':    'https://documentation.espressif.com/esp32_technical_reference_manual_en.pdf',
+  'ESP32-S2': 'https://documentation.espressif.com/esp32-s2_technical_reference_manual_en.pdf',
+  'ESP32-S3': 'https://documentation.espressif.com/esp32-s3_technical_reference_manual_en.pdf',
+  'ESP32-C3': 'https://documentation.espressif.com/esp32-c3_technical_reference_manual_en.pdf',
+  'ESP32-C5': 'https://documentation.espressif.com/esp32-c5_technical_reference_manual_en.pdf',
+  'ESP32-C6': 'https://documentation.espressif.com/esp32-c6_technical_reference_manual_en.pdf',
+  'ESP32-H2': 'https://documentation.espressif.com/esp32-h2_technical_reference_manual_en.pdf',
 }
 
 // Fixed groups relevant to this chip, with pins the module actually breaks
