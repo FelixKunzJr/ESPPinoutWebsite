@@ -2,43 +2,88 @@ import type { Pin, Chip, ModuleInfo, ConstraintId, Severity } from '../../types/
 
 export const ROW_H = 30
 
+// ─── Function colors: single source of truth ──────────────────────────────────
+// Every view (schematic text, module badges, connector dots) and the legend
+// derive their colors from this one map, so they can never drift apart.
+// Tones are chosen to read both as badges on the dark UI and as text on the
+// light schematic sheet.
+
+export type FnCategory =
+  | 'power' | 'gnd' | 'adc1' | 'adc2' | 'dac' | 'touch'
+  | 'gpio' | 'spi' | 'i2c' | 'uart' | 'clock' | 'enrtc'
+  | 'usb' | 'sd' | 'jtag' | 'strap' | 'nc' | 'other'
+
+export const FN_COLOR: Record<FnCategory, string> = {
+  power: '#dc2626',
+  gnd:   '#111827',
+  adc1:  '#ea580c',
+  adc2:  '#d97706',
+  dac:   '#a16207',
+  touch: '#15803d',
+  gpio:  '#475569',
+  spi:   '#2563eb',
+  i2c:   '#7c3aed',
+  uart:  '#0891b2',
+  clock: '#0369a1',
+  enrtc: '#0f766e',
+  usb:   '#be185d',
+  sd:    '#4338ca',
+  jtag:  '#57534e',
+  strap: '#eab308',
+  nc:    '#6b7280',
+  other: '#6b7280',
+}
+
+// Classify a single pin-function name token into a color category.
+export function fnCategory(name: string): FnCategory {
+  const u = name.toUpperCase()
+  if (/^GND$/.test(u))                                               return 'gnd'
+  if (/^3V3$|^VCC$|^3\.3V$|^VIN$|^VBUS$|^5V$/.test(u))             return 'power'
+  if (/^EN$|^RST$|^RESET$|^ENABLE$/.test(u))                       return 'enrtc'
+  if (/^NC$/.test(u))                                                return 'nc'
+  if (/^ADC1/.test(u))                                               return 'adc1'
+  if (/^ADC2/.test(u))                                               return 'adc2'
+  if (/^DAC\d?$/.test(u))                                            return 'dac'
+  if (/^TOUCH/.test(u))                                              return 'touch'
+  if (/^RTC/.test(u))                                                return 'enrtc'
+  if (/USB|JTAG/.test(u))                                            return 'usb'
+  if (/^MT(DI|CK|MS|DO)$/.test(u))                                  return 'jtag'
+  if (/MOSI$|MISO$|^SCK$|VSPI|HSPI/.test(u))                       return 'spi'
+  if (/SDA$|SCL$/.test(u))                                           return 'i2c'
+  if (/^U[0-9]?(TXD?|RXD?|CTS|RTS)$|^TX\d?$|^RX\d?$/.test(u))      return 'uart'
+  if (/^SD_|^CMD$|^SD[0-9]$/.test(u))                              return 'sd'
+  if (/CLK|XTAL|^32K/.test(u))                                      return 'clock'
+  if (/^GPIO\d/.test(u))                                             return 'gpio'
+  return 'other'
+}
+
+// Color for a function-name token (used by the schematic annotation text).
+export function fnColor(name: string): string {
+  return FN_COLOR[fnCategory(name)]
+}
+
 // ─── Badge helpers ────────────────────────────────────────────────────────────
 
 export function getBadge(name: string): { bg: string; text: string } {
-  const u = name.toUpperCase()
-  if (u === 'GND')                                                        return { bg: '#111827', text: '#9ca3af' }
-  if (/^3V3$|^VCC$|^3\.3V$/.test(u))                                    return { bg: '#dc2626', text: '#fff' }
-  if (/^VIN$|^VBUS$|^5V$/.test(u))                                       return { bg: '#b91c1c', text: '#fff' }
-  if (/^EN$|^RST$|^RESET$|^ENABLE$/.test(u))                            return { bg: '#0f766e', text: '#fff' }
-  if (/^NC$/.test(u))                                                      return { bg: '#1f2937', text: '#6b7280' }
-  if (/^ADC1/.test(u))                                                    return { bg: '#ea580c', text: '#fff' }
-  if (/^ADC2/.test(u))                                                    return { bg: '#d97706', text: '#fff' }
-  if (/^DAC\d?$/.test(u))                                                 return { bg: '#ca8a04', text: '#fff' }
-  if (/^TOUCH/.test(u))                                                   return { bg: '#16a34a', text: '#fff' }
-  if (/^RTC/.test(u))                                                     return { bg: '#0f766e', text: '#fff' }
-  if (/MOSI$|MISO$|^SCK$|VSPI|HSPI/.test(u))                            return { bg: '#2563eb', text: '#fff' }
-  if (/SDA$|SCL$/.test(u))                                                return { bg: '#7c3aed', text: '#fff' }
-  if (/^U[0-9]?(TXD?|RXD?|CTS|RTS)$|^TX\d?$|^RX\d?$/.test(u))        return { bg: '#0891b2', text: '#fff' }
-  if (/^GPIO\d/.test(u))                                                  return { bg: '#6d28d9', text: '#fff' }
-  if (/^SD_/.test(u))                                                     return { bg: '#4338ca', text: '#fff' }
-  if (/USB|JTAG/.test(u))                                                 return { bg: '#be185d', text: '#fff' }
-  if (/CLK|XTAL/.test(u))                                                 return { bg: '#0369a1', text: '#fff' }
-  if (/^MT(DI|CK|MS|DO)$/.test(u))                                       return { bg: '#292524', text: '#a8a29e' }
-  if (/^VP$|^VN$/.test(u))                                                return { bg: '#374151', text: '#d1d5db' }
-  return                                                                          { bg: '#374151', text: '#9ca3af' }
+  const cat = fnCategory(name)
+  if (cat === 'gnd')  return { bg: FN_COLOR.gnd, text: '#9ca3af' }
+  if (cat === 'nc')   return { bg: '#1f2937',    text: '#6b7280' }
+  if (cat === 'jtag') return { bg: FN_COLOR.jtag, text: '#e7e5e4' }
+  if (cat === 'other') return { bg: '#374151',   text: '#9ca3af' }
+  return { bg: FN_COLOR[cat], text: '#fff' }
 }
 
 export function connectorColor(pin: Pin): string {
   if (!pin.isUsable || pin.constraints.some(c => c.severity === 'danger')) return '#374151'
-  if (pin.capabilities.includes('adc1'))   return '#ea580c'
-  if (pin.capabilities.includes('adc2'))   return '#d97706'
-  if (pin.capabilities.includes('dac'))    return '#ca8a04'
-  if (pin.capabilities.includes('touch'))  return '#16a34a'
-  if (pin.capabilities.includes('i2c'))    return '#7c3aed'
-  if (pin.capabilities.includes('spi'))    return '#2563eb'
-  if (pin.capabilities.includes('uart'))   return '#0891b2'
-  if (pin.constraints.some(c => c.id === 'strapping_pin')) return '#eab308'
-  return '#6b7280'
+  if (pin.capabilities.includes('adc1'))   return FN_COLOR.adc1
+  if (pin.capabilities.includes('adc2'))   return FN_COLOR.adc2
+  if (pin.capabilities.includes('dac'))    return FN_COLOR.dac
+  if (pin.capabilities.includes('touch'))  return FN_COLOR.touch
+  if (pin.capabilities.includes('i2c'))    return FN_COLOR.i2c
+  if (pin.capabilities.includes('spi'))    return FN_COLOR.spi
+  if (pin.capabilities.includes('uart'))   return FN_COLOR.uart
+  if (pin.constraints.some(c => c.id === 'strapping_pin')) return FN_COLOR.strap
+  return FN_COLOR.gpio
 }
 
 export function sortedNames(names: string[], side: 'left' | 'right'): string[] {
@@ -191,19 +236,37 @@ export function resolveModule(chip: Chip): ModuleInfo {
 
 // ─── Legend ───────────────────────────────────────────────────────────────────
 
-export const LEGEND = [
-  { bg: '#dc2626', text: '#fff',     label: 'Power' },
-  { bg: '#111827', text: '#9ca3af',  label: 'GND' },
-  { bg: '#ea580c', text: '#fff',     label: 'ADC1 (WiFi-safe)' },
-  { bg: '#d97706', text: '#fff',     label: 'ADC2 (WiFi conflict)' },
-  { bg: '#ca8a04', text: '#fff',     label: 'DAC' },
-  { bg: '#16a34a', text: '#fff',     label: 'Touch' },
-  { bg: '#6d28d9', text: '#fff',     label: 'GPIO' },
-  { bg: '#2563eb', text: '#fff',     label: 'SPI' },
-  { bg: '#7c3aed', text: '#fff',     label: 'I2C' },
-  { bg: '#0891b2', text: '#fff',     label: 'UART' },
-  { bg: '#0369a1', text: '#fff',     label: 'Clock' },
-  { bg: '#0f766e', text: '#fff',     label: 'EN / RTC' },
-  { bg: '#7f1d1d', text: '#fca5a5',  label: '✕ Danger' },
-  { bg: '#78350f', text: '#fde68a',  label: '⚠ Warning' },
-] as const
+export interface LegendItem { bg: string; text: string; label: string }
+
+// Legend entries for the active view, derived from FN_COLOR so the swatches
+// always match what the diagram actually draws. Only the categories a given
+// view renders are shown.
+export function legendFor(view: 'schematic' | 'module'): LegendItem[] {
+  const C = FN_COLOR
+  const fns: LegendItem[] = [
+    { bg: C.power, text: '#fff',     label: 'Power' },
+    { bg: C.gnd,   text: '#9ca3af',  label: 'GND' },
+    { bg: C.adc1,  text: '#fff',     label: 'ADC1 (WiFi-safe)' },
+    { bg: C.adc2,  text: '#fff',     label: 'ADC2 (WiFi conflict)' },
+    { bg: C.dac,   text: '#fff',     label: 'DAC' },
+    { bg: C.touch, text: '#fff',     label: 'Touch' },
+    { bg: C.gpio,  text: '#fff',     label: 'GPIO' },
+    { bg: C.spi,   text: '#fff',     label: 'SPI' },
+    { bg: C.i2c,   text: '#fff',     label: 'I2C' },
+    { bg: C.uart,  text: '#fff',     label: 'UART' },
+    { bg: C.clock, text: '#fff',     label: 'Clock' },
+    { bg: C.enrtc, text: '#fff',     label: 'EN / RTC' },
+    { bg: C.usb,   text: '#fff',     label: 'USB / JTAG' },
+    { bg: C.sd,    text: '#fff',     label: 'SD' },
+  ]
+  // View-specific extras: the schematic labels the JTAG strap pins (MTxx);
+  // the module view tints strapping pins on the connector dot.
+  if (view === 'schematic') fns.push({ bg: C.jtag, text: '#e7e5e4', label: 'JTAG (MTxx)' })
+  else                      fns.push({ bg: C.strap, text: '#1c1917', label: 'Strapping' })
+
+  return [
+    ...fns,
+    { bg: '#7f1d1d', text: '#fca5a5', label: '✕ Danger' },
+    { bg: '#78350f', text: '#fde68a', label: '⚠ Warning' },
+  ]
+}

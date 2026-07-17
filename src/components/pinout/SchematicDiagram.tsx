@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
 import type { Pin, Chip, LayoutPin, SymbolPin } from '../../types/chip'
-import { AFFECTED_WORD, resolveModule } from './shared'
+import { AFFECTED_WORD, resolveModule, fnColor } from './shared'
 
 // ─── EDA sheet palette (KiCad Eeschema classic) ───────────────────────────────
 
@@ -22,24 +22,6 @@ const HPITCH = 30         // vertical-pin pitch along top/bottom edges
 const PL     = 46         // pin (stub) length
 const VPL    = 36         // vertical pin length
 const FONT   = "'Segoe UI','Helvetica Neue',Arial,sans-serif"
-
-// Function-name → annotation text color on the light sheet.
-function fnColor(name: string): string {
-  const u = name.toUpperCase()
-  if (/^ADC1/.test(u))                             return '#c2410c'
-  if (/^ADC2/.test(u))                             return '#b45309'
-  if (/^DAC/.test(u))                              return '#a16207'
-  if (/^TOUCH/.test(u))                            return '#15803d'
-  if (/^RTC|^32K|XTAL/.test(u))                    return '#0f766e'
-  if (/MOSI|MISO|^SCK$|VSPI|HSPI/.test(u))       return '#1d4ed8'
-  if (/SDA$|SCL$/.test(u))                         return '#6d28d9'
-  if (/^U[0-9]?(TXD?|RXD?|CTS|RTS)|^TX|^RX/.test(u)) return '#0e7490'
-  if (/USB|JTAG/.test(u))                          return '#be185d'
-  if (/^MT(DI|CK|MS|DO)$/.test(u))                return '#57534e'
-  if (/^SD_|^CMD$|^CLK$|^SD[0-9]$/.test(u))       return '#4338ca'
-  if (/CLK/.test(u))                               return '#0369a1'
-  return '#57534e'
-}
 
 // Pin-name color inside the body.
 function pinNameColor(label: string): string {

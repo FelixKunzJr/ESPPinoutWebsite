@@ -1,5 +1,5 @@
 import { useApp } from '../context/AppContext'
-import { MATRIX_PERIPHERALS, FAMILY_ROUTING_NOTE, resolveGroups, usbPins } from '../data/routing'
+import { MATRIX_PERIPHERALS, FAMILY_ROUTING_NOTE, resolveGroups } from '../data/routing'
 
 // "Can I put I2C on pin X?" - the GPIO matrix / IO MUX explainer the diagram
 // alone cannot answer. Fixed-interface pin chips are clickable and open the
@@ -7,7 +7,6 @@ import { MATRIX_PERIPHERALS, FAMILY_ROUTING_NOTE, resolveGroups, usbPins } from 
 export function RoutingCard() {
   const { chip, setSelectedPin } = useApp()
   const groups = resolveGroups(chip)
-  const usb = usbPins(chip)
   const note = FAMILY_ROUTING_NOTE[chip.family]
 
   const select = (gpio: number) => {
@@ -35,7 +34,7 @@ export function RoutingCard() {
         {note && <p className="text-xs text-gray-500 mt-1 leading-relaxed">{note}</p>}
       </div>
 
-      {(groups.length > 0 || usb.length > 0) && (
+      {groups.length > 0 && (
         <div className="space-y-2">
           {groups.map(g => (
             <div key={g.id} className="rounded-lg bg-gray-800/50 px-3 py-2">
@@ -65,30 +64,13 @@ export function RoutingCard() {
             </div>
           ))}
 
-          {usb.length > 0 && (
-            <div className="rounded-lg bg-gray-800/50 px-3 py-2">
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span className="text-xs font-semibold text-gray-200">Native USB (fixed)</span>
-                <span className="flex flex-wrap gap-1">
-                  {usb.map(p => (
-                    <button
-                      key={p.gpio}
-                      onClick={() => select(p.gpio)}
-                      title={`GPIO${p.gpio} - ${p.names.join(' / ')}. Click for details.`}
-                      className="font-mono text-[10px] leading-none rounded-sm px-1.5 py-1 bg-gray-700/80 text-gray-200 hover:bg-violet-800 transition-colors"
-                    >
-                      {p.names.find(n => /USB/i.test(n)) ?? `GPIO${p.gpio}`}:{p.gpio}
-                    </button>
-                  ))}
-                </span>
-              </div>
-              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                USB D-/D+ cannot be moved. Avoid these pins if you flash or debug over native USB.
-              </p>
-            </div>
-          )}
         </div>
       )}
+
+      <p className="text-[10px] text-gray-600 leading-relaxed">
+        Advanced: the GPIO matrix can even loop a peripheral output back into another peripheral's
+        input on-chip, without using any pin at all - see the Technical Reference Manual.
+      </p>
     </div>
   )
 }

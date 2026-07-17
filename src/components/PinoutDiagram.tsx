@@ -1,7 +1,7 @@
 import { useApp } from '../context/AppContext'
 import { ModuleDiagram } from './pinout/ModuleDiagram'
 import { SchematicDiagram } from './pinout/SchematicDiagram'
-import { LEGEND } from './pinout/shared'
+import { legendFor } from './pinout/shared'
 import { reportMistakeUrl } from '../utils/github'
 
 const VIEWS = [
@@ -56,7 +56,7 @@ export function PinoutDiagram() {
 
       {/* Legend */}
       <div className="px-4 py-2.5 flex flex-wrap gap-x-4 gap-y-1.5" style={{ borderTop: '1px solid #1a2535' }}>
-        {LEGEND.map(({ bg, text, label }) => (
+        {legendFor(view).map(({ bg, text, label }) => (
           <span key={label} className="flex items-center gap-1.5" style={{ fontSize: 10 }}>
             <span className="font-mono font-bold rounded-sm flex-shrink-0"
               style={{ background: bg, color: text, fontSize: 8, lineHeight: '14px', height: 14, padding: '0 4px' }}>

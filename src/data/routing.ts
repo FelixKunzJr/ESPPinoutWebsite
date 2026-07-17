@@ -1,4 +1,4 @@
-import type { Chip, Pin } from '../types/chip'
+import type { Chip } from '../types/chip'
 
 // Peripheral routing knowledge: what the GPIO matrix can put on any free pin,
 // and which interfaces are bound to fixed pins or the IO MUX. This is the
@@ -74,17 +74,66 @@ export const FIXED_GROUPS: FixedGroup[] = [
       { gpio: 15, role: 'CS0' },
     ],
   },
+]
+
+// Groups derived from the pin names themselves (which come from Espressif's
+// official symbols and carry the IO MUX function names). Deriving instead of
+// hand-copying datasheet tables keeps every family and module accurate by
+// construction: a module only shows the pins it actually breaks out.
+interface NameGroupDef {
+  id: string
+  name: string
+  desc: string
+  match: RegExp
+  role: (name: string) => string
+  families?: string[]     // restrict to specific chip.family values
+}
+
+const NAME_GROUPS: NameGroupDef[] = [
   {
     id: 'jtag',
     name: 'JTAG debug',
-    desc: 'Hardware debug interface on fixed pins. Free to use as GPIOs when you are not debugging over JTAG.',
-    families: ['ESP32'],
-    pins: [
-      { gpio: 12, role: 'MTDI' },
-      { gpio: 13, role: 'MTCK' },
-      { gpio: 14, role: 'MTMS' },
-      { gpio: 15, role: 'MTDO' },
-    ],
+    desc: 'Hardware debug interface on fixed IO MUX pins. Free to use as GPIOs when you are not debugging over JTAG.',
+    match: /^MT(MS|DI|CK|DO)$/,
+    role: n => n,
+  },
+  {
+    id: 'fspi',
+    name: 'FSPI on IO MUX',
+    desc: 'Full-speed SPI must use these IO MUX pins; routed through the GPIO matrix, SPI tops out around 26 MHz on any pin.',
+    match: /^FSPI(CLK|Q|D|CS0|HD|WP)$/,
+    role: n => ({ FSPICLK: 'SCLK', FSPIQ: 'MISO', FSPID: 'MOSI', FSPICS0: 'CS0', FSPIHD: 'HD', FSPIWP: 'WP' }[n] ?? n),
+  },
+  {
+    // SPIIO*/SPIDQS/SPICLK_* (no F prefix) is the internal memory bus;
+    // FSPIIO*/FSPIDQS is SPI2's octal-mode extension and stays usable.
+    id: 'octal',
+    name: 'Octal flash/PSRAM bus',
+    desc: 'On S3 modules with octal flash or PSRAM (WROOM-2, R8 variants) these pins carry the memory bus and must not be used. On quad modules they are regular GPIOs.',
+    match: /^(SPIIO[4-7]|SPIDQS|SPICLK_[NP])$/,
+    role: n => n,
+    families: ['ESP32-S3'],
+  },
+  {
+    id: 'xtal32k',
+    name: '32 kHz crystal',
+    desc: 'Optional external 32.768 kHz crystal for accurate RTC timekeeping in deep sleep. Plain GPIOs when no crystal is fitted.',
+    match: /^(XTAL_32K_[PN]|32K_X?[PN])$/,
+    role: n => (/P$/.test(n) ? 'XP' : 'XN'),
+  },
+  {
+    id: 'uart0',
+    name: 'UART0 (console)',
+    desc: 'Default console UART used for flashing and the boot log. UART is matrix-routable to any pin, but the ROM bootloader always logs here.',
+    match: /^U0(TXD|RXD)$/,
+    role: n => n.replace('U0', ''),
+  },
+  {
+    id: 'usb',
+    name: 'Native USB',
+    desc: 'USB D-/D+ cannot be moved. Avoid these pins if you flash or debug over native USB.',
+    match: /^USB_D[+-]$/,
+    role: n => n.replace('USB_', ''),
   },
 ]
 
@@ -111,9 +160,59 @@ export interface ResolvedGroup extends FixedGroup {
   missing: FixedGroupPin[]
 }
 
+// Pins wired to the flash/PSRAM die inside the module or SiP - the Reddit
+// point about "internal connections on modules / PICO chips". Derived from
+// the existing constraint data.
+function internalConnectionsGroup(chip: Chip): ResolvedGroup | null {
+  const present: FixedGroupPin[] = chip.pins
+    .filter(p => p.constraints.some(c => c.id === 'flash_reserved' || c.id === 'psram_reserved'))
+    .map(p => ({
+      gpio: p.gpio,
+      role: p.constraints.some(c => c.id === 'psram_reserved') ? 'PSRAM' : 'flash',
+    }))
+  if (present.length === 0) return null
+  return {
+    id: 'internal',
+    name: 'Wired inside the module',
+    desc: 'These GPIOs connect to the flash or PSRAM die inside the module/SiP. They are electrically in use even where the pad or header pin is broken out - never repurpose them.',
+    families: [chip.family],
+    pins: present,
+    present,
+    missing: [],
+  }
+}
+
+function deriveNameGroups(chip: Chip): ResolvedGroup[] {
+  return NAME_GROUPS
+    .filter(g => !g.families || g.families.includes(chip.family))
+    .map(g => {
+      // One pin per role, first (lowest-GPIO) wins - on chips where a signal
+      // has more than one IO MUX candidate (S3 FSPI) we show the primary set.
+      const present: FixedGroupPin[] = []
+      const seenRoles = new Set<string>()
+      for (const pin of chip.pins) {
+        const hit = pin.names.find(n => g.match.test(n))
+        if (!hit) continue
+        const role = g.role(hit)
+        if (seenRoles.has(role)) continue
+        seenRoles.add(role)
+        present.push({ gpio: pin.gpio, role })
+      }
+      return {
+        id: g.id, name: g.name, desc: g.desc,
+        families: g.families ?? [chip.family],
+        pins: present, present, missing: [],
+      }
+    })
+    .filter(g => g.present.length > 0)
+}
+
+// All fixed-interface groups for a chip: internal module wiring first, then
+// hand-authored datasheet groups (classic ESP32), then groups derived from
+// the Espressif symbol pin names (every family).
 export function resolveGroups(chip: Chip): ResolvedGroup[] {
   const have = new Set(chip.pins.map(p => p.gpio))
-  return FIXED_GROUPS
+  const hand = FIXED_GROUPS
     .filter(g => g.families.includes(chip.family))
     .map(g => ({
       ...g,
@@ -121,20 +220,15 @@ export function resolveGroups(chip: Chip): ResolvedGroup[] {
       missing: g.pins.filter(p => !have.has(p.gpio)),
     }))
     .filter(g => g.present.length > 0)
-}
-
-// USB pins are already flagged in the pin data; derive the fixed-USB group
-// from there instead of duplicating per-family tables.
-export function usbPins(chip: Chip): Pin[] {
-  return chip.pins.filter(p => p.capabilities.includes('usb'))
+  const internal = internalConnectionsGroup(chip)
+  return [...(internal ? [internal] : []), ...hand, ...deriveNameGroups(chip)]
 }
 
 // Special-interface roles for one pin (for the pin detail panel).
 export function specialInterfaces(chip: Chip, gpio: number): { group: string; role: string }[] {
   const out: { group: string; role: string }[] = []
-  for (const g of FIXED_GROUPS) {
-    if (!g.families.includes(chip.family)) continue
-    const hit = g.pins.find(p => p.gpio === gpio)
+  for (const g of resolveGroups(chip)) {
+    const hit = g.present.find(p => p.gpio === gpio)
     if (hit) out.push({ group: g.name, role: hit.role })
   }
   return out
