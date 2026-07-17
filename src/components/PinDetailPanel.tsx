@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import { ConstraintBadge } from './ConstraintBadge'
 import { reportMistakeUrl } from '../utils/github'
@@ -19,6 +20,27 @@ const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
 
 export function PinDetailPanel() {
   const { selectedPin, setSelectedPin, chip } = useApp()
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // Close when clicking anywhere outside the panel. Uses a document listener
+  // (not a backdrop) so a click on another pin selects it directly instead of
+  // just dismissing. The pin-diagram click that opened the panel has already
+  // finished before this effect attaches, so it won't self-close.
+  useEffect(() => {
+    if (!selectedPin) return
+    const onDown = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setSelectedPin(null)
+      }
+    }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedPin(null) }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [selectedPin, setSelectedPin])
 
   if (!selectedPin) return null
 
@@ -27,7 +49,7 @@ export function PinDetailPanel() {
     .map(c => ({ cap: c, detail: CAP_DETAILS[c] ?? { label: c.toUpperCase(), desc: '' } }))
 
   return (
-    <div className="fixed right-0 top-0 h-full w-80 bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col z-50 overflow-y-auto">
+    <div ref={panelRef} className="fixed right-0 top-0 h-full w-80 bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col z-50 overflow-y-auto">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
         <div>
           <span className="text-2xl font-bold font-mono text-green-400">GPIO{selectedPin.gpio}</span>
