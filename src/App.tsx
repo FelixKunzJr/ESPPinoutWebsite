@@ -1,4 +1,5 @@
 import { ChipSelector }    from './components/ChipSelector'
+import { RoutingCard }     from './components/RoutingCard'
 import { FilterBar }       from './components/FilterBar'
 import { PinoutDiagram }   from './components/PinoutDiagram'
 import { PinTable }        from './components/PinTable'
@@ -52,6 +53,8 @@ export default function App() {
             <div id="pinout-diagram-export">
               <PinoutDiagram />
             </div>
+
+            <RoutingCard />
 
             <FilterBar />
 

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import { ConstraintBadge } from './ConstraintBadge'
 import { reportMistakeUrl } from '../utils/github'
+import { specialInterfaces, MATRIX_PERIPHERALS } from '../data/routing'
 
 const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
   adc1:  { label: 'ADC1',  desc: 'Analog-to-digital converter, channel 1. Safe to use while WiFi is active.' },
@@ -92,6 +93,30 @@ export function PinDetailPanel() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {specialInterfaces(chip, selectedPin.gpio).length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Special Interfaces</h3>
+            <div className="space-y-1.5">
+              {specialInterfaces(chip, selectedPin.gpio).map(s => (
+                <div key={s.group + s.role} className="rounded-lg bg-gray-800/60 px-3 py-2 flex items-baseline justify-between gap-2">
+                  <span className="text-xs text-gray-300">{s.group}</span>
+                  <span className="font-mono text-xs text-cyan-300">{s.role}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {selectedPin.isUsable && (
+          <div className="rounded-lg bg-gray-800/40 border border-gray-700/60 px-3 py-2">
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              {selectedPin.constraints.some(c => c.id === 'input_only')
+                ? '🔀 Input-only, but the GPIO matrix can still route peripheral inputs here (UART RX, I2S data in, pulse counter and similar).'
+                : `🔀 Via the GPIO matrix this pin can also host ${MATRIX_PERIPHERALS.join(' · ')} - most peripherals are not tied to specific pins.`}
+            </p>
           </div>
         )}
 
