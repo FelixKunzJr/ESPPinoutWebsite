@@ -2,9 +2,13 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import { CHIPS } from '../data/chips/index'
 import type { Chip, Pin, PinAssignment, FilterKey } from '../types/chip'
 
+export type DiagramView = 'schematic' | 'module'
+
 interface AppState {
   chip: Chip
   setChip: (id: string) => void
+  view: DiagramView
+  setView: (v: DiagramView) => void
   selectedPin: Pin | null
   setSelectedPin: (pin: Pin | null) => void
   filter: FilterKey
@@ -48,6 +52,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return CHIPS[0]
   })
 
+  const [view, setViewState] = useState<DiagramView>(() => {
+    try {
+      const stored = localStorage.getItem('diagram-view')
+      if (stored === 'schematic' || stored === 'module') return stored
+    } catch { /* private mode etc. */ }
+    return 'schematic'
+  })
+
+  const setView = useCallback((v: DiagramView) => {
+    setViewState(v)
+    try { localStorage.setItem('diagram-view', v) } catch { /* ignore */ }
+  }, [])
+
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null)
   const [filter, setFilter] = useState<FilterKey>('all')
   const [mapping, setMapping] = useState<PinAssignment[]>(() => {
@@ -87,6 +104,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       chip, setChip,
+      view, setView,
       selectedPin, setSelectedPin,
       filter, setFilter,
       mapping, assignPin, unassignPin, clearMapping,
