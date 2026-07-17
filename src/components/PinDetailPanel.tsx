@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import { ConstraintBadge } from './ConstraintBadge'
 import { reportMistakeUrl } from '../utils/github'
-import { specialInterfaces, MATRIX_PERIPHERALS } from '../data/routing'
+import { specialInterfaces, matrixPeripherals } from '../data/routing'
 
 const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
   adc1:  { label: 'ADC1',  desc: 'Analog-to-digital converter, channel 1. Safe to use while WiFi is active.' },
@@ -115,7 +115,7 @@ export function PinDetailPanel() {
             <p className="text-[11px] text-gray-400 leading-relaxed">
               {selectedPin.constraints.some(c => c.id === 'input_only')
                 ? '🔀 Input-only, but the GPIO matrix can still route peripheral inputs here (UART RX, I2S data in, pulse counter and similar).'
-                : `🔀 Via the GPIO matrix this pin can also host ${MATRIX_PERIPHERALS.join(' · ')} - most peripherals are not tied to specific pins.`}
+                : `🔀 Via the GPIO matrix this pin can also host ${matrixPeripherals(chip.family).join(' · ')} - most peripherals are not tied to specific pins.`}
             </p>
           </div>
         )}

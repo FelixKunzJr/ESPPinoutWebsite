@@ -1,5 +1,5 @@
 import { useApp } from '../context/AppContext'
-import { MATRIX_PERIPHERALS, FAMILY_ROUTING_NOTE, TRM_URLS, resolveGroups } from '../data/routing'
+import { matrixPeripherals, FAMILY_ROUTING_NOTE, TRM_URLS, resolveGroups } from '../data/routing'
 
 // "Can I put I2C on pin X?" - the GPIO matrix / IO MUX explainer the diagram
 // alone cannot answer. Fixed-interface pin chips are clickable and open the
@@ -36,7 +36,7 @@ export function RoutingCard() {
         <p className="text-xs text-gray-400 leading-relaxed">
           The {chip.family} routes most peripherals through its GPIO matrix, so these can use{' '}
           <span className="text-gray-200 font-medium">almost any free GPIO</span>:{' '}
-          {MATRIX_PERIPHERALS.map((p, i) => (
+          {matrixPeripherals(chip.family).map((p, i) => (
             <span key={p}>
               {i > 0 && <span className="text-gray-600"> · </span>}
               <span className="text-emerald-300/90 font-mono text-[11px]">{p}</span>
@@ -85,7 +85,6 @@ export function RoutingCard() {
         0/1 without using a pin, and loop a peripheral output back into another peripheral on-chip.
         Every pad has configurable drive strength and a hold latch that freezes its state through
         resets and deep sleep.
-        {chip.family !== 'ESP32' && ' Sigma-delta output channels can fake analog on any pin.'}
       </p>
     </div>
   )
