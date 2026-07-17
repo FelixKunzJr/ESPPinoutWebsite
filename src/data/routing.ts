@@ -138,9 +138,13 @@ const NAME_GROUPS: NameGroupDef[] = [
 ]
 
 // Peripherals the GPIO matrix can place on (almost) any free GPIO.
-export const MATRIX_PERIPHERALS = [
-  'I2C', 'UART', 'PWM (LEDC)', 'SPI (up to ~26 MHz)', 'I2S', 'RMT', 'Pulse counter',
-] as const
+// Sigma-delta modulated output (a pseudo-analog voltage after an RC filter,
+// like a faster PWM) exists on every family except the classic ESP32.
+export function matrixPeripherals(family: string): string[] {
+  const base = ['I2C', 'UART', 'PWM (LEDC)', 'SPI (up to ~26 MHz)', 'I2S', 'RMT', 'Pulse counter']
+  if (family !== 'ESP32') base.push('Sigma-delta (pseudo-analog out)')
+  return base
+}
 
 // One-line family-specific footnote for the routing card. Sleep-domain and
 // sigma-delta facts verified against each family's TRM (IO MUX chapter).
