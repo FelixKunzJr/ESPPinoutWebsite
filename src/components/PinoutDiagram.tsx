@@ -2,6 +2,7 @@ import { useApp } from '../context/AppContext'
 import { ModuleDiagram } from './pinout/ModuleDiagram'
 import { SchematicDiagram } from './pinout/SchematicDiagram'
 import { LEGEND } from './pinout/shared'
+import { reportMistakeUrl } from '../utils/github'
 
 const VIEWS = [
   { id: 'schematic', label: 'Schematic' },
@@ -9,7 +10,7 @@ const VIEWS = [
 ] as const
 
 export function PinoutDiagram() {
-  const { chip, view, setView } = useApp()
+  const { chip, view, setView, selectedPin } = useApp()
 
   return (
     <div className="rounded-xl border overflow-hidden" style={{ background: '#060b12', borderColor: '#1a2535' }}>
@@ -18,6 +19,20 @@ export function PinoutDiagram() {
         <span className="font-mono truncate" style={{ fontSize: 11, color: '#5a6b80' }}>
           {chip.name} · {view === 'schematic' ? 'logical pinout' : 'physical module, top view'}
         </span>
+        <div className="flex items-center gap-2 flex-shrink-0">
+        <a
+          href={reportMistakeUrl(chip, selectedPin)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold rounded-md transition-colors"
+          title="Something wrong on this diagram? Open a prefilled GitHub issue."
+          style={{
+            fontSize: 11, padding: '4px 10px', lineHeight: '16px',
+            color: '#fbbf24', border: '1px solid #78350f', background: 'rgba(120,53,15,0.25)',
+          }}
+        >
+          ⚠ Report mistake
+        </a>
         <div className="flex rounded-md overflow-hidden flex-shrink-0" style={{ border: '1px solid #2a3a52' }}>
           {VIEWS.map(v => (
             <button
@@ -33,6 +48,7 @@ export function PinoutDiagram() {
               {v.label}
             </button>
           ))}
+        </div>
         </div>
       </div>
 
@@ -50,6 +66,13 @@ export function PinoutDiagram() {
           </span>
         ))}
       </div>
+
+      <p className="px-4 pb-2.5" style={{ fontSize: 9.5, color: '#4a5a6e' }}>
+        Community-maintained reference. Always verify against the{' '}
+        <a href={chip.datasheetUrl} target="_blank" rel="noopener noreferrer"
+          style={{ color: '#6b7f99', textDecoration: 'underline' }}>official datasheet</a>{' '}
+        before committing hardware.
+      </p>
     </div>
   )
 }

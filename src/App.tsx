@@ -22,7 +22,7 @@ export default function App() {
               <p className="text-xs text-gray-500">Free interactive pinout reference for the maker community</p>
             </div>
             <a
-              href="https://github.com/felixkunz/esp32-pinout-studio"
+              href="https://github.com/FelixKunzJr/ESPPinoutWebsite"
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-gray-500 hover:text-gray-300"

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://esp32pin.com/sitemap.xml

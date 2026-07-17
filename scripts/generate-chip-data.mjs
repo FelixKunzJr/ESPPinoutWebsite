@@ -136,22 +136,28 @@ function buildModule(mod, fam) {
     const gpio = +g[1]
     if (!seen.has(gpio)) seen.set(gpio, raw)
   }
+  // Classic-ESP32 flash bus: GPIO6-11 wire to the SPI flash. 6/7/8/11 are
+  // always off-limits; 9/10 only when the module exposes the full bus
+  // (WROOM-32 pads / DevKitC headers). PICO/MINI SiP parts keep 9/10 free.
+  const fullFlashBus = fam.flashBus && seen.has(6)
   const pinObjs = [...seen.entries()].sort((a, b) => a[0] - b[0]).map(([gpio, raw]) => {
     const toks = nameTokens(raw)
     const inputOnly = fam.inputOnly?.includes(gpio)
+    const flashReserved = fam.flashBus && ([6, 7, 8, 11].includes(gpio) || (fullFlashBus && [9, 10].includes(gpio)))
     const cs = []
+    if (flashReserved) cs.push('FLASH')
     if (inputOnly) cs.push('INPUT_ONLY')
     if (fam.strapping?.includes(gpio)) cs.push('STRAP')
     if (fam.adc2Wifi && toks.some(t => /^ADC2/i.test(t))) cs.push('ADC2_WIFI')
     if (toks.some(t => /USB_D/i.test(t))) cs.push('USB')
-    return { gpio, names: toks, capabilities: caps(toks, inputOnly), constraints: cs }
+    return { gpio, names: toks, capabilities: flashReserved ? [] : caps(toks, inputOnly), constraints: cs, usable: !flashReserved }
   })
   return { pins: pinObjs, layout: { name: mod.name, ...buildLayout(pins, pads) } }
 }
 
 // Per-family boot/strapping rules (the lore KiCad doesn't encode).
 const FAM = {
-  esp32: { strapping: [0, 2, 5, 12, 15], inputOnly: [34, 35, 36, 37, 38, 39], adc2Wifi: true },
+  esp32: { strapping: [0, 2, 5, 12, 15], inputOnly: [34, 35, 36, 37, 38, 39], adc2Wifi: true, flashBus: true },
   s2:    { strapping: [0, 45, 46], inputOnly: [46], adc2Wifi: true },
   s3:    { strapping: [0, 3, 45, 46], inputOnly: [], adc2Wifi: false },
   c3:    { strapping: [2, 8, 9], inputOnly: [], adc2Wifi: false },
@@ -203,7 +209,7 @@ function fmtSym(sym) {
   return s + '}'
 }
 function fmtPin(p) {
-  return `  { gpio: ${p.gpio}, names: ${JSON.stringify(p.names)}, capabilities: ${JSON.stringify(p.capabilities)} as Capability[], constraints: [${p.constraints.join(', ')}], isUsable: true }`
+  return `  { gpio: ${p.gpio}, names: ${JSON.stringify(p.names)}, capabilities: ${JSON.stringify(p.capabilities)} as Capability[], constraints: [${p.constraints.join(', ')}], isUsable: ${p.usable !== false} }`
 }
 function fmtArr(a) {
   return '[' + a.map(p => p.gpio !== undefined ? `{ pinNumber: ${p.pinNumber}, gpio: ${p.gpio} }` : `{ pinNumber: ${p.pinNumber}, label: '${p.label}' }`).join(', ') + ']'
@@ -213,7 +219,8 @@ let out = `// AUTO-GENERATED from Espressif's official KiCad libraries (symbols 
 out += `const INPUT_ONLY = { id: 'input_only' as const, severity: 'warning' as const, title: 'Input only', description: 'This pin has no output driver or internal pull resistors. Use only as a digital/analog input.' }\n`
 out += `const STRAP = { id: 'strapping_pin' as const, severity: 'warning' as const, title: 'Strapping pin', description: 'Sampled at boot to set boot mode / configuration. Avoid driving it at reset unless you know the required level.' }\n`
 out += `const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, title: 'ADC2 unusable with Wi-Fi', description: 'ADC2 is claimed by the Wi-Fi driver; analogRead() on this pin fails while Wi-Fi is active. Prefer ADC1 pins.' }\n`
-out += `const USB = { id: 'usb_jtag' as const, severity: 'warning' as const, title: 'USB / Serial-JTAG', description: 'Part of the native USB (Serial/JTAG) interface. Avoid repurposing while USB is in use.' }\n\n`
+out += `const USB = { id: 'usb_jtag' as const, severity: 'warning' as const, title: 'USB / Serial-JTAG', description: 'Part of the native USB (Serial/JTAG) interface. Avoid repurposing while USB is in use.' }\n`
+out += `const FLASH = { id: 'flash_reserved' as const, severity: 'danger' as const, title: 'Reserved for flash', description: 'Wired to the SPI flash of the module. Using it for anything else will crash the chip.' }\n\n`
 
 const keys = []
 for (const mod of MODULES) {

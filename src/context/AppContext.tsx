@@ -39,18 +39,27 @@ function decodeState(hash: string): { chipId: string; mapping: PinAssignment[] }
   } catch { return null }
 }
 
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [chip, setChipState] = useState<Chip>(() => {
-    const hash = window.location.hash.slice(1)
-    if (hash) {
-      const decoded = decodeState(hash)
-      if (decoded) {
-        const found = CHIPS.find(c => c.id === decoded.chipId)
-        if (found) return found
-      }
+// Chip encoded in the current URL: path (/esp32s3, canonical) with the
+// legacy hash format (#base64{c,m}) as fallback for old shared links.
+function chipFromLocation(): Chip | null {
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase()
+  if (path) {
+    const found = CHIPS.find(c => c.id === path)
+    if (found) return found
+  }
+  const hash = window.location.hash.slice(1)
+  if (hash) {
+    const decoded = decodeState(hash)
+    if (decoded) {
+      const found = CHIPS.find(c => c.id === decoded.chipId)
+      if (found) return found
     }
-    return CHIPS[0]
-  })
+  }
+  return null
+}
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [chip, setChipState] = useState<Chip>(() => chipFromLocation() ?? CHIPS[0])
 
   const [view, setViewState] = useState<DiagramView>(() => {
     try {
@@ -76,12 +85,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return []
   })
 
-  const shareUrl = `${window.location.origin}${window.location.pathname}#${encodeState(chip.id, mapping)}`
+  const shareUrl = `${window.location.origin}/${chip.id}${mapping.length ? `#${encodeState(chip.id, mapping)}` : ''}`
 
-  // Sync URL hash whenever chip or mapping changes
+  // Keep the URL in sync: chip lives in the path (one history entry per chip),
+  // the pin mapping lives in the hash (replaced in place, no history spam).
   useEffect(() => {
-    window.location.hash = encodeState(chip.id, mapping)
-  }, [chip.id, mapping])
+    const path = `/${chip.id}`
+    const hash = mapping.length ? `#${encodeState(chip.id, mapping)}` : ''
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, '', path + hash)
+    } else if ((window.location.hash || '') !== hash) {
+      window.history.replaceState({}, '', path + hash)
+    }
+    document.title = `${chip.name} pinout | ESP32 Pinout Studio`
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+    if (canonical) canonical.href = `https://esp32pin.com${path}`
+  }, [chip.id, chip.name, mapping])
+
+  // Browser back/forward between chips
+  useEffect(() => {
+    const onPop = () => {
+      const found = chipFromLocation() ?? CHIPS[0]
+      const decoded = decodeState(window.location.hash.slice(1))
+      setChipState(prev => (prev.id === found.id ? prev : found))
+      setSelectedPin(null)
+      setMapping(decoded && decoded.chipId === found.id ? decoded.mapping : [])
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
 
   const setChip = useCallback((id: string) => {
     const found = CHIPS.find(c => c.id === id)

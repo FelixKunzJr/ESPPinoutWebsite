@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
-
-const SUBMIT_ISSUE_URL = 'https://github.com/felixkunz/esp32-pinout-studio/issues/new?template=chip_data.md&title=New+chip+data'
+import { newChipUrl } from '../utils/github'
 
 export function CommunitySubmit() {
   const { chip } = useApp()
@@ -28,7 +27,7 @@ export function CommunitySubmit() {
           {copied ? '✓ Copied JSON' : 'Copy current chip JSON'}
         </button>
         <a
-          href={SUBMIT_ISSUE_URL}
+          href={newChipUrl()}
           target="_blank"
           rel="noopener noreferrer"
           className="px-3 py-1.5 bg-green-800 hover:bg-green-700 rounded text-xs text-white transition-colors"

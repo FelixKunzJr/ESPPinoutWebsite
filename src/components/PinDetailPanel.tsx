@@ -1,5 +1,6 @@
 import { useApp } from '../context/AppContext'
 import { ConstraintBadge } from './ConstraintBadge'
+import { reportMistakeUrl } from '../utils/github'
 
 const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
   adc1:  { label: 'ADC1',  desc: 'Analog-to-digital converter, channel 1. Safe to use while WiFi is active.' },
@@ -85,6 +86,16 @@ export function PinDetailPanel() {
             <p className="text-xs text-red-400 mt-1">This GPIO is reserved by the chip and cannot be used for user code.</p>
           </div>
         )}
+
+        <a
+          href={reportMistakeUrl(chip, selectedPin)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block text-center text-xs rounded-lg px-3 py-2 transition-colors"
+          style={{ color: '#fbbf24', border: '1px solid #78350f', background: 'rgba(120,53,15,0.2)' }}
+        >
+          ⚠ Report a mistake with this pin
+        </a>
       </div>
     </div>
   )
