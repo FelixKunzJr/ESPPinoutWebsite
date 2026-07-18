@@ -3,10 +3,13 @@ import { CHIPS } from '../data/chips/index'
 import type { Chip, Pin, PinAssignment, FilterKey } from '../types/chip'
 
 export type DiagramView = 'schematic' | 'module'
+export type Page = 'studio' | 'contribute'
 
 interface AppState {
   chip: Chip
   setChip: (id: string) => void
+  page: Page
+  navigate: (to: Page) => void
   view: DiagramView
   setView: (v: DiagramView) => void
   selectedPin: Pin | null
@@ -58,8 +61,23 @@ function chipFromLocation(): Chip | null {
   return null
 }
 
+// Non-chip pages live at their own path (e.g. /contribute); everything else
+// is the studio (a chip page).
+function pageFromLocation(): Page {
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase()
+  return path === 'contribute' ? 'contribute' : 'studio'
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [chip, setChipState] = useState<Chip>(() => chipFromLocation() ?? CHIPS[0])
+  const [page, setPage] = useState<Page>(() => pageFromLocation())
+
+  const navigate = useCallback((to: Page) => {
+    const path = to === 'contribute' ? '/contribute' : `/${chip.id}`
+    if (window.location.pathname !== path) window.history.pushState({}, '', path)
+    setPage(to)
+    window.scrollTo(0, 0)
+  }, [chip.id])
 
   const [view, setViewState] = useState<DiagramView>(() => {
     try {
@@ -90,6 +108,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Keep the URL in sync: chip lives in the path (one history entry per chip),
   // the pin mapping lives in the hash (replaced in place, no history spam).
   useEffect(() => {
+    if (page !== 'studio') return
     const path = `/${chip.id}`
     const hash = mapping.length ? `#${encodeState(chip.id, mapping)}` : ''
     if (window.location.pathname !== path) {
@@ -100,11 +119,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     document.title = `${chip.name} pinout | ESP32 Pinout Studio`
     const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
     if (canonical) canonical.href = `https://esp32pin.com${path}`
-  }, [chip.id, chip.name, mapping])
+  }, [chip.id, chip.name, mapping, page])
 
   // Browser back/forward between chips
   useEffect(() => {
     const onPop = () => {
+      setPage(pageFromLocation())
       const found = chipFromLocation() ?? CHIPS[0]
       const decoded = decodeState(window.location.hash.slice(1))
       setChipState(prev => (prev.id === found.id ? prev : found))
@@ -136,6 +156,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       chip, setChip,
+      page, navigate,
       view, setView,
       selectedPin, setSelectedPin,
       filter, setFilter,

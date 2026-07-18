@@ -2,6 +2,10 @@ import type { Chip, Pin } from '../types/chip'
 
 export const REPO_URL = 'https://github.com/FelixKunzJr/ESPPinoutWebsite'
 
+// Pick-a-template chooser and the full contributor guide.
+export const ISSUE_CHOOSE_URL = `${REPO_URL}/issues/new/choose`
+export const CONTRIBUTING_URL = `${REPO_URL}/blob/main/CONTRIBUTING.md`
+
 // Prefilled GitHub issue for reporting wrong pin data, with enough context
 // that the report is actionable without a follow-up round-trip.
 export function reportMistakeUrl(chip: Chip, pin?: Pin | null): string {

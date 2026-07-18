@@ -74,6 +74,11 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 ### ESP32-H2 (RISC-V, BLE + 802.15.4, no Wi-Fi)
 - [ESP32-H2-MINI-1](https://esp32pin.com/esp32h2)
 
+## Contributing
+
+- [Contribute](https://esp32pin.com/contribute) - the ways to help improve the reference (report a wrong pin, request a board, submit board data or gotchas).
+- Contributor guide: https://github.com/FelixKunzJr/ESPPinoutWebsite/blob/main/CONTRIBUTING.md
+
 ## Data provenance
 
 Pin data is generated from https://github.com/espressif/kicad-libraries via a build script; the schematic symbols shown are the official Espressif KiCad symbols. Family-level rules that KiCad does not encode (strapping pins, boot modes, ADC2/Wi-Fi arbitration, flash-bus rules) are maintained alongside the generator. Source: https://github.com/FelixKunzJr/ESPPinoutWebsite

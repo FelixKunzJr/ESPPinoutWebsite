@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How to contribute (guide)
+    url: https://github.com/FelixKunzJr/ESPPinoutWebsite/blob/main/CONTRIBUTING.md
+    about: How the data pipeline works and how to add a board yourself.
+  - name: Ways to help (contribute page)
+    url: https://esp32pin.com/contribute
+    about: The different ways to help improve the reference.

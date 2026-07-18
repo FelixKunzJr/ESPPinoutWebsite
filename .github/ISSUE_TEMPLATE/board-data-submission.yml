@@ -1,0 +1,33 @@
+name: Submit board data or gotchas
+description: You have pin data, KiCad files, or hard-won gotchas for one or many boards.
+title: "[board data] "
+labels: ["board", "data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Amazing, thank you. You can put **one board or many** in a single issue, no need to file separate ones.
+
+        The hand-found gotchas are worth more than the pinouts (those we can generate), so please don't leave them out.
+  - type: textarea
+    id: boards
+    attributes:
+      label: Boards
+      description: One per line, with a link to KiCad files or a schematic/pinout source where possible.
+      placeholder: |
+        - LILYGO T-Display-S3 -> https://github.com/Xinyuan-LilyGO/... (KiCad)
+        - Waveshare ESP32-S3-Touch-LCD-1.28 -> <link>
+    validations:
+      required: true
+  - type: textarea
+    id: gotchas
+    attributes:
+      label: Gotchas you hit during development
+      description: Board + pin + what went wrong. A datasheet or errata line is gold but not required.
+      placeholder: |
+        - T-Display-S3: GPIO0 is the boot button AND wired to the display backlight, so pulling it low at boot enters download mode.
+  - type: input
+    id: credit
+    attributes:
+      label: How should we credit you?
+      placeholder: GitHub handle, name, or "no credit needed"

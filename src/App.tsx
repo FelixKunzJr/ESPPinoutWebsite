@@ -7,10 +7,13 @@ import { PinDetailPanel }  from './components/PinDetailPanel'
 import { MappingBuilder }  from './components/MappingBuilder'
 import { ExportPanel }     from './components/ExportPanel'
 import { CommunitySubmit } from './components/CommunitySubmit'
+import { ContributePage } from './components/ContributePage'
 import { useApp }          from './context/AppContext'
 
 export default function App() {
-  const { chip } = useApp()
+  const { chip, page, navigate } = useApp()
+
+  if (page === 'contribute') return <ContributePage />
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
@@ -22,14 +25,22 @@ export default function App() {
               <h1 className="text-lg font-bold text-green-400">ESP32 Pinout Studio</h1>
               <p className="text-xs text-gray-500">Free interactive pinout reference for the maker community</p>
             </div>
-            <a
-              href="https://github.com/FelixKunzJr/ESPPinoutWebsite"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-gray-500 hover:text-gray-300"
-            >
-              GitHub ↗
-            </a>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('contribute')}
+                className="text-xs text-gray-500 hover:text-gray-300"
+              >
+                Contribute
+              </button>
+              <a
+                href="https://github.com/FelixKunzJr/ESPPinoutWebsite"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:text-gray-300"
+              >
+                GitHub ↗
+              </a>
+            </div>
           </div>
           <ChipSelector />
         </div>

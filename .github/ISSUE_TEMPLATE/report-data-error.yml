@@ -1,0 +1,37 @@
+name: Report incorrect data or a gotcha
+description: A pin, constraint, or warning is wrong, missing, or misleading.
+title: "[data] "
+labels: ["data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for improving the data. Accuracy is the whole point of this project, so **please include a source** (datasheet section, errata, or a link) wherever you can.
+  - type: input
+    id: board
+    attributes:
+      label: Chip / module / board
+      placeholder: e.g. ESP32-S3-WROOM-1
+    validations:
+      required: true
+  - type: input
+    id: pin
+    attributes:
+      label: Pin
+      placeholder: e.g. GPIO45
+  - type: textarea
+    id: whats-wrong
+    attributes:
+      label: What is wrong or missing?
+    validations:
+      required: true
+  - type: textarea
+    id: correct
+    attributes:
+      label: What should it be?
+      description: Datasheet section or link if you have one.
+  - type: input
+    id: page
+    attributes:
+      label: Page URL (if reporting from the site)
+      placeholder: https://esp32pin.com/esp32s3

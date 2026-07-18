@@ -1,0 +1,31 @@
+name: Request a board
+description: Ask for an ESP32 chip, module, or dev board to be added.
+title: "[board request] "
+labels: ["board", "data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Requests that come with a KiCad symbol/footprint or an official datasheet get added fastest.
+  - type: input
+    id: name
+    attributes:
+      label: Board / module name
+      placeholder: e.g. LILYGO T-Display-S3
+    validations:
+      required: true
+  - type: input
+    id: chip
+    attributes:
+      label: Underlying ESP32 chip
+      placeholder: e.g. ESP32-S3
+  - type: input
+    id: source
+    attributes:
+      label: KiCad files / schematic / datasheet link
+      placeholder: URL to the vendor's KiCad library, schematic, or datasheet
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: Display resolution, unusual pin muxing, on-board peripherals, etc.
