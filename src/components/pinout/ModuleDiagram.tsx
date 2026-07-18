@@ -500,7 +500,7 @@ export function ModuleDiagram() {
 
   return (
     <div ref={scrollRef} className="p-4 pb-2 overflow-x-auto">
-      <div className="flex flex-col items-center min-w-fit mx-auto">
+      <div id="module-diagram-canvas" className="flex flex-col items-center min-w-fit mx-auto p-2">
 
         {/* ── Exposed thermal pad (EPAD) - a ground paddle on the back, not an edge ── */}
         {topIsThermal && (

@@ -26,7 +26,7 @@ function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
 }
 
 export function ExportPanel() {
-  const { chip, mapping, shareUrl } = useApp()
+  const { chip, mapping, shareUrl, view } = useApp()
   const [copied, setCopied] = useState<'url' | 'code' | null>(null)
 
   const code = generateArduinoDefines(chip, mapping)
@@ -37,16 +37,60 @@ export function ExportPanel() {
     setTimeout(() => setCopied(null), 2000)
   }
 
-  const downloadPng = async () => {
-    const target = document.getElementById('pinout-diagram-export')
-    if (!target) return
-    const scale = 2
-    const canvas = await html2canvas(target, { backgroundColor: '#030712', scale })
-    drawWatermark(canvas, scale)
+  const download = (canvas: HTMLCanvasElement) => {
     const a = document.createElement('a')
-    a.download = `${chip.id}-pinout-mapping.png`
+    a.download = `${chip.id}-pinout.png`
     a.href = canvas.toDataURL('image/png')
     a.click()
+  }
+
+  const downloadPng = async () => {
+    const scale = 2
+    if (view === 'schematic') {
+      // The schematic is a self-contained SVG sheet - rasterize it directly.
+      // Full sheet regardless of zoom/scroll, no UI chrome, crisp at 2x, and
+      // the sheet's own title block already carries the site credit.
+      const svg = document.querySelector<SVGSVGElement>('#pinout-diagram-export svg')
+      if (!svg) return
+      const vb = svg.viewBox.baseVal
+      const w = vb?.width || svg.clientWidth
+      const h = vb?.height || svg.clientHeight
+      const clone = svg.cloneNode(true) as SVGSVGElement
+      clone.setAttribute('width', String(w))
+      clone.setAttribute('height', String(h))
+      const url = URL.createObjectURL(new Blob(
+        [new XMLSerializer().serializeToString(clone)],
+        { type: 'image/svg+xml;charset=utf-8' },
+      ))
+      try {
+        const img = new Image()
+        await new Promise<void>((res, rej) => {
+          img.onload = () => res()
+          img.onerror = () => rej(new Error('svg rasterize failed'))
+          img.src = url
+        })
+        const canvas = document.createElement('canvas')
+        canvas.width = w * scale
+        canvas.height = h * scale
+        const ctx = canvas.getContext('2d')!
+        ctx.fillStyle = '#fdfcf6'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.scale(scale, scale)
+        ctx.drawImage(img, 0, 0, w, h)
+        download(canvas)
+      } finally {
+        URL.revokeObjectURL(url)
+      }
+      return
+    }
+    // Module view is HTML - capture the diagram content itself (full intrinsic
+    // width, not the scroll-clipped card with its buttons and legend).
+    const target = document.getElementById('module-diagram-canvas')
+      ?? document.getElementById('pinout-diagram-export')
+    if (!target) return
+    const canvas = await html2canvas(target, { backgroundColor: '#060b12', scale })
+    drawWatermark(canvas, scale)
+    download(canvas)
   }
 
   return (
