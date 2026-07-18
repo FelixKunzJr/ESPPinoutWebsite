@@ -39,9 +39,13 @@ KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs
 
 ## Adding a board
 
+**No KiCad, no code? Start here.** Most third-party boards (LILYGO, Waveshare, combo display boards) are a known ESP32 chip on a carrier. You can add one with a small JSON file that inherits all the electrical facts from the base chip, so you can't get the pin data wrong. See [docs/adding-a-board.md](docs/adding-a-board.md). This is the recommended path for third-party boards.
+
+For the KiCad-based pipeline (Espressif's own modules):
+
 1. **Espressif module or dev board** (in Espressif's KiCad lib): add an entry to the `MODULES` array in `scripts/generate-chip-data.mjs` pointing at the KiCad `sym`/`fp` names, add the matching catalog entry in `src/data/chips/catalog.ts`, then regenerate.
 2. **Third-party board that ships KiCad** (Seeed, Waveshare, LILYGO, etc.): if the vendor's symbol/footprint format matches Espressif's, point the generator at their library the same way. Formats vary, so open a [board data issue](../../issues/new/choose) with the KiCad link first — confirming the format is the only hard part.
-3. **Board with no KiCad**: hand-author a `Chip` in `src/data/chips/` implementing the `Chip` interface (see `esp32.ts` as the reference), then register it in `catalog.ts`.
+3. **Board with no KiCad**: use the [BoardSpec path](docs/adding-a-board.md) above, or hand-author a full `Chip` in `src/data/chips/` (see `esp32.ts`) for total control.
 
 After adding a chip, update `public/sitemap.xml`, `public/llms.txt`, and the fallback module list in `index.html`.
 

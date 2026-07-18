@@ -1,0 +1,39 @@
+{
+  "id": "example-devboard",
+  "name": "Example Dev Board (template)",
+  "baseChip": "esp32s3",
+  "pcb": "black",
+  "notes": [
+    "This file is a copy-me template, not a real board. Replace every value with your board's."
+  ],
+  "headers": {
+    "left": [
+      { "label": "5V" },
+      { "label": "GND" },
+      { "label": "3V3" },
+      { "gpio": 1 },
+      { "gpio": 2 },
+      { "gpio": 3 },
+      { "gpio": 4 },
+      { "gpio": 5 },
+      { "gpio": 6 },
+      { "gpio": 7 }
+    ],
+    "right": [
+      { "gpio": 43 },
+      { "gpio": 44 },
+      { "gpio": 0 },
+      { "gpio": 21 },
+      { "gpio": 14 },
+      { "gpio": 13 },
+      { "gpio": 12 },
+      { "gpio": 11 },
+      { "gpio": 10 },
+      { "gpio": 9 }
+    ]
+  },
+  "overrides": {
+    "1": { "label": "TFT_CS", "note": "wired to the on-board display chip-select" },
+    "0": { "note": "also the BOOT button; holding it low at reset enters download mode" }
+  }
+}
