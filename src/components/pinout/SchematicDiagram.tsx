@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
 import type { Pin, Chip, LayoutPin, SymbolPin } from '../../types/chip'
-import { AFFECTED_WORD, resolveModule, fnColor } from './shared'
+import { AFFECTED_WORD, resolveModule, fnColor, fnCategory } from './shared'
 
 // ─── EDA sheet palette (KiCad Eeschema classic) ───────────────────────────────
 
@@ -147,6 +147,22 @@ function rowName(row: SchemRow): string {
 
 const numText = (row: SchemRow) => (row.pinNums.length > 3 ? `×${row.pinNums.length}` : row.pinNums.join(','))
 
+// Body-name tokens carrying a recognizable function (U0TXD, MTDI, DAC_1...)
+// render in their function color so "which pin is TX?" is answerable at a
+// glance; the GPIO token and unclassified names keep the KiCad teal.
+function nameTspans(name: string): ReactNode {
+  return name.split('/').map((t, i) => {
+    const cat = fnCategory(t)
+    const plain = cat === 'gpio' || cat === 'other' || cat === 'gnd' || cat === 'nc'
+    return (
+      <tspan key={i}>
+        {i > 0 && <tspan fill="#b0a98f">/</tspan>}
+        <tspan fill={plain ? undefined : fnColor(t)}>{t}</tspan>
+      </tspan>
+    )
+  })
+}
+
 // ─── Diagram ──────────────────────────────────────────────────────────────────
 
 export function SchematicDiagram() {
@@ -273,7 +289,9 @@ export function SchematicDiagram() {
           textAnchor="middle">{numText(row)}</text>
         <text x={isLeft ? edgeX + 7 : edgeX - 7} y={cy + 3.5} fontSize="10.5" fontFamily={FONT}
           fontWeight={600} fill={pinNameColor(name)}
-          textAnchor={isLeft ? 'start' : 'end'}>{name}</text>
+          textAnchor={isLeft ? 'start' : 'end'}>
+          {row.pin ? nameTspans(name) : name}
+        </text>
         {annots}
       </g>
     )
