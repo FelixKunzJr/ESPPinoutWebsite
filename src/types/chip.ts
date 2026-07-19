@@ -50,6 +50,10 @@ export interface ModuleInfo {
   pcb: 'green' | 'black'     // PCB substrate color
   accent: string             // hex accent matching the family (selector colors)
   radios: string             // accurate radio markings, e.g. 'Wi-Fi 4 · BT · BLE'
+  // Board appearance hints (form 'board' only):
+  usbEdge?: 'top' | 'bottom' // where the USB connector sits (default bottom)
+  bare?: boolean             // bare chip + ceramic antenna instead of a shielded module
+  aspect?: number            // board width / height ratio for realistic proportions
 }
 
 export interface Chip {

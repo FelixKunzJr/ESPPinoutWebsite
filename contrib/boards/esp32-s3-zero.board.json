@@ -201,5 +201,8 @@
     "45": {
       "label": "GP45"
     }
-  }
+  },
+  "usbEdge": "top",
+  "bare": true,
+  "aspect": 0.77
 }

@@ -35,7 +35,12 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
     </div>
   )
 
-  const solderDot = (
+  // Surface solder pads get a square gold-rimmed marker instead of the round
+  // through-hole dot - you cannot put a header pin here, only solder a wire.
+  const solderDot = layoutPin.isSurfacePad ? (
+    <div className="flex-shrink-0" title="Solder pad only - no header pin. Solder a wire directly."
+      style={{ width: 9, height: 9, background: color, border: '1.5px solid #caa83a', borderRadius: 2, boxShadow: `0 0 5px ${color}60` }} />
+  ) : (
     <div className="flex-shrink-0 rounded-full"
       style={{ width: 9, height: 9, background: color, boxShadow: `0 0 5px ${color}80` }} />
   )
@@ -363,11 +368,26 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
   const cx = W / 2
   const rows = Math.max(1, Math.round(H / ROW_H))
 
+  // Appearance hints from the board spec: DevKits have the USB at the bottom
+  // and a shielded module; compact boards like the S3-Zero have the USB at the
+  // top, a bare chip and a ceramic antenna at the far end.
+  const usbTop = m.usbEdge === 'top'
+  const bare = !!m.bare
+
   const usbW = 26, usbH = 13
   const modW = W - 26, modL = 13
-  const modTop = 16, modH = Math.min(110, Math.max(70, H * 0.26))
+  const modTop = usbTop ? 40 : 16
+  const modH = Math.min(110, Math.max(70, H * 0.26))
   const modCx = cx
-  const chipShort = m.name.replace(/^Dev board · /, '').replace(/^ESP32-?/, 'ESP32 ')
+  const chipShort = m.name.replace(/^Dev board · /, '').replace(/^ESP32-?/, 'ESP32 ').replace(/^Waveshare /, '')
+
+  // Anchors that flip with the USB edge
+  const usbY = usbTop ? -4 : H - usbH
+  const btnY = usbTop ? usbH + 6 : H - 52
+  const btnLabelY = usbTop ? usbH + 28 : H - 30
+  const ledCy = usbTop ? usbH + 12 : H - 46
+  const chipCy = bare ? H * 0.42 : 0
+  const nameY = bare ? chipCy + 42 : modTop + modH + 26
 
   return (
     <svg width={W} height={H} style={{ flexShrink: 0, display: 'block' }} xmlns="http://www.w3.org/2000/svg">
@@ -390,8 +410,8 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
       <rect x="1" y="1" width={W - 2} height={H - 2} rx="7" fill="none" stroke="#2b3543" strokeWidth="1.5" />
       <rect x="4.5" y="4.5" width={W - 9} height={H - 9} rx="5" fill="none" stroke={m.accent} strokeWidth="0.75" opacity="0.35" />
 
-      {/* Mounting holes in the corners */}
-      {([[11, 11], [W - 11, 11], [11, H - 11], [W - 11, H - 11]] as [number, number][]).map(([x, y], i) => (
+      {/* Mounting holes in the corners (compact bare boards have none) */}
+      {!bare && ([[11, 11], [W - 11, 11], [11, H - 11], [W - 11, H - 11]] as [number, number][]).map(([x, y], i) => (
         <g key={i}><circle cx={x} cy={y} r={4} fill="#05080c" stroke="#39434f" strokeWidth="1" /><circle cx={x} cy={y} r={1.6} fill="#1a2230" /></g>
       ))}
 
@@ -415,77 +435,96 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
         )
       })}
 
-      {/* Mounted RF-shielded module */}
-      <rect x={modL + 1.5} y={modTop + 2} width={modW} height={modH} rx="2.5" fill="#000" opacity="0.4" />
-      <rect x={modL} y={modTop} width={modW} height={modH} rx="2.5" fill={`url(#bshield-${uid})`} stroke="#a6b4c0" strokeWidth="1" />
-      <rect x={modL} y={modTop} width={modW} height={2.5} rx="1" fill="#dde7f0" opacity="0.5" />
-      {/* meander antenna hint at the top of the module */}
-      <path d={`M ${modL + 8},${modTop + 12} ${Array.from({ length: 6 }, (_, i) => {
-        const x0 = modL + 8 + i * ((modW - 16) / 6)
-        const y = i % 2 === 0 ? modTop + 5 : modTop + 12
-        return `L ${x0.toFixed(1)},${y} L ${(x0 + (modW - 16) / 12).toFixed(1)},${y}`
-      }).join(' ')}`} fill="none" stroke="#7c8896" strokeWidth="1.2" />
-      <text x={modCx} y={modTop + modH / 2 + 1} textAnchor="middle" fontSize="7" fontFamily="monospace" fontWeight="700" fill="#243343" letterSpacing="0.4">ESPRESSIF</text>
-      <text x={modCx} y={modTop + modH / 2 + 11} textAnchor="middle" fontSize="6.2" fontFamily="monospace" fill="#33465a">{chipShort}</text>
+      {/* Mounted RF-shielded module (DevKit style) */}
+      {!bare && (
+        <g>
+          <rect x={modL + 1.5} y={modTop + 2} width={modW} height={modH} rx="2.5" fill="#000" opacity="0.4" />
+          <rect x={modL} y={modTop} width={modW} height={modH} rx="2.5" fill={`url(#bshield-${uid})`} stroke="#a6b4c0" strokeWidth="1" />
+          <rect x={modL} y={modTop} width={modW} height={2.5} rx="1" fill="#dde7f0" opacity="0.5" />
+          {/* meander antenna hint at the top of the module */}
+          <path d={`M ${modL + 8},${modTop + 12} ${Array.from({ length: 6 }, (_, i) => {
+            const x0 = modL + 8 + i * ((modW - 16) / 6)
+            const y = i % 2 === 0 ? modTop + 5 : modTop + 12
+            return `L ${x0.toFixed(1)},${y} L ${(x0 + (modW - 16) / 12).toFixed(1)},${y}`
+          }).join(' ')}`} fill="none" stroke="#7c8896" strokeWidth="1.2" />
+          <text x={modCx} y={modTop + modH / 2 + 1} textAnchor="middle" fontSize="7" fontFamily="monospace" fontWeight="700" fill="#243343" letterSpacing="0.4">ESPRESSIF</text>
+          <text x={modCx} y={modTop + modH / 2 + 11} textAnchor="middle" fontSize="6.2" fontFamily="monospace" fill="#33465a">{chipShort}</text>
+        </g>
+      )}
+
+      {/* Bare chip + ceramic antenna (S3-Zero style) */}
+      {bare && (
+        <g>
+          {/* QFN package */}
+          <rect x={cx - 21} y={chipCy - 21} width={42} height={42} rx="2" fill="#000" opacity="0.5" />
+          <rect x={cx - 20} y={chipCy - 20} width={40} height={40} rx="2" fill="#1c232c" stroke="#39434f" strokeWidth="1" />
+          <rect x={cx - 16} y={chipCy - 16} width={32} height={32} rx="1" fill="none" stroke="#2a333f" strokeWidth="0.6" />
+          <circle cx={cx - 14} cy={chipCy - 14} r={1.6} fill="#39434f" />
+          <text x={cx} y={chipCy - 2} textAnchor="middle" fontSize="5.6" fontFamily="monospace" fontWeight="700" fill="#5a6675" letterSpacing="0.4">ESPRESSIF</text>
+          <text x={cx} y={chipCy + 7} textAnchor="middle" fontSize="5" fontFamily="monospace" fill="#495563">{chipShort}</text>
+          {/* ceramic antenna block at the far end from the USB */}
+          {(() => {
+            const antY = usbTop ? H - 19 : 7
+            return (
+              <g>
+                <rect x={cx - 30} y={antY} width={60} height={12} rx="1.5" fill="#d9d2c0" stroke="#8a8578" strokeWidth="0.8" />
+                <path d={`M ${cx - 25},${antY + 6} h8 v-3 h8 v6 h8 v-6 h8 v6 h8 v-3 h8`} fill="none" stroke="#6b6455" strokeWidth="1.1" />
+                <text x={cx + 36} y={antY + 9} fontSize="5.4" fontFamily="monospace" fill="#5a6675" letterSpacing="0.5">ANT</text>
+              </g>
+            )
+          })()}
+        </g>
+      )}
 
       {/* BOOT + EN buttons near the USB end */}
       {([['BOOT', cx - 13], ['EN', cx + 13]] as [string, number][]).map(([label, x]) => (
         <g key={label}>
-          <rect x={x - 9} y={H - 52} width={18} height={12} rx="2" fill="#cdd5dd" stroke="#7c8896" strokeWidth="0.6" />
-          <rect x={x - 5} y={H - 49} width={10} height={6} rx="1.5" fill="#9aa6b2" />
-          <text x={x} y={H - 30} textAnchor="middle" fontSize="5.6" fontFamily="monospace" fill="#5a6675" letterSpacing="0.3">{label}</text>
+          <rect x={x - 9} y={btnY} width={18} height={12} rx="2" fill="#cdd5dd" stroke="#7c8896" strokeWidth="0.6" />
+          <rect x={x - 5} y={btnY + 3} width={10} height={6} rx="1.5" fill="#9aa6b2" />
+          <text x={x} y={btnLabelY} textAnchor="middle" fontSize="5.6" fontFamily="monospace" fill="#5a6675" letterSpacing="0.3">{label}</text>
         </g>
       ))}
 
       {/* power LED */}
-      <circle cx={cx + 30 > W - 12 ? W - 14 : modL + 6} cy={H - 46} r={2.4} fill={m.accent} opacity="0.85" />
+      <circle cx={cx + 30 > W - 12 ? W - 14 : modL + 6} cy={ledCy} r={2.4} fill={m.accent} opacity="0.85" />
 
-      {/* USB connector at the bottom edge */}
-      <rect x={cx - usbW / 2} y={H - usbH} width={usbW} height={usbH + 4} rx="3" fill={`url(#usb-${uid})`} stroke="#5b6774" strokeWidth="0.8" />
-      <rect x={cx - usbW / 2 + 3} y={H - usbH + 3} width={usbW - 6} height={5} rx="2.5" fill="#3a4450" />
-      <text x={cx} y={H - 20} textAnchor="middle" fontSize="5.4" fontFamily="monospace" fill="#5a6675" letterSpacing="1">USB</text>
+      {/* USB connector */}
+      <rect x={cx - usbW / 2} y={usbY} width={usbW} height={usbH + 4} rx="3" fill={`url(#usb-${uid})`} stroke="#5b6774" strokeWidth="0.8" />
+      <rect x={cx - usbW / 2 + 3} y={usbY + (usbTop ? 6 : 3)} width={usbW - 6} height={5} rx="2.5" fill="#3a4450" />
+      <text x={cx} y={usbTop ? usbY + usbH + 14 : H - 20} textAnchor="middle" fontSize="5.4" fontFamily="monospace" fill="#5a6675" letterSpacing="1">USB</text>
 
-      {/* board name silkscreen, vertical along the centre */}
-      <text x={cx} y={modTop + modH + 26} textAnchor="middle" fontSize="9" fontFamily="monospace" fontWeight="800" fill="#e2e8f0" letterSpacing="0.5">{m.name.replace(/^ESP32-/, '')}</text>
-      <text x={cx} y={modTop + modH + 38} textAnchor="middle" fontSize="6" fontFamily="monospace" fill={m.accent} letterSpacing="0.4">{m.radios}</text>
+      {/* board name silkscreen */}
+      <text x={cx} y={nameY} textAnchor="middle" fontSize="9" fontFamily="monospace" fontWeight="800" fill="#e2e8f0" letterSpacing="0.5">{m.name.replace(/^Waveshare /, '').replace(/^ESP32-/, '')}</text>
+      <text x={cx} y={nameY + 12} textAnchor="middle" fontSize="6" fontFamily="monospace" fill={m.accent} letterSpacing="0.4">{m.radios}</text>
 
-      {/* Front-surface pads (left and right layout arrays) */}
+      {/* Front-surface solder pads: castellated half-pads ON the board edge,
+          continuing the header column - no through-hole, wire-solder only.
+          Selection is a ring, never a recolor (a green pad reads as a
+          different pad type, not as "selected"). */}
       {[
-        { list: chip.packageLayout?.left, xPos: 25, labelAnchor: 'start' as const, labelXOffset: 7 },
-        { list: chip.packageLayout?.right, xPos: W - 25, labelAnchor: 'end' as const, labelXOffset: -7 }
-      ].map(({ list, xPos, labelAnchor, labelXOffset }) => 
-        list?.map((lp, i) => {
-          if (!lp.isSurfacePad) return null
-          const isSelected = selectedPin?.gpio === lp.gpio
-          const y = i * ROW_H + ROW_H / 2
-          return (
-            <g key={lp.pinNumber}>
-              <rect
-                x={xPos - 5}
-                y={y - 6}
-                width={10}
-                height={12}
-                rx="1.5"
-                fill={isSelected ? m.accent : "#caa83a"}
-                stroke={isSelected ? "#fff" : "#1a2230"}
-                strokeWidth="0.8"
-              />
-              <text
-                x={xPos + labelXOffset}
-                y={y + 2.5}
-                textAnchor={labelAnchor}
-                fontSize="6.5"
-                fontFamily="monospace"
-                fontWeight="bold"
-                fill="#e2e8f0"
-                opacity="0.8"
-              >
-                {lp.gpio !== undefined ? `GP${lp.gpio}` : lp.label}
-              </text>
-            </g>
-          )
-        })
-      )}
+        { list: chip.packageLayout?.left, xPos: 4, labelAnchor: 'start' as const, labelX: 12 },
+        { list: chip.packageLayout?.right, xPos: W - 4, labelAnchor: 'end' as const, labelX: W - 12 },
+      ].map(({ list, xPos, labelAnchor, labelX }, side) => (
+        <g key={side}>
+          {list?.map((lp, i) => {
+            if (!lp.isSurfacePad) return null
+            const isSelected = selectedPin?.gpio === lp.gpio
+            const y = i * ROW_H + ROW_H / 2
+            return (
+              <g key={lp.pinNumber}>
+                <rect x={xPos - 4.5} y={y - 6.5} width={9} height={13} rx="2"
+                  fill="#caa83a" stroke={isSelected ? '#a78bfa' : '#1a2230'} strokeWidth={isSelected ? 2 : 0.8} />
+                {/* castellation notch on the board edge */}
+                <circle cx={side === 0 ? 0 : W} cy={y} r={2.2} fill={`url(#board-${uid})`} stroke="#8a6d1f" strokeWidth="0.7" />
+                <text x={labelX} y={y + 2.5} textAnchor={labelAnchor} fontSize="6.5" fontFamily="monospace"
+                  fontWeight="bold" fill="#e2e8f0" opacity="0.85">
+                  {lp.gpio !== undefined ? `GP${lp.gpio}` : lp.label}
+                </text>
+              </g>
+            )
+          })}
+        </g>
+      ))}
 
       {/* Underside pads (usually bottom boundary pads) */}
       {chip.packageLayout?.bottom?.map((lp, i) => {
@@ -570,7 +609,12 @@ export function ModuleDiagram() {
 
   const sideHeight = Math.max(leftLayout.length, rightLayout.length) * ROW_H
   const padCount   = Math.max(bottomLayout.length, topIsThermal ? 0 : topLayout.length, 1)
-  const chipWidth  = isBoard ? 150 : Math.max(240, padCount * 30)
+  // Boards with a declared aspect ratio (width/height, from real dimensions)
+  // render in proportion; DevKits keep their narrow default.
+  const boardAspect = chip.module?.aspect
+  const chipWidth  = isBoard
+    ? (boardAspect ? Math.round(Math.min(340, Math.max(150, sideHeight * boardAspect))) : 150)
+    : Math.max(240, padCount * 30)
   const colWidth   = bottomLayout.length > 0 ? chipWidth / bottomLayout.length : 30
   const topColWidth = topLayout.length > 0 ? chipWidth / topLayout.length : 30
 
@@ -675,7 +719,7 @@ export function ModuleDiagram() {
         {bottomLayout.length > 0 && bottomIsBackside && (
           <div className="flex flex-col items-center" style={{ marginTop: 8, maxWidth: Math.max(chipWidth + 260, 400) }}>
             <span className="font-mono" style={{ fontSize: 8.5, color: '#5a6b80', letterSpacing: 0.3, marginBottom: 4 }}>
-              solder pads on the underside
+              solder pads on the underside - no header pins, solder wires directly
             </span>
             <div className="flex flex-wrap justify-center gap-1.5">
               {bottomLayout.map(lp => {

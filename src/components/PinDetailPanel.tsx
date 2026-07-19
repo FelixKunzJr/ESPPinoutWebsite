@@ -45,6 +45,15 @@ export function PinDetailPanel() {
 
   if (!selectedPin) return null
 
+  // Is this pin a solder-only pad on the board (front surface or underside)?
+  const layoutPin = [
+    ...(chip.packageLayout?.left ?? []),
+    ...(chip.packageLayout?.right ?? []),
+    ...(chip.packageLayout?.bottom ?? []),
+    ...(chip.packageLayout?.top ?? []),
+  ].find(lp => lp.gpio === selectedPin.gpio)
+  const padLocation = layoutPin?.isBacksidePad ? 'underside' : layoutPin?.isSurfacePad ? 'front surface' : null
+
   const capEntries = selectedPin.capabilities
     .filter(c => c !== 'gpio')
     .map(c => ({ cap: c, detail: CAP_DETAILS[c] ?? { label: c.toUpperCase(), desc: '' } }))
@@ -60,6 +69,16 @@ export function PinDetailPanel() {
       </div>
 
       <div className="p-4 flex-1 space-y-5">
+        {padLocation && (
+          <div className="rounded-lg bg-amber-950/40 border border-amber-700 px-3 py-2">
+            <p className="text-xs text-amber-300 leading-relaxed">
+              🔧 <span className="font-semibold">Solder pad only</span> ({padLocation} of the board) - this
+              signal is not on the headers. No breadboard or header pin access; you must solder a wire
+              directly to the pad.
+            </p>
+          </div>
+        )}
+
         <div>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Pin Names</h3>
           <div className="flex flex-wrap gap-1">
