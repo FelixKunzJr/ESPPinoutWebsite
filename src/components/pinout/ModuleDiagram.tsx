@@ -561,9 +561,9 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
         const pads = (side === 'left' ? chip.packageLayout?.left : chip.packageLayout?.right)
           ?.filter(lp => lp.isSurfacePad) ?? []
         if (pads.length === 0) return null
-        const xPos = side === 'left' ? 4 : W - 4
-        const edgeX = side === 'left' ? 0 : W
-        const labelX = side === 'left' ? 12 : W - 12
+        // Inboard of the header rail so pads and rail holes never collide.
+        const xPos = side === 'left' ? 18 : W - 18
+        const labelX = side === 'left' ? 26 : W - 26
         const anchor = side === 'left' ? ('start' as const) : ('end' as const)
         // Stack upward from just above the antenna zone (USB-top boards) or
         // downward from below it, at half-header pitch.
@@ -578,7 +578,6 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
                 <g key={lp.pinNumber}>
                   <rect x={xPos - 4.5} y={y - 6.5} width={9} height={13} rx="2"
                     fill="#caa83a" stroke={isSelected ? '#a78bfa' : '#1a2230'} strokeWidth={isSelected ? 2 : 0.8} />
-                  <circle cx={edgeX} cy={y} r={2.2} fill={`url(#board-${uid})`} stroke="#8a6d1f" strokeWidth="0.7" />
                   <text x={labelX} y={y + 2.5} textAnchor={anchor} fontSize="6.5" fontFamily="monospace"
                     fontWeight="bold" fill="#e2e8f0" opacity="0.85">
                     {lp.gpio !== undefined ? `GP${lp.gpio}` : lp.label}
