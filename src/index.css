@@ -31,6 +31,11 @@
   --dg-underside-border: #2a3a52;
   --map-chip-bg: rgba(99, 102, 241, 0.4);
   --map-chip-text: #a5b4fc;
+  /* Brand logo (Logo.tsx + favicon.svg keeps a fixed copy of these) */
+  --logo-body: #101d31;
+  --logo-ring: rgba(148, 163, 184, 0.45);
+  --logo-ink: #f1f5f9;
+  --logo-green: #22c55e;
 }
 html.light {
   --pill-bg: rgba(15, 23, 42, 0.03);
@@ -52,6 +57,10 @@ html.light {
   --dg-underside-border: #94a3b8;
   --map-chip-bg: #e0e7ff;
   --map-chip-text: #4338ca;
+  --logo-body: #101d31;
+  --logo-ring: transparent;
+  --logo-ink: #0e1a2b;
+  --logo-green: #16a34a;
 }
 
 /* Diagram row states (Tailwind classes inside the themed diagram card) */

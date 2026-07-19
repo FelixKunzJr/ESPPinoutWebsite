@@ -10,6 +10,7 @@ import { CommunitySubmit } from './components/CommunitySubmit'
 import { ContributePage } from './components/ContributePage'
 import { BoardBuilderPage } from './components/BoardBuilderPage'
 import { useApp }          from './context/AppContext'
+import { Logo }            from './components/Logo'
 
 export default function App() {
   const { chip, page, navigate, theme, toggleTheme } = useApp()
@@ -23,9 +24,11 @@ export default function App() {
       <header className="border-b border-gray-800 px-6 py-4 sticky top-0 bg-gray-950/95 backdrop-blur z-40">
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-lg font-bold text-green-400">ESP32 Pinout Studio</h1>
-              <p className="text-xs text-gray-500">Free interactive pinout reference for the maker community</p>
+            <div className="flex items-center gap-3">
+              <h1 className="m-0"><Logo /></h1>
+              <p className="text-xs text-gray-500 hidden sm:block border-l border-gray-800 pl-3">
+                Free interactive pinout reference<br />for the maker community
+              </p>
             </div>
             <div className="flex items-center gap-4">
               <button

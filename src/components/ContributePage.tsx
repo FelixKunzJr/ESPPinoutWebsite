@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useApp } from '../context/AppContext'
+import { Logo } from './Logo'
 import { REPO_URL, ISSUE_CHOOSE_URL, CONTRIBUTING_URL } from '../utils/github'
 
 const TEMPLATE = (file: string) => `${REPO_URL}/issues/new?template=${file}`
@@ -59,8 +60,7 @@ export function ContributePage() {
             onClick={() => navigate('studio')}
             className="text-left"
           >
-            <h1 className="text-lg font-bold text-green-400">ESP32 Pinout Studio</h1>
-            <p className="text-xs text-gray-500">Free interactive pinout reference for the maker community</p>
+            <h1 className="m-0"><Logo /></h1>
           </button>
           <button
             onClick={() => navigate('studio')}
