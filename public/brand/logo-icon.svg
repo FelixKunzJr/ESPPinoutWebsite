@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- ESP32 Pinout Studio brand icon: chip with a 3x3 pin grid, green signal
+       diagonal. Keep in sync with src/components/Logo.tsx (fixed colors here
+       because a favicon cannot read the app theme). -->
+  <g fill="#101d31">
+    <rect x="16.7" y="3" width="4.6" height="10" rx="2.3"/><rect x="25.4" y="3" width="4.6" height="10" rx="2.3"/><rect x="34" y="3" width="4.6" height="10" rx="2.3"/><rect x="42.7" y="3" width="4.6" height="10" rx="2.3"/>
+    <rect x="16.7" y="51" width="4.6" height="10" rx="2.3"/><rect x="25.4" y="51" width="4.6" height="10" rx="2.3"/><rect x="34" y="51" width="4.6" height="10" rx="2.3"/><rect x="42.7" y="51" width="4.6" height="10" rx="2.3"/>
+    <rect x="3" y="16.7" width="10" height="4.6" rx="2.3"/><rect x="3" y="25.4" width="10" height="4.6" rx="2.3"/><rect x="3" y="34" width="10" height="4.6" rx="2.3"/><rect x="3" y="42.7" width="10" height="4.6" rx="2.3"/>
+    <rect x="51" y="16.7" width="10" height="4.6" rx="2.3"/><rect x="51" y="25.4" width="10" height="4.6" rx="2.3"/><rect x="51" y="34" width="10" height="4.6" rx="2.3"/><rect x="51" y="42.7" width="10" height="4.6" rx="2.3"/>
+  </g>
+  <rect x="11" y="11" width="42" height="42" rx="10" fill="#101d31" stroke="rgba(148,163,184,0.45)" stroke-width="1.5"/>
+  <g fill="#f8fafc">
+    <circle cx="22.5" cy="22.5" r="3.3"/><circle cx="32" cy="22.5" r="3.3"/>
+    <circle cx="22.5" cy="32" r="3.3"/><circle cx="41.5" cy="32" r="3.3"/>
+    <circle cx="32" cy="41.5" r="3.3"/><circle cx="41.5" cy="41.5" r="3.3"/>
+  </g>
+  <g fill="#22c55e">
+    <circle cx="41.5" cy="22.5" r="3.3"/><circle cx="32" cy="32" r="3.3"/><circle cx="22.5" cy="41.5" r="3.3"/>
+  </g>
+</svg>

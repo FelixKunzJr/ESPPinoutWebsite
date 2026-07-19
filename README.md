@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/brand/logo-horizontal-dark.svg">
+    <img src="public/brand/logo-horizontal.svg" alt="ESP32 Pinout Studio" width="420">
+  </picture>
+</p>
+
 # ESP32 Pinout Studio
 
 **Live at [esp32pin.com](https://esp32pin.com)** - a free, interactive pinout reference for the whole ESP32 family, built for the maker community.

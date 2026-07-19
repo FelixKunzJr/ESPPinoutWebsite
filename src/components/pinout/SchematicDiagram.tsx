@@ -464,7 +464,15 @@ export function SchematicDiagram() {
           <text x={tbX + 8} y={tbY + 15} fontSize="10.5" fontFamily={FONT} fontWeight={700} fill={TEXT_DARK}>
             {m.name} - pinout
           </text>
-          <text x={tbX + 8} y={tbY + 37} fontSize="9.5" fontFamily={FONT} fill={TEXT_DARK}>
+          {/* brand icon: chip with the green signal diagonal (Logo.tsx, miniature) */}
+          <g transform={`translate(${tbX + 8}, ${tbY + 26.5})`}>
+            <rect width="13" height="13" rx="3" fill="#101d31" />
+            {[0, 1, 2].map(r => [0, 1, 2].map(c => (
+              <circle key={`${r}${c}`} cx={3.4 + c * 3.1} cy={3.4 + r * 3.1} r="1.15"
+                fill={r + c === 2 ? '#22c55e' : '#f8fafc'} />
+            )))}
+          </g>
+          <text x={tbX + 26} y={tbY + 37} fontSize="9.5" fontFamily={FONT} fill={TEXT_DARK}>
             ESP32 Pinout Studio · esp32pin.com
           </text>
           <text x={tbX + 8} y={tbY + 59} fontSize="9" fontFamily={FONT} fill={TEXT_DARK}>

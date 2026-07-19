@@ -14,15 +14,29 @@ function generateArduinoDefines(chip: { name: string }, mapping: PinAssignment[]
   return lines.join('\n')
 }
 
-function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
+async function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
   const pad = 8 * scale
   ctx.font = `${11 * scale}px ui-monospace, SFMono-Regular, Menlo, monospace`
   ctx.textAlign = 'right'
-  ctx.textBaseline = 'bottom'
   ctx.fillStyle = 'rgba(156, 163, 175, 0.85)'
-  ctx.fillText('esp32pin.com', canvas.width - pad, canvas.height - pad)
+  try {
+    // Brand icon + site name, bottom right.
+    const icon = new Image()
+    await new Promise<void>((res, rej) => {
+      icon.onload = () => res()
+      icon.onerror = () => rej(new Error('logo load failed'))
+      icon.src = '/brand/logo-icon.svg'
+    })
+    const size = 20 * scale
+    ctx.drawImage(icon, canvas.width - pad - size, canvas.height - pad - size, size, size)
+    ctx.textBaseline = 'middle'
+    ctx.fillText('esp32pin.com', canvas.width - pad - size - 5 * scale, canvas.height - pad - size / 2)
+  } catch {
+    ctx.textBaseline = 'bottom'
+    ctx.fillText('esp32pin.com', canvas.width - pad, canvas.height - pad)
+  }
 }
 
 export function ExportPanel() {
@@ -94,7 +108,7 @@ export function ExportPanel() {
     // Match the themed diagram card background (dark canvas or light paper).
     const dgBg = getComputedStyle(document.documentElement).getPropertyValue('--dg-bg').trim() || '#060b12'
     const canvas = await toCanvas(target, { backgroundColor: dgBg, pixelRatio: scale })
-    drawWatermark(canvas, scale)
+    await drawWatermark(canvas, scale)
     download(canvas)
   }
 
@@ -169,8 +183,13 @@ export function ExportPanel() {
     </style></head><body>
     <main>
       <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
-      <h1>${escapeHtml(name)} pinout</h1>
-      <p class="sub">ESP32 Pinout Studio - esp32pin.com/${chip.id} - ${new Date().toISOString().slice(0, 10)}</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <img src="${window.location.origin}/brand/logo-icon.svg" width="44" height="44" alt="">
+        <div>
+          <h1>${escapeHtml(name)} pinout</h1>
+          <p class="sub" style="margin:0;">ESP32 Pinout Studio - esp32pin.com/${chip.id} - ${new Date().toISOString().slice(0, 10)}</p>
+        </div>
+      </div>
       ${diagramHtml}
       <h2>Known gotchas</h2><ul class="gotchas">${gotchas}</ul>
       ${rows ? `<h2>Pin mapping</h2><table class="map"><tr><th>GPIO</th><th>Role</th><th>Label</th></tr>${rows}</table>` : ''}
