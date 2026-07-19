@@ -30,7 +30,7 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
 
   const pinNumBox = (
     <div className="flex-shrink-0 flex items-center justify-center font-mono"
-      style={{ width: 17, height: 17, background: '#0d1520', border: '1px solid #1e2d40', borderRadius: 2, fontSize: 7.5, fontWeight: 700, color: '#3d5068' }}>
+      style={{ width: 17, height: 17, background: 'var(--dg-chip-bg)', border: '1px solid var(--dg-chip-border)', borderRadius: 2, fontSize: 7.5, fontWeight: 700, color: 'var(--dg-chip-text)' }}>
       {layoutPin.pinNumber}
     </div>
   )
@@ -67,7 +67,7 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
       `}
       style={{
         height: ROW_H,
-        borderBottom: '1px solid #050a10',
+        borderBottom: '1px solid var(--dg-row-border)',
         background: isSelected ? undefined : rowBg,
       }}
     >
@@ -124,7 +124,7 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, on
   const stub = <div style={{ width: 1.5, height: 12, background: color + '70' }} />
   const dot = <div className="rounded-full" style={{ width: 8, height: 8, background: color, boxShadow: `0 0 4px ${color}60` }} />
   const num = (
-    <div className="font-mono" style={{ fontSize: 7.5, fontWeight: 700, color: '#3d5068' }}>
+    <div className="font-mono" style={{ fontSize: 7.5, fontWeight: 700, color: 'var(--dg-chip-text)' }}>
       {layoutPin.pinNumber}
     </div>
   )
@@ -189,7 +189,7 @@ function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedP
   if (withPins.length === 0) return null
   return (
     <div className="flex flex-col items-center" style={{ marginTop: 8, maxWidth: maxW }}>
-      <span className="font-mono" style={{ fontSize: 8.5, color: '#5a6b80', letterSpacing: 0.3, marginBottom: 4 }}>
+      <span className="font-mono" style={{ fontSize: 8.5, color: 'var(--dg-muted)', letterSpacing: 0.3, marginBottom: 4 }}>
         {caption}
       </span>
       <div className="flex flex-wrap justify-center gap-1.5">
@@ -207,10 +207,10 @@ function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedP
               className={`flex items-center gap-1.5 cursor-pointer select-none rounded-md transition-colors
                 ${isActive ? '' : 'opacity-[0.07]'}
                 ${isSelected ? 'bg-violet-950/60' : 'hover:bg-white/[0.05]'}`}
-              style={{ padding: '3px 7px', border: `1px dashed ${borderColor}`, background: isSelected ? undefined : '#0b111c' }}
+              style={{ padding: '3px 7px', border: `1px dashed ${borderColor}`, background: isSelected ? undefined : 'var(--dg-chip-bg)' }}
             >
               <span className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: color, boxShadow: `0 0 4px ${color}60` }} />
-              <span className="font-mono" style={{ fontSize: 7.5, fontWeight: 700, color: '#3d5068' }}>{lp.pinNumber}</span>
+              <span className="font-mono" style={{ fontSize: 7.5, fontWeight: 700, color: 'var(--dg-chip-text)' }}>{lp.pinNumber}</span>
               <span className="font-mono font-bold rounded-sm" style={{ background: bg, color: text, fontSize: 9, lineHeight: '15px', padding: '0 4px' }}>
                 {pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0]}
               </span>
@@ -723,12 +723,12 @@ export function ModuleDiagram() {
         {topIsThermal && (
           <div className="flex justify-center" style={{ width: chipWidth, marginBottom: 4 }}>
             <div className="flex items-center gap-2 rounded-md"
-              style={{ padding: '4px 10px', background: '#0d1520', border: '1px solid #1e2d40' }}>
+              style={{ padding: '4px 10px', background: 'var(--dg-chip-bg)', border: '1px solid var(--dg-chip-border)' }}>
               <span className="font-mono font-bold rounded-sm"
                 style={{ background: '#111827', color: '#9ca3af', fontSize: 9, lineHeight: '15px', padding: '0 6px' }}>
                 GND ×{thermalGnd}
               </span>
-              <span className="font-mono" style={{ fontSize: 8.5, color: '#5a6b80', letterSpacing: 0.3 }}>
+              <span className="font-mono" style={{ fontSize: 8.5, color: 'var(--dg-muted)', letterSpacing: 0.3 }}>
                 underside ground + thermal pad
               </span>
             </div>
@@ -821,7 +821,7 @@ export function ModuleDiagram() {
           <SolderPadStrip
             pads={bottomLayout}
             caption="solder pads on the underside - no header pins, solder wires directly"
-            borderColor="#2a3a52"
+            borderColor="var(--dg-underside-border)"
             maxW={Math.max(chipWidth + 260, 400)}
             pinByGpio={pinByGpio}
             selectedPin={selectedPin}

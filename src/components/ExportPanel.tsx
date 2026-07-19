@@ -88,7 +88,9 @@ export function ExportPanel() {
     const target = document.getElementById('module-diagram-canvas')
       ?? document.getElementById('pinout-diagram-export')
     if (!target) return
-    const canvas = await html2canvas(target, { backgroundColor: '#060b12', scale })
+    // Match the themed diagram card background (dark canvas or light paper).
+    const dgBg = getComputedStyle(document.documentElement).getPropertyValue('--dg-bg').trim() || '#060b12'
+    const canvas = await html2canvas(target, { backgroundColor: dgBg, scale })
     drawWatermark(canvas, scale)
     download(canvas)
   }
@@ -136,7 +138,9 @@ export function ExportPanel() {
     const gotchas = chip.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')
     const rows = mapping.map(a =>
       `<tr><td>GPIO${a.gpio}</td><td>${escapeHtml(a.role)}</td><td>${escapeHtml(a.label)}</td></tr>`).join('')
-    w.document.write(`<!doctype html><html><head><title>${escapeHtml(name)} pinout</title>
+    // class="light": the print sheet is white paper, so the diagram's themed
+    // CSS variables must resolve to their light values regardless of app theme.
+    w.document.write(`<!doctype html><html class="light"><head><title>${escapeHtml(name)} pinout</title>
     ${styles}
     <style>
       @page { size: A4; margin: 12mm; }

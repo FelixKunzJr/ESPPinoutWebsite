@@ -186,7 +186,7 @@ export function FunctionBadges({ pin, side, mappingLabel }: { pin: Pin; side: 'l
     <>
       {mappingLabel && (
         <span className="font-mono font-bold rounded-sm flex-shrink-0"
-          style={{ background: 'rgba(99,102,241,0.4)', color: '#a5b4fc', fontSize: 10, lineHeight: '17px', height: 17, padding: '0 5px' }}>
+          style={{ background: 'var(--map-chip-bg)', color: 'var(--map-chip-text)', fontSize: 10, lineHeight: '17px', height: 17, padding: '0 5px' }}>
           {mappingLabel}
         </span>
       )}

@@ -16,6 +16,21 @@
   --pill-text: #cbd5e1;
   --pill-text-hover: #fff;
   --selector-sep: rgba(255, 255, 255, 0.08);
+  /* Diagram card chrome (module view + legend). The SVG module/board artwork
+     keeps its physical colors; only the UI around it follows the theme. */
+  --dg-bg: #060b12;
+  --dg-border: #1a2535;
+  --dg-muted: #5a6b80;
+  --dg-muted2: #4a5a6e;
+  --dg-link: #6b7f99;
+  --dg-chip-bg: #0d1520;
+  --dg-chip-border: #1e2d40;
+  --dg-chip-text: #3d5068;
+  --dg-row-border: #050a10;
+  --dg-toggle-border: #2a3a52;
+  --dg-underside-border: #2a3a52;
+  --map-chip-bg: rgba(99, 102, 241, 0.4);
+  --map-chip-text: #a5b4fc;
 }
 html.light {
   --pill-bg: rgba(15, 23, 42, 0.03);
@@ -24,7 +39,26 @@ html.light {
   --pill-text: #334155;
   --pill-text-hover: #0f172a;
   --selector-sep: rgba(15, 23, 42, 0.10);
+  --dg-bg: #fbfcfe;
+  --dg-border: #dbe1e8;
+  --dg-muted: #64748b;
+  --dg-muted2: #6b7a8f;
+  --dg-link: #47617e;
+  --dg-chip-bg: #eef1f6;
+  --dg-chip-border: #d3dbe4;
+  --dg-chip-text: #5b6b7f;
+  --dg-row-border: #e8edf3;
+  --dg-toggle-border: #c9d2dd;
+  --dg-underside-border: #94a3b8;
+  --map-chip-bg: #e0e7ff;
+  --map-chip-text: #4338ca;
 }
+
+/* Diagram row states (Tailwind classes inside the themed diagram card) */
+html.light .hover\:bg-white\/\[0\.03\]:hover { background-color: rgba(15, 23, 42, 0.045); }
+html.light .hover\:bg-white\/\[0\.05\]:hover { background-color: rgba(15, 23, 42, 0.055); }
+html.light .bg-violet-950\/40 { background-color: #ede9fe; }
+html.light .bg-violet-950\/60 { background-color: #ddd6fe; }
 
 /* Page + card chrome */
 html.light .bg-gray-950 { background-color: #eef1f5; }

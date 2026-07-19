@@ -12,6 +12,18 @@ const FAMILY_ACCENT: Record<string, string> = {
   'ESP32-C5': '#14b8a6',
   'ESP32-H2': '#ec4899',
 }
+// One shade darker per family for light mode - the dark-tuned accents (the
+// C3 yellow especially) wash out as a filled tab with white text on white.
+const LIGHT_ACCENT: Record<string, string> = {
+  '#3b82f6': '#2563eb',
+  '#a855f7': '#9333ea',
+  '#22c55e': '#16a34a',
+  '#eab308': '#ca8a04',
+  '#f97316': '#ea580c',
+  '#14b8a6': '#0d9488',
+  '#ec4899': '#db2777',
+  '#94a3b8': '#64748b',
+}
 const BOARDS = 'Boards'
 const BOARD_ACCENT = '#94a3b8'
 
@@ -19,7 +31,7 @@ const isBoard = (c: Chip) => c.module?.form === 'board'
 const tabOf = (c: Chip) => (isBoard(c) ? BOARDS : c.family)
 
 export function ChipSelector() {
-  const { chip, setChip } = useApp()
+  const { chip, setChip, theme } = useApp()
 
   // Tab order: families in catalog order, then Boards.
   const tabs: string[] = []
@@ -32,7 +44,10 @@ export function ChipSelector() {
   // Follow external chip changes (e.g. shared URL) back to the right tab.
   useEffect(() => { setTab(tabOf(chip)) }, [chip.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const accentOf = (t: string) => (t === BOARDS ? BOARD_ACCENT : FAMILY_ACCENT[t] ?? '#64748b')
+  const accentOf = (t: string) => {
+    const a = t === BOARDS ? BOARD_ACCENT : FAMILY_ACCENT[t] ?? '#64748b'
+    return theme === 'light' ? LIGHT_ACCENT[a] ?? a : a
+  }
   const shown = CHIPS.filter(c => tabOf(c) === tab)
 
   // Switching family immediately loads that family's first module -
