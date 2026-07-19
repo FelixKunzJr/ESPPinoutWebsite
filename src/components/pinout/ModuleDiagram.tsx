@@ -173,6 +173,62 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, on
   )
 }
 
+// ─── Solder-pad strip (front-surface or underside pads, wire-solder only) ─────
+
+function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedPin, filteredSet, onToggle }: {
+  pads: LayoutPin[]
+  caption: string
+  borderColor: string
+  maxW: number
+  pinByGpio: Map<number, Pin>
+  selectedPin: Pin | null
+  filteredSet: Set<number>
+  onToggle: (pin: Pin | undefined) => void
+}) {
+  const withPins = pads.filter(lp => lp.gpio !== undefined && pinByGpio.has(lp.gpio))
+  if (withPins.length === 0) return null
+  return (
+    <div className="flex flex-col items-center" style={{ marginTop: 8, maxWidth: maxW }}>
+      <span className="font-mono" style={{ fontSize: 8.5, color: '#5a6b80', letterSpacing: 0.3, marginBottom: 4 }}>
+        {caption}
+      </span>
+      <div className="flex flex-wrap justify-center gap-1.5">
+        {withPins.map(lp => {
+          const pin = pinByGpio.get(lp.gpio!)!
+          const color = connectorColor(pin)
+          const { bg, text } = getBadge(pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0])
+          const warn = primaryConstraint(pin)
+          const isSelected = selectedPin?.gpio === pin.gpio
+          const isActive = filteredSet.has(pin.gpio)
+          return (
+            <div
+              key={lp.pinNumber}
+              onClick={() => onToggle(pin)}
+              className={`flex items-center gap-1.5 cursor-pointer select-none rounded-md transition-colors
+                ${isActive ? '' : 'opacity-[0.07]'}
+                ${isSelected ? 'bg-violet-950/60' : 'hover:bg-white/[0.05]'}`}
+              style={{ padding: '3px 7px', border: `1px dashed ${borderColor}`, background: isSelected ? undefined : '#0b111c' }}
+            >
+              <span className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: color, boxShadow: `0 0 4px ${color}60` }} />
+              <span className="font-mono" style={{ fontSize: 7.5, fontWeight: 700, color: '#3d5068' }}>{lp.pinNumber}</span>
+              <span className="font-mono font-bold rounded-sm" style={{ background: bg, color: text, fontSize: 9, lineHeight: '15px', padding: '0 4px' }}>
+                {pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0]}
+              </span>
+              {warn && (
+                <span title={warn.title} className="font-mono font-bold rounded-sm flex items-center justify-center flex-shrink-0"
+                  style={{ background: sevStyle(warn.sev).bg, color: sevStyle(warn.sev).fg, border: `1px solid ${sevStyle(warn.sev).bd}`,
+                    width: 12, height: 12, fontSize: 8, lineHeight: 1 }}>
+                  {sevStyle(warn.sev).icon}
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ─── SVG Chip body ────────────────────────────────────────────────────────────
 
 // Square-wave serpentine - reads as an etched meander PCB antenna trace.
@@ -497,34 +553,42 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
       <text x={cx} y={nameY} textAnchor="middle" fontSize="9" fontFamily="monospace" fontWeight="800" fill="#e2e8f0" letterSpacing="0.5">{m.name.replace(/^Waveshare /, '').replace(/^ESP32-/, '')}</text>
       <text x={cx} y={nameY + 12} textAnchor="middle" fontSize="6" fontFamily="monospace" fill={m.accent} letterSpacing="0.4">{m.radios}</text>
 
-      {/* Front-surface solder pads: castellated half-pads ON the board edge,
-          continuing the header column - no through-hole, wire-solder only.
-          Selection is a ring, never a recolor (a green pad reads as a
-          different pad type, not as "selected"). */}
-      {[
-        { list: chip.packageLayout?.left, xPos: 4, labelAnchor: 'start' as const, labelX: 12 },
-        { list: chip.packageLayout?.right, xPos: W - 4, labelAnchor: 'end' as const, labelX: W - 12 },
-      ].map(({ list, xPos, labelAnchor, labelX }, side) => (
-        <g key={side}>
-          {list?.map((lp, i) => {
-            if (!lp.isSurfacePad) return null
-            const isSelected = selectedPin?.gpio === lp.gpio
-            const y = i * ROW_H + ROW_H / 2
-            return (
-              <g key={lp.pinNumber}>
-                <rect x={xPos - 4.5} y={y - 6.5} width={9} height={13} rx="2"
-                  fill="#caa83a" stroke={isSelected ? '#a78bfa' : '#1a2230'} strokeWidth={isSelected ? 2 : 0.8} />
-                {/* castellation notch on the board edge */}
-                <circle cx={side === 0 ? 0 : W} cy={y} r={2.2} fill={`url(#board-${uid})`} stroke="#8a6d1f" strokeWidth="0.7" />
-                <text x={labelX} y={y + 2.5} textAnchor={labelAnchor} fontSize="6.5" fontFamily="monospace"
-                  fontWeight="bold" fill="#e2e8f0" opacity="0.85">
-                  {lp.gpio !== undefined ? `GP${lp.gpio}` : lp.label}
-                </text>
-              </g>
-            )
-          })}
-        </g>
-      ))}
+      {/* Front-surface solder pads: castellated half-pads tucked into the
+          board corner at tight pitch, exactly like the real PCB - they are
+          not header rows and do not stretch the board. Selection is a ring,
+          never a recolor. */}
+      {(['left', 'right'] as const).map(side => {
+        const pads = (side === 'left' ? chip.packageLayout?.left : chip.packageLayout?.right)
+          ?.filter(lp => lp.isSurfacePad) ?? []
+        if (pads.length === 0) return null
+        const xPos = side === 'left' ? 4 : W - 4
+        const edgeX = side === 'left' ? 0 : W
+        const labelX = side === 'left' ? 12 : W - 12
+        const anchor = side === 'left' ? ('start' as const) : ('end' as const)
+        // Stack upward from just above the antenna zone (USB-top boards) or
+        // downward from below it, at half-header pitch.
+        const baseY = usbTop ? H - 30 : 30
+        const dir = usbTop ? -1 : 1
+        return (
+          <g key={side}>
+            {pads.map((lp, k) => {
+              const isSelected = selectedPin?.gpio === lp.gpio
+              const y = baseY + dir * (pads.length - 1 - k) * 17
+              return (
+                <g key={lp.pinNumber}>
+                  <rect x={xPos - 4.5} y={y - 6.5} width={9} height={13} rx="2"
+                    fill="#caa83a" stroke={isSelected ? '#a78bfa' : '#1a2230'} strokeWidth={isSelected ? 2 : 0.8} />
+                  <circle cx={edgeX} cy={y} r={2.2} fill={`url(#board-${uid})`} stroke="#8a6d1f" strokeWidth="0.7" />
+                  <text x={labelX} y={y + 2.5} textAnchor={anchor} fontSize="6.5" fontFamily="monospace"
+                    fontWeight="bold" fill="#e2e8f0" opacity="0.85">
+                    {lp.gpio !== undefined ? `GP${lp.gpio}` : lp.label}
+                  </text>
+                </g>
+              )
+            })}
+          </g>
+        )
+      })}
 
       {/* Underside pads (usually bottom boundary pads) */}
       {chip.packageLayout?.bottom?.map((lp, i) => {
@@ -606,6 +670,13 @@ export function ModuleDiagram() {
   // not a bottom edge - render them as a labeled chip strip instead of
   // floating edge columns.
   const bottomIsBackside = bottomLayout.length > 0 && bottomLayout.every(lp => lp.isBacksidePad)
+
+  // Front-surface solder pads are not header pins either: they leave the side
+  // banks entirely (so they do not stretch the board length) and get their own
+  // strip, with the pads drawn tucked into the board corner like the real PCB.
+  const surfacePads = [...leftLayout, ...rightLayout].filter(lp => lp.isSurfacePad)
+  leftLayout  = leftLayout.filter(lp => !lp.isSurfacePad)
+  rightLayout = rightLayout.filter(lp => !lp.isSurfacePad)
 
   const sideHeight = Math.max(leftLayout.length, rightLayout.length) * ROW_H
   const padCount   = Math.max(bottomLayout.length, topIsThermal ? 0 : topLayout.length, 1)
@@ -715,47 +786,30 @@ export function ModuleDiagram() {
 
         </div>
 
+        {/* ── Front-surface solder pads (tucked into the board corner, not header rows) ── */}
+        <SolderPadStrip
+          pads={surfacePads}
+          caption="solder pads on the front - no header pins, solder wires directly"
+          borderColor="#8a6d1f"
+          maxW={Math.max(chipWidth + 260, 400)}
+          pinByGpio={pinByGpio}
+          selectedPin={selectedPin}
+          filteredSet={filteredSet}
+          onToggle={toggle}
+        />
+
         {/* ── Underside pads (back of the board, not a physical bottom edge) ── */}
-        {bottomLayout.length > 0 && bottomIsBackside && (
-          <div className="flex flex-col items-center" style={{ marginTop: 8, maxWidth: Math.max(chipWidth + 260, 400) }}>
-            <span className="font-mono" style={{ fontSize: 8.5, color: '#5a6b80', letterSpacing: 0.3, marginBottom: 4 }}>
-              solder pads on the underside - no header pins, solder wires directly
-            </span>
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {bottomLayout.map(lp => {
-                const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
-                if (!pin) return null
-                const color = connectorColor(pin)
-                const { bg, text } = getBadge(pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0])
-                const warn = primaryConstraint(pin)
-                const isSelected = selectedPin?.gpio === pin.gpio
-                const isActive = filteredSet.has(pin.gpio)
-                return (
-                  <div
-                    key={lp.pinNumber}
-                    onClick={() => toggle(pin)}
-                    className={`flex items-center gap-1.5 cursor-pointer select-none rounded-md transition-colors
-                      ${isActive ? '' : 'opacity-[0.07]'}
-                      ${isSelected ? 'bg-violet-950/60' : 'hover:bg-white/[0.05]'}`}
-                    style={{ padding: '3px 7px', border: '1px dashed #2a3a52', background: isSelected ? undefined : '#0b111c' }}
-                  >
-                    <span className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: color, boxShadow: `0 0 4px ${color}60` }} />
-                    <span className="font-mono" style={{ fontSize: 7.5, fontWeight: 700, color: '#3d5068' }}>{lp.pinNumber}</span>
-                    <span className="font-mono font-bold rounded-sm" style={{ background: bg, color: text, fontSize: 9, lineHeight: '15px', padding: '0 4px' }}>
-                      {pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0]}
-                    </span>
-                    {warn && (
-                      <span title={warn.title} className="font-mono font-bold rounded-sm flex items-center justify-center flex-shrink-0"
-                        style={{ background: sevStyle(warn.sev).bg, color: sevStyle(warn.sev).fg, border: `1px solid ${sevStyle(warn.sev).bd}`,
-                          width: 12, height: 12, fontSize: 8, lineHeight: 1 }}>
-                        {sevStyle(warn.sev).icon}
-                      </span>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+        {bottomIsBackside && (
+          <SolderPadStrip
+            pads={bottomLayout}
+            caption="solder pads on the underside - no header pins, solder wires directly"
+            borderColor="#2a3a52"
+            maxW={Math.max(chipWidth + 260, 400)}
+            pinByGpio={pinByGpio}
+            selectedPin={selectedPin}
+            filteredSet={filteredSet}
+            onToggle={toggle}
+          />
         )}
 
         {/* ── Bottom pin row (a real physical bottom edge) ── */}
