@@ -40,6 +40,8 @@ interface SchemRow {
   pin?: Pin
   label?: string
   name?: string        // verbatim symbol pin name, e.g. 'SENSOR_VP/GPIO36/ADC1_CH0'
+  solderPad?: boolean  // wire-solder-only pad (front surface or underside), not a header pin
+  divider?: string     // section divider row inside the symbol (e.g. 'front solder pads')
 }
 
 function toRow(sp: SymbolPin, pinByGpio: Map<number, Pin>, i: number): SchemRow {
@@ -59,6 +61,8 @@ function fallbackBanks(chip: Chip): { left: SchemRow[]; right: SchemRow[]; top: 
     pads = [...chip.pins].sort((a, b) => a.gpio - b.gpio).map((p, i) => ({ pinNumber: i + 1, gpio: p.gpio }))
   }
   const gpioRows: SchemRow[] = []
+  const frontRows: SchemRow[] = []
+  const backRows: SchemRow[] = []
   const extras: SchemRow[] = []
   const gnd: number[] = []
   const nc: number[] = []
@@ -67,7 +71,13 @@ function fallbackBanks(chip: Chip): { left: SchemRow[]; right: SchemRow[]; top: 
     if (lp.gpio !== undefined) {
       if (seen.has(lp.gpio)) continue
       seen.add(lp.gpio)
-      gpioRows.push({ key: `g${lp.gpio}`, pinNums: [lp.pinNumber], pin: pinByGpio.get(lp.gpio) })
+      const row: SchemRow = {
+        key: `g${lp.gpio}`, pinNums: [lp.pinNumber], pin: pinByGpio.get(lp.gpio),
+        solderPad: !!(lp.isSurfacePad || lp.isBacksidePad),
+      }
+      if (lp.isSurfacePad) frontRows.push(row)
+      else if (lp.isBacksidePad) backRows.push(row)
+      else gpioRows.push(row)
       continue
     }
     const l = (lp.label ?? 'NC').toUpperCase()
@@ -75,15 +85,22 @@ function fallbackBanks(chip: Chip): { left: SchemRow[]; right: SchemRow[]; top: 
     else if (l === 'NC') nc.push(lp.pinNumber)
     else extras.push({ key: `s${lp.pinNumber}`, pinNums: [lp.pinNumber], label: lp.label })
   }
-  gpioRows.sort((a, b) => (a.pin?.gpio ?? 999) - (b.pin?.gpio ?? 999))
+  const byGpio = (a: SchemRow, b: SchemRow) => (a.pin?.gpio ?? 999) - (b.pin?.gpio ?? 999)
+  gpioRows.sort(byGpio); frontRows.sort(byGpio); backRows.sort(byGpio)
   const tail: SchemRow[] = []
   if (gnd.length) tail.push({ key: 'gnd', pinNums: gnd.sort((a, b) => a - b), label: 'GND' })
   if (nc.length)  tail.push({ key: 'nc',  pinNums: nc.sort((a, b) => a - b),  label: 'NC' })
+  // Solder-only pads are grouped apart from the header pins, behind a divider.
+  const leftPadGroup: SchemRow[] = frontRows.length
+    ? [{ key: 'div-front', pinNums: [], divider: 'front solder pads' }, ...frontRows] : []
+  const rightPadGroup: SchemRow[] = backRows.length
+    ? [{ key: 'div-back', pinNums: [], divider: 'underside solder pads' }, ...backRows] : []
   const G = gpioRows.length
-  const leftG = Math.max(0, Math.min(G, Math.ceil((G + tail.length - extras.length) / 2)))
+  const leftG = Math.max(0, Math.min(G,
+    Math.ceil((G + tail.length + rightPadGroup.length - extras.length - leftPadGroup.length) / 2)))
   return {
-    left: [...extras, ...gpioRows.slice(0, leftG)],
-    right: [...gpioRows.slice(leftG), ...tail],
+    left: [...extras, ...gpioRows.slice(0, leftG), ...leftPadGroup],
+    right: [...gpioRows.slice(leftG), ...tail, ...rightPadGroup],
     top: [], bottom: [],
   }
 }
@@ -230,6 +247,7 @@ export function SchematicDiagram() {
     if (row.pin) {
       return row.pin.names.join(' / ')
         + (row.pinNums.length > 1 ? ` - pads ${row.pinNums.join(', ')}` : '')
+        + (row.solderPad ? ' - solder pad only, no header pin' : '')
         + (row.pin.constraints.length ? ' - ' + row.pin.constraints.map(c => c.title).join(' · ') : '')
     }
     const label = row.name ?? row.label
@@ -244,6 +262,19 @@ export function SchematicDiagram() {
     const isLeft = side === 'left'
     const edgeX = isLeft ? bodyX : bodyX + BW
     const tipX  = isLeft ? edgeX - PL : edgeX + PL
+
+    // Section divider inside the symbol (separates solder-only pads from headers)
+    if (row.divider) {
+      const x0 = isLeft ? edgeX + 6 : edgeX - 6
+      const x1 = isLeft ? edgeX + 96 : edgeX - 96
+      return (
+        <g key={row.key}>
+          <line x1={x0} y1={cy + 6} x2={x1} y2={cy + 6} stroke="#8a6d1f" strokeWidth="1" strokeDasharray="3 2" />
+          <text x={x0} y={cy + 1} textAnchor={isLeft ? 'start' : 'end'} fontSize="6.5" fontFamily={FONT}
+            fontWeight={700} fill="#8a6d1f" letterSpacing="1">{row.divider.toUpperCase()} - NO HEADER</text>
+        </g>
+      )
+    }
     const segs = rowSegments(row, mapLabel(row))
     const name = rowName(row)
     const isSelected = !!row.pin && selectedPin?.gpio === row.pin.gpio
@@ -278,8 +309,13 @@ export function SchematicDiagram() {
         <rect className="sch-hit" x={hitX} y={cy - PITCH / 2} width={hitW} height={PITCH}
           fill={isSelected ? 'rgba(37,99,235,0.14)' : 'transparent'}
           stroke={isSelected ? '#2563eb' : 'none'} strokeWidth="1" strokeDasharray={isSelected ? '3 2' : undefined} />
-        <line x1={edgeX} y1={cy} x2={tipX} y2={cy} stroke={PIN_COLOR} strokeWidth="1.5" />
-        <circle cx={tipX} cy={cy} r="1.8" fill="none" stroke={PIN_COLOR} strokeWidth="1" />
+        {/* solder-only pads: dashed stub + square pad tip instead of the
+            round pin circle - reads as "pad, not a pin" */}
+        <line x1={edgeX} y1={cy} x2={tipX} y2={cy} stroke={PIN_COLOR} strokeWidth="1.5"
+          strokeDasharray={row.solderPad ? '3 2' : undefined} />
+        {row.solderPad
+          ? <rect x={tipX - 2.5} y={cy - 2.5} width={5} height={5} fill="#caa83a" stroke={PIN_COLOR} strokeWidth="0.8" />
+          : <circle cx={tipX} cy={cy} r="1.8" fill="none" stroke={PIN_COLOR} strokeWidth="1" />}
         {/* constraint marker at the body edge - stays visible when the
             annotation chips are scrolled out of view on narrow screens */}
         {row.pin && row.pin.constraints.length > 0 && (
