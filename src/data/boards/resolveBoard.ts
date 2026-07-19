@@ -89,6 +89,9 @@ export function resolveBoard(spec: BoardSpec, base: Chip | undefined): BoardResu
     pcb: spec.pcb ?? 'black',
     accent: base.module?.accent ?? '#22c55e',
     radios: base.module?.radios ?? '',
+    usbEdge: spec.usbEdge,
+    bare: spec.bare,
+    aspect: spec.aspect,
   }
 
   const chip: Chip = {

@@ -34,6 +34,10 @@ export interface BoardSpec {
     rightRailHoles?: number // limit count of edge through-holes to render on right rail
   }
   overrides?: Record<string, BoardOverride>  // keyed by GPIO number (as a string)
+  // Physical appearance hints for the board rendering:
+  usbEdge?: 'top' | 'bottom'  // where the USB connector sits (default bottom, like the DevKits)
+  bare?: boolean              // bare chip + ceramic antenna instead of a shielded module (S3-Zero style)
+  aspect?: number             // board width / height ratio (e.g. 18mm/23.5mm = 0.77); default keeps the narrow DevKit look
 }
 
 export interface BoardResult {

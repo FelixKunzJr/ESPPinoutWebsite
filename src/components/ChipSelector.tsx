@@ -46,7 +46,7 @@ export function ChipSelector() {
   }
 
   const shortLabel = (c: Chip) => {
-    if (isBoard(c)) return c.name.replace(/^Waveshare /, '').replace(/^ESP32-/, '')
+    if (isBoard(c)) return c.name.replace(/^ESP32-/, '')
     return (c.name.startsWith(c.family) ? c.name.slice(c.family.length).replace(/^-/, '') : c.name) || c.name
   }
 
