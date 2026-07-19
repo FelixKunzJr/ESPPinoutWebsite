@@ -32,11 +32,11 @@ async function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
     const h = 76 * scale
     const w = h * (300 / 292)
     const x = canvas.width - pad - w
-    const y = canvas.height - pad - h - 14 * scale
+    const y = canvas.height - pad - h
     ctx.drawImage(logo, x, y, w, h)
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'bottom'
-    ctx.fillText('esp32pin.com', x + w / 2, canvas.height - pad)
+    ctx.textAlign = 'right'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('esp32pin.com', x - 8 * scale, y + h / 2)
   } catch {
     ctx.textAlign = 'right'
     ctx.textBaseline = 'bottom'
@@ -174,7 +174,10 @@ export function ExportPanel() {
       main.sheet { width: 210mm; min-height: 297mm; box-sizing: border-box; padding: 12mm;
                    margin: 18px auto 40px; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,0.45);
                    position: relative; }
-      .brandmark { position: absolute; bottom: 12mm; right: 12mm; width: 32mm; height: auto; }
+      .brandmark { position: absolute; bottom: 12mm; right: 12mm;
+                   display: flex; align-items: center; gap: 10px; text-decoration: none; }
+      .brandmark img { width: 26mm; height: auto; }
+      .brandmark span { font: 600 11px -apple-system, "Segoe UI", sans-serif; color: #555; letter-spacing: 0.4px; }
       h1 { font-size: 20px; margin: 0 0 2px; }
       .sub { color: #555; margin: 0 0 10px; font-size: 11px; }
       svg { max-width: 100%; height: auto; display: block; }
@@ -193,24 +196,22 @@ export function ExportPanel() {
         body { background: #fff; }
         .toolbar { display: none; }
         main.sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
-        .brandmark { position: fixed; bottom: 0; right: 0; width: 28mm; }
+        .brandmark { position: fixed; bottom: 0; right: 0; }
         .foot { margin-bottom: 0; }
       }
     </style></head><body>
     <div class="toolbar"><button onclick="window.print()">Print / Save as PDF</button></div>
     <main class="sheet">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-        <img src="${window.location.origin}/brand/logo-icon.svg" width="44" height="44" alt="">
-        <div>
-          <h1>${escapeHtml(name)} pinout</h1>
-          <p class="sub" style="margin:0;">ESP32 Pinout Studio - esp32pin.com/${chip.id} - ${new Date().toISOString().slice(0, 10)}</p>
-        </div>
-      </div>
+      <h1>${escapeHtml(name)} pinout</h1>
+      <p class="sub">ESP32 Pinout Studio - esp32pin.com/${chip.id} - ${new Date().toISOString().slice(0, 10)}</p>
       ${diagramHtml}
       <h2>Known gotchas</h2><ul class="gotchas">${gotchas}</ul>
       ${rows ? `<h2>Pin mapping</h2><table class="map"><tr><th>GPIO</th><th>Role</th><th>Label</th></tr>${rows}</table>` : ''}
       <p class="foot">Interactive version with live conflict checking: https://esp32pin.com/${chip.id}</p>
-      <img class="brandmark" src="${window.location.origin}/brand/logo-stacked.svg" alt="ESP32 Pinout Studio">
+      <a class="brandmark" href="https://esp32pin.com/${chip.id}">
+        <span>esp32pin.com</span>
+        <img src="${window.location.origin}/brand/logo-stacked.svg" alt="ESP32 Pinout Studio">
+      </a>
     </main>
     </body></html>`)
     w.document.close()
