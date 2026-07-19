@@ -1,0 +1,205 @@
+{
+  "id": "esp32-s3-zero",
+  "name": "Waveshare ESP32-S3-Zero",
+  "baseChip": "esp32s3",
+  "pcb": "black",
+  "notes": [
+    "Compact mini development board based on ESP32-S3FH4R2 (4MB Flash, 2MB PSRAM).",
+    "Onboard ceramic antenna requires clearance; do not cover with PCB, metal, or plastic components.",
+    "Features native USB JTAG debugging. To enter download mode, hold the BOOT button, pulse the RESET button, and release BOOT."
+  ],
+  "headers": {
+    "leftRailHoles": 9,
+    "rightRailHoles": 9,
+    "left": [
+      {
+        "label": "5V"
+      },
+      {
+        "label": "GND"
+      },
+      {
+        "label": "3V3"
+      },
+      {
+        "gpio": 1
+      },
+      {
+        "gpio": 2
+      },
+      {
+        "gpio": 3
+      },
+      {
+        "gpio": 4
+      },
+      {
+        "gpio": 5
+      },
+      {
+        "gpio": 6
+      }
+    ],
+    "right": [
+      {
+        "gpio": 43
+      },
+      {
+        "gpio": 44
+      },
+      {
+        "gpio": 13
+      },
+      {
+        "gpio": 12
+      },
+      {
+        "gpio": 11
+      },
+      {
+        "gpio": 10
+      },
+      {
+        "gpio": 9
+      },
+      {
+        "gpio": 8
+      },
+      {
+        "gpio": 7
+      },
+      {
+        "gpio": 16,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 15,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 14,
+        "isSurfacePad": true
+      }
+    ],
+    "bottom": [
+      {
+        "gpio": 45,
+        "isBacksidePad": true
+      },
+      {
+        "gpio": 42,
+        "isBacksidePad": true
+      },
+      {
+        "gpio": 41,
+        "isBacksidePad": true
+      },
+      {
+        "gpio": 40,
+        "isBacksidePad": true
+      },
+      {
+        "gpio": 39,
+        "isBacksidePad": true
+      },
+      {
+        "gpio": 38,
+        "isBacksidePad": true
+      },
+      {
+        "gpio": 18,
+        "isBacksidePad": true
+      },
+      {
+        "gpio": 17,
+        "isBacksidePad": true
+      }
+    ]
+  },
+  "overrides": {
+    "1": {
+      "label": "GP1"
+    },
+    "2": {
+      "label": "GP2"
+    },
+    "3": {
+      "label": "GP3"
+    },
+    "4": {
+      "label": "GP4"
+    },
+    "5": {
+      "label": "GP5"
+    },
+    "6": {
+      "label": "GP6"
+    },
+    "7": {
+      "label": "GP7"
+    },
+    "8": {
+      "label": "GP8"
+    },
+    "9": {
+      "label": "GP9"
+    },
+    "10": {
+      "label": "GP10"
+    },
+    "11": {
+      "label": "GP11"
+    },
+    "12": {
+      "label": "GP12"
+    },
+    "13": {
+      "label": "GP13"
+    },
+    "14": {
+      "label": "GP14"
+    },
+    "15": {
+      "label": "GP15"
+    },
+    "16": {
+      "label": "GP16"
+    },
+    "17": {
+      "label": "GP17"
+    },
+    "18": {
+      "label": "GP18"
+    },
+    "21": {
+      "label": "GP21",
+      "note": "Wired directly to the onboard WS2812B RGB LED"
+    },
+    "38": {
+      "label": "GP38"
+    },
+    "39": {
+      "label": "GP39"
+    },
+    "40": {
+      "label": "GP40"
+    },
+    "41": {
+      "label": "GP41"
+    },
+    "42": {
+      "label": "GP42"
+    },
+    "43": {
+      "label": "TX",
+      "note": "UART0 TX (silkscreen TX)"
+    },
+    "44": {
+      "label": "RX",
+      "note": "UART0 RX (silkscreen RX)"
+    },
+    "45": {
+      "label": "GP45"
+    }
+  }
+}

@@ -68,6 +68,8 @@ export function resolveBoard(spec: BoardSpec, base: Chip | undefined): BoardResu
       pinNumber: ++n,
       gpio: pad.gpio,
       label: pad.gpio === undefined ? (pad.label ?? 'NC') : undefined,
+      isSurfacePad: pad.isSurfacePad,
+      isBacksidePad: pad.isBacksidePad,
     }))
 
   const packageLayout: PackageLayout = {
@@ -76,6 +78,8 @@ export function resolveBoard(spec: BoardSpec, base: Chip | undefined): BoardResu
     right: toLayout(spec.headers.right),
     bottom: spec.headers.bottom ? toLayout(spec.headers.bottom) : [],
     top: spec.headers.top ? toLayout(spec.headers.top) : undefined,
+    leftRailHoles: spec.headers.leftRailHoles,
+    rightRailHoles: spec.headers.rightRailHoles,
   }
 
   const module: ModuleInfo = {

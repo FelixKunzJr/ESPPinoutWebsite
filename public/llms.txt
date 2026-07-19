@@ -55,6 +55,7 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 - [ESP32-S3-WROOM-1](https://esp32pin.com/esp32s3)
 - [ESP32-S3-WROOM-2](https://esp32pin.com/esp32s3wroom2)
 - [ESP32-S3-MINI-1](https://esp32pin.com/esp32s3mini1)
+- [Waveshare ESP32-S3-Zero](https://esp32pin.com/esp32-s3-zero)
 - [ESP32-S3-DevKitC-1](https://esp32pin.com/esp32s3devkitc)
 
 ### ESP32-C3 (RISC-V, Wi-Fi + BLE)

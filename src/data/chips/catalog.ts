@@ -5,6 +5,11 @@ import type { Chip, ModuleForm, Pin, PackageLayout, SymbolLayout } from '../../t
 import * as G from './generated'
 import { esp32 } from './esp32'
 import { esp32wrover } from './esp32wrover'
+import esp32S3ZeroJson from '../../../contrib/boards/esp32-s3-zero.board.json'
+import { resolveBoard } from '../boards/resolveBoard'
+import type { BoardSpec } from '../boards/types'
+
+
 
 const GEN = G as unknown as Record<string, Pin[] | PackageLayout | SymbolLayout>
 
@@ -183,6 +188,9 @@ function build(spec: ModuleSpec): Chip {
 const generated = MODULES.map(build)
 const byId = (id: string) => generated.find(c => c.id === id)!
 
+export const esp32S3Zero = resolveBoard(esp32S3ZeroJson as unknown as BoardSpec, byId('esp32s3')).chip!
+
+
 // Ordered, grouped by family for the selector.
 export const CHIPS: Chip[] = [
   esp32,                       // ESP32-WROOM-32
@@ -197,6 +205,7 @@ export const CHIPS: Chip[] = [
   byId('esp32s3'),
   byId('esp32s3wroom2'),
   byId('esp32s3mini1'),
+  esp32S3Zero,
   byId('esp32c3'),
   byId('esp32c3wroom02'),
   byId('esp32c6'),

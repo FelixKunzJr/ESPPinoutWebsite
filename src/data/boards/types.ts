@@ -9,6 +9,8 @@ import type { Severity } from '../../types/chip'
 export interface HeaderPad {
   gpio?: number   // omit for power/ground/NC pads
   label?: string  // for non-GPIO pads ('GND' | '3V3' | 'EN' | '5V' | 'NC')
+  isSurfacePad?: boolean  // true = SMD pad on the front/top surface of the PCB
+  isBacksidePad?: boolean // true = SMD pad on the underside/back of the PCB
 }
 
 export interface BoardOverride {
@@ -28,6 +30,8 @@ export interface BoardSpec {
     right: HeaderPad[]          // top -> bottom
     top?: HeaderPad[]           // left -> right
     bottom?: HeaderPad[]        // left -> right
+    leftRailHoles?: number  // limit count of edge through-holes to render on left rail
+    rightRailHoles?: number // limit count of edge through-holes to render on right rail
   }
   overrides?: Record<string, BoardOverride>  // keyed by GPIO number (as a string)
 }

@@ -86,6 +86,8 @@ export interface LayoutPin {
   pinNumber: number     // physical pad number (e.g. 1-38 on WROOM-32)
   gpio?: number         // present for GPIO pads
   label?: string        // 'GND' | '3V3' | 'EN' | 'NC' for non-GPIO pads
+  isSurfacePad?: boolean // true = SMD pad on the front/top surface of the PCB
+  isBacksidePad?: boolean // true = SMD pad on the underside/back of the PCB
 }
 
 // Schematic symbol geometry, extracted from Espressif's official KiCad symbol:
@@ -111,6 +113,8 @@ export interface PackageLayout {
   right:  LayoutPin[]   // top → bottom (pin 38 first for WROOM-32)
   bottom: LayoutPin[]   // left → right
   top?:   LayoutPin[]   // left → right (MINI modules have a GND ring on the top edge too)
+  leftRailHoles?: number  // limit count of edge through-holes to render on left rail
+  rightRailHoles?: number // limit count of edge through-holes to render on right rail
 }
 
 // Add packageLayout?: PackageLayout to Chip (optional; falls back to 50/50 split)

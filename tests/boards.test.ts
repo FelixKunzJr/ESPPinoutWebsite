@@ -23,6 +23,18 @@ describe('board spec pipeline', () => {
     expect(chip!.pins.find(p => p.gpio === 1)!.names[0]).toBe('TFT_CS')
   })
 
+  it('resolves the waveshare s3 zero board with no errors', () => {
+    const spec = JSON.parse(
+      readFileSync(resolve(here, '../contrib/boards/esp32-s3-zero.board.json'), 'utf8'),
+    ) as BoardSpec
+    const { chip, errors } = resolveBoard(spec, findChip(spec.baseChip))
+    expect(errors).toEqual([])
+    expect(chip).not.toBeNull()
+    // Verify specific overrides
+    expect(chip!.pins.find(p => p.gpio === 43)!.names[0]).toBe('TX')
+    expect(chip!.pins.find(p => p.gpio === 21)!.names[0]).toBe('GP21')
+  })
+
   it('flags an unknown base chip', () => {
     const spec: BoardSpec = { id: 'x', name: 'X', baseChip: 'nope', headers: { left: [], right: [] } }
     const { chip, errors } = resolveBoard(spec, findChip(spec.baseChip))

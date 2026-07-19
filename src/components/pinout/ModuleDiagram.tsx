@@ -355,7 +355,7 @@ function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHe
 
 // ─── Dev-board body (PCB with mounted module, USB, buttons, header rails) ───────
 
-function BoardBody({ chip, sideHeight, width }: { chip: Chip; sideHeight: number; width: number }) {
+function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideHeight: number; width: number; selectedPin: Pin | null }) {
   const m = resolveModule(chip)
   const uid = chip.id
   const W = width
@@ -396,14 +396,24 @@ function BoardBody({ chip, sideHeight, width }: { chip: Chip; sideHeight: number
       ))}
 
       {/* Header rails + plated holes aligned to the pin rows */}
-      {([6, W - 6] as number[]).map((x, si) => (
-        <g key={si}>
-          <rect x={x - 3.5} y={modTop} width={7} height={H - modTop - 8} rx="3" fill="#0c1119" stroke="#2a333f" strokeWidth="0.6" />
-          {Array.from({ length: rows }, (_, i) => (
-            <circle key={i} cx={x} cy={i * ROW_H + ROW_H / 2} r={2.6} fill="#0a0d12" stroke="#caa83a" strokeWidth="1.1" />
-          ))}
-        </g>
-      ))}
+      {([6, W - 6] as number[]).map((x, si) => {
+        const isLeft = si === 0
+        const overrideCount = isLeft
+          ? chip.packageLayout?.leftRailHoles
+          : chip.packageLayout?.rightRailHoles
+        const limitHoles = overrideCount !== undefined ? overrideCount : rows
+        const railH = overrideCount !== undefined
+          ? limitHoles * ROW_H + 4
+          : H - modTop - 8
+        return (
+          <g key={si}>
+            <rect x={x - 3.5} y={modTop} width={7} height={railH} rx="3" fill="#0c1119" stroke="#2a333f" strokeWidth="0.6" />
+            {Array.from({ length: limitHoles }, (_, i) => (
+              <circle key={i} cx={x} cy={i * ROW_H + ROW_H / 2} r={2.6} fill="#0a0d12" stroke="#caa83a" strokeWidth="1.1" />
+            ))}
+          </g>
+        )
+      })}
 
       {/* Mounted RF-shielded module */}
       <rect x={modL + 1.5} y={modTop + 2} width={modW} height={modH} rx="2.5" fill="#000" opacity="0.4" />
@@ -438,6 +448,75 @@ function BoardBody({ chip, sideHeight, width }: { chip: Chip; sideHeight: number
       {/* board name silkscreen, vertical along the centre */}
       <text x={cx} y={modTop + modH + 26} textAnchor="middle" fontSize="9" fontFamily="monospace" fontWeight="800" fill="#e2e8f0" letterSpacing="0.5">{m.name.replace(/^ESP32-/, '')}</text>
       <text x={cx} y={modTop + modH + 38} textAnchor="middle" fontSize="6" fontFamily="monospace" fill={m.accent} letterSpacing="0.4">{m.radios}</text>
+
+      {/* Front-surface pads (left and right layout arrays) */}
+      {[
+        { list: chip.packageLayout?.left, xPos: 25, labelAnchor: 'start' as const, labelXOffset: 7 },
+        { list: chip.packageLayout?.right, xPos: W - 25, labelAnchor: 'end' as const, labelXOffset: -7 }
+      ].map(({ list, xPos, labelAnchor, labelXOffset }) => 
+        list?.map((lp, i) => {
+          if (!lp.isSurfacePad) return null
+          const isSelected = selectedPin?.gpio === lp.gpio
+          const y = i * ROW_H + ROW_H / 2
+          return (
+            <g key={lp.pinNumber}>
+              <rect
+                x={xPos - 5}
+                y={y - 6}
+                width={10}
+                height={12}
+                rx="1.5"
+                fill={isSelected ? m.accent : "#caa83a"}
+                stroke={isSelected ? "#fff" : "#1a2230"}
+                strokeWidth="0.8"
+              />
+              <text
+                x={xPos + labelXOffset}
+                y={y + 2.5}
+                textAnchor={labelAnchor}
+                fontSize="6.5"
+                fontFamily="monospace"
+                fontWeight="bold"
+                fill="#e2e8f0"
+                opacity="0.8"
+              >
+                {lp.gpio !== undefined ? `GP${lp.gpio}` : lp.label}
+              </text>
+            </g>
+          )
+        })
+      )}
+
+      {/* Underside pads (usually bottom boundary pads) */}
+      {chip.packageLayout?.bottom?.map((lp, i) => {
+        if (!lp.isBacksidePad) return null
+        const isSelected = selectedPin?.gpio === lp.gpio
+        const y = (i + 2) * ROW_H + ROW_H / 2
+        return (
+          <g key={lp.pinNumber}>
+            <circle
+              cx={34}
+              cy={y}
+              r={3.2}
+              fill="none"
+              stroke={isSelected ? m.accent : "#5a6b80"}
+              strokeWidth={isSelected ? "1.6" : "1"}
+              strokeDasharray={isSelected ? undefined : "1.5,1.5"}
+            />
+            <text
+              x={42}
+              y={y + 2}
+              textAnchor="start"
+              fontSize="6"
+              fontFamily="monospace"
+              fill={isSelected ? m.accent : "#5a6b80"}
+              opacity={isSelected ? "1" : "0.7"}
+            >
+              {lp.gpio !== undefined ? `GP${lp.gpio}` : lp.label}
+            </text>
+          </g>
+        )
+      })}
     </svg>
   )
 }
@@ -563,7 +642,7 @@ export function ModuleDiagram() {
 
           {/* IC body */}
           {isBoard
-            ? <BoardBody chip={chip} sideHeight={sideHeight} width={chipWidth} />
+            ? <BoardBody chip={chip} sideHeight={sideHeight} width={chipWidth} selectedPin={selectedPin} />
             : <ChipBody chip={chip} sideHeight={sideHeight} bottomCount={bottomLayout.length || 10} width={chipWidth} />}
 
           {/* Right pin bank */}
