@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import html2canvas from 'html2canvas'
+import { toCanvas } from 'html-to-image'
 import { useApp } from '../context/AppContext'
 import type { PinAssignment } from '../types/chip'
 
@@ -85,12 +85,15 @@ export function ExportPanel() {
     }
     // Module view is HTML - capture the diagram content itself (full intrinsic
     // width, not the scroll-clipped card with its buttons and legend).
+    // html-to-image renders through the browser's own SVG foreignObject
+    // pipeline, so vertical writing-mode labels and text baselines come out
+    // exactly as on screen (html2canvas garbled both).
     const target = document.getElementById('module-diagram-canvas')
       ?? document.getElementById('pinout-diagram-export')
     if (!target) return
     // Match the themed diagram card background (dark canvas or light paper).
     const dgBg = getComputedStyle(document.documentElement).getPropertyValue('--dg-bg').trim() || '#060b12'
-    const canvas = await html2canvas(target, { backgroundColor: dgBg, scale })
+    const canvas = await toCanvas(target, { backgroundColor: dgBg, pixelRatio: scale })
     drawWatermark(canvas, scale)
     download(canvas)
   }
