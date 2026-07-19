@@ -4,6 +4,7 @@ import type { Chip, Pin, PinAssignment, FilterKey } from '../types/chip'
 
 export type DiagramView = 'schematic' | 'module'
 export type Page = 'studio' | 'contribute' | 'build'
+export type Theme = 'dark' | 'light'
 
 export interface AppState {
   chip: Chip
@@ -12,6 +13,8 @@ export interface AppState {
   navigate: (to: Page) => void
   view: DiagramView
   setView: (v: DiagramView) => void
+  theme: Theme
+  toggleTheme: () => void
   selectedPin: Pin | null
   setSelectedPin: (pin: Pin | null) => void
   filter: FilterKey
@@ -96,6 +99,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem('diagram-view', v) } catch { /* ignore */ }
   }, [])
 
+  // The pre-paint script in index.html has already put the saved (or system)
+  // theme on <html>; React just mirrors and toggles it from here on.
+  const [theme, setTheme] = useState<Theme>(() =>
+    document.documentElement.classList.contains('light') ? 'light' : 'dark')
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => {
+      const next: Theme = prev === 'dark' ? 'light' : 'dark'
+      document.documentElement.classList.toggle('light', next === 'light')
+      try { localStorage.setItem('theme', next) } catch { /* ignore */ }
+      const meta = document.querySelector('meta[name="theme-color"]')
+      if (meta) meta.setAttribute('content', next === 'light' ? '#eef1f5' : '#030712')
+      return next
+    })
+  }, [])
+
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null)
   const [filter, setFilter] = useState<FilterKey>('all')
   const [mapping, setMapping] = useState<PinAssignment[]>(() => {
@@ -162,6 +180,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       chip, setChip,
       page, navigate,
       view, setView,
+      theme, toggleTheme,
       selectedPin, setSelectedPin,
       filter, setFilter,
       mapping, assignPin, unassignPin, clearMapping,

@@ -91,6 +91,7 @@ export function BoardBuilderPage() {
       setChip: () => {},
       page: 'build', navigate: () => {},
       view: pview, setView: setPview,
+      theme: 'dark', toggleTheme: () => {},
       selectedPin: null, setSelectedPin: () => {},
       filter: 'all', setFilter: () => {},
       mapping: [], assignPin: () => {}, unassignPin: () => {}, clearMapping: () => {},

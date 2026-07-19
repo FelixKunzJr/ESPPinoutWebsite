@@ -4,6 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#030712" />
+    <!-- Apply the saved (or system) theme before first paint to avoid a flash.
+         Dark is the base design; light mode is the html.light override. -->
+    <script>
+      try {
+        var t = localStorage.getItem('theme')
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+        }
+        if (t === 'light') {
+          document.documentElement.classList.add('light')
+          var m = document.querySelector('meta[name="theme-color"]')
+          if (m) m.setAttribute('content', '#eef1f5')
+        }
+      } catch (e) {}
+    </script>
     <title>ESP32 Pinout Studio | Interactive pinout reference for every ESP32 module</title>
     <meta name="description" content="Free interactive pinout diagrams for ESP32, S2, S3, C3, C5, C6 and H2 modules and dev boards. Official Espressif schematic symbols, strapping-pin and ADC2/Wi-Fi warnings, pin mapping builder, and Arduino code export." />
     <link rel="canonical" href="https://esp32pin.com/" />

@@ -66,8 +66,8 @@ export function ChipSelector() {
               style={{
                 fontSize: 11.5, padding: '6px 10px',
                 color: active ? '#fff' : accent,
-                background: active ? accent : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${active ? accent : 'rgba(255,255,255,0.10)'}`,
+                background: active ? accent : 'var(--pill-bg)',
+                border: `1px solid ${active ? accent : 'var(--pill-border)'}`,
               }}
             >
               {t === BOARDS ? t.toUpperCase() : t}
@@ -78,7 +78,7 @@ export function ChipSelector() {
       </div>
 
       {/* Separator between family tabs and module pills */}
-      <div style={{ height: 1, background: 'rgba(255,255,255,0.08)' }} />
+      <div style={{ height: 1, background: 'var(--selector-sep)' }} />
 
       {/* Modules within the selected tab */}
       <div className="flex flex-wrap gap-1.5">
@@ -92,13 +92,13 @@ export function ChipSelector() {
               className="rounded-md text-[12.5px] font-semibold transition-all duration-150 leading-none"
               style={{
                 padding: '6px 11px',
-                color: active ? '#fff' : '#cbd5e1',
-                background: active ? accent : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${active ? accent : 'rgba(255,255,255,0.09)'}`,
+                color: active ? '#fff' : 'var(--pill-text)',
+                background: active ? accent : 'var(--pill-bg)',
+                border: `1px solid ${active ? accent : 'var(--pill-border-dim)'}`,
                 boxShadow: active ? `0 2px 12px ${accent}55` : 'none',
               }}
-              onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = '#fff' } }}
-              onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.09)'; e.currentTarget.style.color = '#cbd5e1' } }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = 'var(--pill-text-hover)' } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.borderColor = 'var(--pill-border-dim)'; e.currentTarget.style.color = 'var(--pill-text)' } }}
             >
               {shortLabel(c)}
             </button>

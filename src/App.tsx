@@ -12,7 +12,7 @@ import { BoardBuilderPage } from './components/BoardBuilderPage'
 import { useApp }          from './context/AppContext'
 
 export default function App() {
-  const { chip, page, navigate } = useApp()
+  const { chip, page, navigate, theme, toggleTheme } = useApp()
 
   if (page === 'contribute') return <ContributePage />
   if (page === 'build') return <BoardBuilderPage />
@@ -28,6 +28,13 @@ export default function App() {
               <p className="text-xs text-gray-500">Free interactive pinout reference for the maker community</p>
             </div>
             <div className="flex items-center gap-4">
+              <button
+                onClick={toggleTheme}
+                className="text-xs text-gray-500 hover:text-gray-300"
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? '☀ Light' : '☾ Dark'}
+              </button>
               <button
                 onClick={() => navigate('contribute')}
                 className="text-xs text-gray-500 hover:text-gray-300"

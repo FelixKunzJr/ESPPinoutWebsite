@@ -157,7 +157,7 @@ export function PinDetailPanel() {
           href={reportMistakeUrl(chip, selectedPin)}
           target="_blank"
           rel="noopener noreferrer"
-          className="block text-center text-xs rounded-lg px-3 py-2 transition-colors"
+          className="report-mistake block text-center text-xs rounded-lg px-3 py-2 transition-colors"
           style={{ color: '#fbbf24', border: '1px solid #78350f', background: 'rgba(120,53,15,0.2)' }}
         >
           ⚠ Report a mistake with this pin

@@ -2,3 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Theme ──────────────────────────────────────────────────────────────────
+   Dark is the base design (all component classes are authored dark). Light
+   mode is html.light, which remaps the chrome utilities below. The two
+   diagram surfaces are deliberately NOT remapped: the schematic is already a
+   light paper sheet, and the module view stays a dark "hardware canvas" in
+   both themes (its palette is tuned like a photo of a physical board). */
+
+:root {
+  --pill-bg: rgba(255, 255, 255, 0.03);
+  --pill-border: rgba(255, 255, 255, 0.10);
+  --pill-border-dim: rgba(255, 255, 255, 0.09);
+  --pill-text: #cbd5e1;
+  --pill-text-hover: #fff;
+  --selector-sep: rgba(255, 255, 255, 0.08);
+}
+html.light {
+  --pill-bg: rgba(15, 23, 42, 0.03);
+  --pill-border: rgba(15, 23, 42, 0.16);
+  --pill-border-dim: rgba(15, 23, 42, 0.14);
+  --pill-text: #334155;
+  --pill-text-hover: #0f172a;
+  --selector-sep: rgba(15, 23, 42, 0.10);
+}
+
+/* Page + card chrome */
+html.light .bg-gray-950 { background-color: #eef1f5; }
+html.light .bg-gray-950\/95 { background-color: rgba(248, 250, 252, 0.92); }
+html.light .bg-gray-900 { background-color: #ffffff; }
+html.light .bg-gray-900\/40 { background-color: #ffffff; }
+html.light .bg-gray-900\/60 { background-color: #f8fafc; }
+html.light .bg-gray-800 { background-color: #e7ebf1; }
+html.light .bg-gray-800\/60,
+html.light .bg-gray-800\/50,
+html.light .bg-gray-800\/40 { background-color: #eef1f6; }
+html.light .bg-gray-700,
+html.light .bg-gray-700\/80 { background-color: #dbe2ea; }
+html.light .bg-gray-600 { background-color: #c6d0db; }
+html.light .hover\:bg-gray-800:hover { background-color: #dde3ec; }
+html.light .hover\:bg-gray-700:hover { background-color: #cdd6e0; }
+html.light .hover\:bg-gray-600:hover { background-color: #b9c5d2; }
+
+html.light .border-gray-800 { border-color: #d9dfe7; }
+html.light .border-gray-800\/60 { border-color: #e0e5ec; }
+html.light .border-gray-700,
+html.light .border-gray-700\/60 { border-color: #c9d2dd; }
+
+html.light .text-gray-100 { color: #0f172a; }
+html.light .text-gray-200 { color: #1e293b; }
+html.light .text-gray-300 { color: #334155; }
+html.light .text-gray-400 { color: #475569; }
+html.light .text-gray-500 { color: #64748b; }
+html.light .text-gray-600 { color: #808b9b; }
+html.light .text-gray-700 { color: #98a3b3; }
+html.light .hover\:text-gray-200:hover { color: #0f172a; }
+html.light .hover\:text-gray-300:hover { color: #1e293b; }
+html.light .hover\:text-white:hover { color: #0f172a; }
+html.light .group:hover .group-hover\:text-gray-300 { color: #1e293b; }
+html.light .group:hover .group-hover\:text-white { color: #0f172a; }
+
+/* Brand green needs more pigment on white */
+html.light .text-green-400 { color: #15803d; }
+html.light .text-green-300 { color: #166534; }
+html.light .text-green-100\/75 { color: rgba(20, 83, 45, 0.85); }
+html.light .text-green-100\/70 { color: rgba(20, 83, 45, 0.8); }
+html.light .bg-green-950\/25,
+html.light .bg-green-950\/20 { background-color: #f0fdf4; }
+html.light .border-green-800\/50,
+html.light .border-green-700\/60 { border-color: #bbf7d0; }
+
+/* Gotchas banner + yellow accents */
+html.light .bg-yellow-950\/40,
+html.light .bg-yellow-950\/30 { background-color: #fefce8; }
+html.light .bg-yellow-950\/20 { background-color: #fefce8; }
+html.light .bg-yellow-900\/40 { background-color: #fef3c7; }
+html.light .border-yellow-700\/50 { border-color: rgba(202, 138, 4, 0.45); }
+html.light .border-yellow-800\/50 { border-color: rgba(202, 138, 4, 0.35); }
+html.light .border-yellow-600 { border-color: #ca8a04; }
+html.light .text-yellow-400 { color: #a16207; }
+html.light .text-yellow-300 { color: #854d0e; }
+html.light .text-yellow-300\/80 { color: rgba(133, 77, 14, 0.9); }
+
+/* Red accents */
+html.light .bg-red-950\/40,
+html.light .bg-red-950\/30 { background-color: #fef2f2; }
+html.light .bg-red-900\/40,
+html.light .bg-red-900\/30 { background-color: #fee2e2; }
+html.light .border-red-800\/60 { border-color: rgba(220, 38, 38, 0.4); }
+html.light .text-red-300 { color: #b91c1c; }
+html.light .text-red-300\/80 { color: rgba(185, 28, 28, 0.85); }
+html.light .text-red-400 { color: #dc2626; }
+
+/* Blue accents (info badges, filter chips) */
+html.light .bg-blue-900\/40 { background-color: #dbeafe; }
+html.light .text-blue-300 { color: #1d4ed8; }
+
+/* Misc accent text that is too pale on white */
+html.light .text-cyan-300 { color: #0e7490; }
+html.light .text-sky-400 { color: #0369a1; }
+html.light .text-emerald-300\/90 { color: rgba(4, 120, 87, 0.95); }
+
+/* Amber notice (solder-pad panel note) */
+html.light .bg-amber-950\/40 { background-color: #fffbeb; }
+html.light .border-amber-700 { border-color: #f0d48a; }
+html.light .text-amber-300 { color: #92400e; }
+html.light .text-amber-400 { color: #b45309; }
+
+/* Report-mistake links (inline-styled amber on dark) */
+html.light .report-mistake {
+  color: #92400e !important;
+  border-color: #ecd9a8 !important;
+  background: #fdf6e3 !important;
+}
