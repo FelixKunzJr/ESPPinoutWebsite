@@ -26,7 +26,7 @@ function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
 }
 
 export function ExportPanel() {
-  const { chip, mapping, shareUrl, view } = useApp()
+  const { chip, mapping, shareUrl, view, setView } = useApp()
   const [copied, setCopied] = useState<'url' | 'code' | null>(null)
 
   const code = generateArduinoDefines(chip, mapping)
@@ -99,22 +99,21 @@ export function ExportPanel() {
     if (!w) return
     const escapeHtml = (s: string) =>
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    let diagramHtml = ''
-    const svg = document.querySelector<SVGSVGElement>('#pinout-diagram-export svg')
-    if (view === 'schematic' && svg) {
-      // Vector schematic prints crisp at any size.
-      const clone = svg.cloneNode(true) as SVGSVGElement
-      clone.removeAttribute('width')
-      clone.removeAttribute('height')
-      clone.setAttribute('style', 'width:100%;height:auto')
-      diagramHtml = clone.outerHTML
-    } else {
-      const target = document.getElementById('module-diagram-canvas')
-        ?? document.getElementById('pinout-diagram-export')
-      if (!target) { w.close(); return }
-      const canvas = await html2canvas(target, { backgroundColor: '#060b12', scale: 2 })
-      diagramHtml = `<img src="${canvas.toDataURL('image/png')}" style="width:100%">`
+    // Always print the schematic sheet: white, vector, made for paper. The
+    // module view is a screen artifact (dark, rotated bottom labels).
+    const restoreView = view
+    if (view !== 'schematic') {
+      setView('schematic')
+      await new Promise(r => setTimeout(r, 150)) // let React mount the sheet
     }
+    const svg = document.querySelector<SVGSVGElement>('#pinout-diagram-export svg')
+    if (restoreView !== 'schematic') setView(restoreView)
+    if (!svg) { w.close(); return }
+    const clone = svg.cloneNode(true) as SVGSVGElement
+    clone.removeAttribute('width')
+    clone.removeAttribute('height')
+    clone.setAttribute('style', 'width:100%;height:auto')
+    const diagramHtml = clone.outerHTML
     const name = chip.module?.name ?? chip.name
     const gotchas = chip.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')
     const rows = mapping.map(a =>
