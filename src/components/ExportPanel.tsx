@@ -132,15 +132,16 @@ export function ExportPanel() {
     ${styles}
     <style>
       @page { size: A4; margin: 12mm; }
-      html, body { all: revert; }
-      body { font: 12px/1.45 -apple-system, "Segoe UI", sans-serif; color: #111; margin: 0; background: #fff;
-             -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      html, body { all: revert; height: auto; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { font: 12px/1.45 -apple-system, "Segoe UI", sans-serif; color: #111; margin: 0; background: #fff; }
       main { max-width: 760px; margin: 0 auto; padding: 16px; }
       h1 { font-size: 20px; margin: 0 0 2px; }
       .sub { color: #555; margin: 0 0 10px; font-size: 11px; }
-      svg { max-width: 100%; height: auto; }
-      .module-print { background: #060b12; border-radius: 12px; padding: 14px 6px; zoom: ${moduleZoom};
-                      width: fit-content; margin: 0 auto; }
+      svg { max-width: 100%; height: auto; display: block; }
+      /* Paper is white - the module sits directly on it, no dark app card. */
+      .module-print { zoom: ${moduleZoom}; width: fit-content; margin: 0 auto; }
+      @media print { main { padding: 0; max-width: none; } .foot { margin-bottom: 0; } }
       h2 { font-size: 13px; margin: 12px 0 4px; }
       ul.gotchas { margin: 0; padding-left: 18px; list-style: disc; }
       ul.gotchas li { margin: 2px 0; }
