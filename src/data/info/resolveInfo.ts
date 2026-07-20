@@ -2,6 +2,7 @@ import type { Chip } from '../../types/chip'
 import type { ChipSpecs } from '../chips/specs'
 import { FAMILY_SPECS, SKU_OVERRIDES } from '../chips/specs'
 import type { InfoOverlay } from './types'
+import { familyFlashing } from './flashing'
 
 export interface BoardInfo {
   specs: ChipSpecs
@@ -25,5 +26,7 @@ export function resolveInfo(chip: Chip): BoardInfo {
   const sku = SKU_OVERRIDES[chip.id]
   const specs: ChipSpecs = { ...base, ...(sku ?? {}) }
   const overlay = OVERLAY[chip.id]
-  return { specs, flashing: overlay?.flashing }
+  // A per-id overlay wins; otherwise use the verified family default (bare
+  // modules). Normalize the null from familyFlashing to undefined.
+  return { specs, flashing: overlay?.flashing ?? familyFlashing(chip) ?? undefined }
 }

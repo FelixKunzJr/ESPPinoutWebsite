@@ -15,9 +15,16 @@ describe('resolveInfo', () => {
     expect(resolveInfo(wrover).specs.psram).toMatch(/WROVER/)
   })
 
-  it('leaves flashing undefined when no overlay exists', () => {
-    // esp32h2 has no seeded overlay in Task 3
-    const info = resolveInfo(getChip('esp32h2')!)
+  it('leaves flashing undefined when neither an overlay nor a family default applies', () => {
+    // C5 has no verified boot-mode sequence, so no family flashing default.
+    const info = resolveInfo(getChip('esp32c5wroom1')!)
     expect(info.flashing).toBeUndefined()
+  })
+
+  it('provides a verified family flashing default for a bare module', () => {
+    const info = resolveInfo(getChip('esp32c3')!)
+    expect(info.flashing?.autoFlash).toBe(false)
+    // C3 download pin is GPIO9
+    expect(JSON.stringify(info.flashing)).toMatch(/GPIO9/)
   })
 })

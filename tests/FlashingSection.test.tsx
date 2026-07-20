@@ -13,18 +13,20 @@ function renderWith(id: string) {
 }
 
 describe('FlashingSection', () => {
-  it('renders seeded manual steps for a bare module', async () => {
+  it('renders the family flashing procedure for a bare module', async () => {
     renderWith('esp32')
     await userEvent.click(screen.getByRole('button', { name: /Flashing/i }))
-    expect(screen.getByText(/Connect GPIO0 to GND/)).toBeInTheDocument()
+    // Classic ESP32 download pin is GPIO0.
+    expect(screen.getByText(/hold GPIO0/i)).toBeInTheDocument()
   })
   it('shows the auto-flash default for a devkit with no overlay', async () => {
     renderWith('esp32c6devkitc')
     await userEvent.click(screen.getByRole('button', { name: /Flashing/i }))
     expect(screen.getByText(/auto-reset|BOOT/i)).toBeInTheDocument()
   })
-  it('shows a slim contribute line (no card) for a bare module family with no overlay', () => {
-    renderWith('esp32h2')
+  it('shows a slim contribute line (no card) for a module with no verified procedure', () => {
+    // C5 has no family flashing default, so it falls back to the slim contribute line.
+    renderWith('esp32c5wroom1')
     // Empty state is a slim always-visible line, not a collapsible card - no toggle button.
     expect(screen.queryByRole('button', { name: /Flashing/i })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /add flashing/i })).toBeInTheDocument()
