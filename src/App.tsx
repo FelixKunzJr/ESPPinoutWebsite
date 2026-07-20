@@ -12,6 +12,7 @@ import { BoardBuilderPage } from './components/BoardBuilderPage'
 import { useApp }          from './context/AppContext'
 import { Logo }            from './components/Logo'
 import { SpecsSection }    from './components/info/SpecsSection'
+import { FlashingSection } from './components/info/FlashingSection'
 
 export default function App() {
   const { chip, page, navigate, theme, toggleTheme } = useApp()
@@ -87,6 +88,8 @@ export default function App() {
             <RoutingCard />
 
             <SpecsSection />
+
+            <FlashingSection />
 
             <FilterBar />
 
