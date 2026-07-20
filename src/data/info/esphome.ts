@@ -74,6 +74,17 @@ export function generateEsphomeConfig(chip: Chip, mapping: PinAssignment[]): str
 
   out.push('', '# Generated from your pin mapping - rename entities and verify before use.')
 
+  // Surface the same per-pin gotchas the pinout shows, so the config carries its
+  // own warnings rather than silently emitting a component on a risky pin.
+  const warnings = mapping
+    .map(a => ({ a, pin: chip.pins.find(p => p.gpio === a.gpio) }))
+    .filter(x => x.pin && x.pin.constraints.length > 0)
+    .map(({ a, pin }) =>
+      `#   GPIO${a.gpio} (${a.role}${a.label ? ` "${a.label}"` : ''}): ${pin!.constraints.map(c => c.title).join(', ')}`)
+  if (warnings.length) {
+    out.push('', '# Heads-up - some mapped pins carry constraints (check the pinout):', ...warnings)
+  }
+
   const sda = first(mapping, 'I2C_SDA'), scl = first(mapping, 'I2C_SCL')
   if (sda && scl) out.push('', 'i2c:', `  sda: GPIO${sda.gpio}`, `  scl: GPIO${scl.gpio}`, '  scan: true')
 

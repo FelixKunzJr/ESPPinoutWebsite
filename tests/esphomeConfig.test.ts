@@ -47,6 +47,20 @@ describe('generateEsphomeConfig', () => {
     expect(yaml).toMatch(/output: io_4/)
   })
 
+  it('surfaces a constraint warning when a component is mapped to a risky pin', () => {
+    // GPIO2 on the C3 is a strapping pin.
+    const mapping: PinAssignment[] = [{ gpio: 2, role: 'LED', label: 'Blinky' }]
+    const yaml = generateEsphomeConfig(getChip('esp32c3devkitm')!, mapping)!
+    expect(yaml).toMatch(/Heads-up/)
+    expect(yaml).toMatch(/GPIO2 \(LED "Blinky"\).*[Ss]trapping/)
+  })
+
+  it('emits no warning block when all mapped pins are unconstrained', () => {
+    const mapping: PinAssignment[] = [{ gpio: 0, role: 'LED', label: 'led' }]
+    const yaml = generateEsphomeConfig(getChip('esp32c3devkitm')!, mapping)!
+    expect(yaml).not.toMatch(/Heads-up/)
+  })
+
   it('every board id in ESPHOME_BOARD resolves to a real board chip', () => {
     for (const id of Object.keys(ESPHOME_BOARD)) {
       const chip = getChip(id)
