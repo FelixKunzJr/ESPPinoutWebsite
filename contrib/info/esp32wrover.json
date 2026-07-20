@@ -1,0 +1,7 @@
+{
+  "flashing": {
+    "autoFlash": false,
+    "wiring": "Pull GPIO0 to GND, pulse EN (reset), then release GPIO0 to enter download mode.",
+    "note": "Same procedure as the WROOM-32; the WROVER adds PSRAM but the flashing pins are identical."
+  }
+}

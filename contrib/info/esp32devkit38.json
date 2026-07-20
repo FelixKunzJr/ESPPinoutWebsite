@@ -1,0 +1,6 @@
+{
+  "esphome": {
+    "yaml": "esphome:\n  name: my-device\n\nesp32:\n  board: esp32dev\n  framework:\n    type: esp-idf",
+    "notes": ["Generic 38-pin board (Elegoo / NodeMCU-32S). ESPHome board key: esp32dev."]
+  }
+}

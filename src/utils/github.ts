@@ -59,3 +59,23 @@ export function newChipUrl(): string {
   ].join('\n')
   return `${REPO_URL}/issues/new?labels=data&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`
 }
+
+// Prefilled issue asking a contributor to supply flashing or ESPHome content
+// for a specific board.
+export function boardInfoIssueUrl(chip: Chip, section: 'flashing' | 'esphome'): string {
+  const label = section === 'flashing' ? 'flashing / wiring steps' : 'a minimal ESPHome config'
+  const title = `[info] ${chip.name}: ${section}`
+  const body = [
+    '**Chip / module:** ' + chip.name + ' (`' + chip.id + '`)',
+    '**Section:** ' + section,
+    '**Page:** ' + (typeof window !== 'undefined' ? window.location.href : 'https://esp32pin.com'),
+    '',
+    `Please add ${label} for this board.`,
+    '',
+    section === 'flashing'
+      ? 'How do you put it into download mode? (auto over USB, hold BOOT + tap EN, pull GPIO0 to GND, etc.)'
+      : '```yaml\n# minimal esp32: stanza that boots on this board\n```',
+    '',
+  ].join('\n')
+  return `${REPO_URL}/issues/new?labels=info&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`
+}
