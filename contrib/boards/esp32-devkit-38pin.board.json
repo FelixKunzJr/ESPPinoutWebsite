@@ -1,6 +1,6 @@
 {
   "id": "esp32devkit38",
-  "name": "ESP32 38-pin DevKit",
+  "name": "ESP32 DevKit (38-pin)",
   "baseChip": "esp32",
   "pcb": "black",
   "notes": [
