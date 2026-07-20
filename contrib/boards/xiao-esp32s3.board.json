@@ -1,0 +1,51 @@
+{
+  "id": "xiao-esp32s3",
+  "name": "Seeed XIAO ESP32-S3",
+  "baseChip": "esp32s3",
+  "pcb": "black",
+  "notes": [
+    "Seeed Studio XIAO ESP32-S3: a 21 x 17.5 mm board on the ESP32-S3 (dual-core Xtensa LX7, 8 MB flash, 8 MB PSRAM). 11 GPIO pins broken out as D0-D10 on castellated pads, 7 per side.",
+    "Every XIAO shares the same footprint and D0-D10 silkscreen, but the D-pin to GPIO mapping differs per model - this is the S3 mapping. Do not reuse a C3 or C6 wiring diagram here.",
+    "The 'Sense' variant adds a camera + microphone daughterboard that consumes many extra GPIOs (not broken out on the header) - this pinout is the base board's 14 castellated pads.",
+    "GPIO3 (D2) is a strapping pin; leave it floating or high at reset. Native USB (GPIO19/20) is used by the USB-C port and is not on the header.",
+    "External antenna: keep the u.FL antenna attached. BAT+ / BAT- pads on the underside charge a 3.7 V LiPo."
+  ],
+  "headers": {
+    "leftRailHoles": 7,
+    "rightRailHoles": 7,
+    "left": [
+      { "gpio": 1 },
+      { "gpio": 2 },
+      { "gpio": 3 },
+      { "gpio": 4 },
+      { "gpio": 5 },
+      { "gpio": 6 },
+      { "gpio": 43 }
+    ],
+    "right": [
+      { "gpio": 9 },
+      { "gpio": 8 },
+      { "gpio": 7 },
+      { "gpio": 44 },
+      { "label": "3V3" },
+      { "label": "5V" },
+      { "label": "GND" }
+    ]
+  },
+  "overrides": {
+    "1": { "label": "D0", "note": "Silk D0 / A0." },
+    "2": { "label": "D1", "note": "Silk D1 / A1." },
+    "3": { "label": "D2", "note": "Silk D2 / A2. Strapping pin - avoid holding low at reset." },
+    "4": { "label": "D3", "note": "Silk D3 / A3." },
+    "5": { "label": "D4", "note": "Silk D4. Default I2C SDA." },
+    "6": { "label": "D5", "note": "Silk D5. Default I2C SCL." },
+    "43": { "label": "D6", "note": "Silk D6. Default UART TX (U0TXD)." },
+    "44": { "label": "D7", "note": "Silk D7. Default UART RX (U0RXD)." },
+    "7": { "label": "D8", "note": "Silk D8. Default SPI SCK." },
+    "8": { "label": "D9", "note": "Silk D9. Default SPI MISO." },
+    "9": { "label": "D10", "note": "Silk D10. Default SPI MOSI." }
+  },
+  "usbEdge": "top",
+  "bare": true,
+  "aspect": 0.83
+}

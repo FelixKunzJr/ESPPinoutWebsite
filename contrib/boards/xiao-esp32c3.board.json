@@ -1,0 +1,51 @@
+{
+  "id": "xiao-esp32c3",
+  "name": "Seeed XIAO ESP32-C3",
+  "baseChip": "esp32c3",
+  "pcb": "black",
+  "notes": [
+    "Seeed Studio XIAO ESP32-C3: a thumbnail-sized 21 x 17.5 mm board on the ESP32-C3 (single-core RISC-V, 4 MB flash). 11 GPIO pins broken out as D0-D10 on castellated pads, 7 per side.",
+    "Every XIAO shares the same footprint and D0-D10 silkscreen, but the D-pin to GPIO mapping is different on each model - this is the C3 mapping. Do not reuse a C3 wiring diagram on a XIAO ESP32-S3 or C6.",
+    "External antenna: the C3 has a u.FL/IPEX connector with a detachable antenna. Keep it plugged in - range is poor without it.",
+    "GPIO2 (D0), GPIO8 (D8) and GPIO9 (D9) are strapping pins; GPIO9 doubles as the BOOT button. They work as normal IO once the board is running, but avoid driving them to the wrong level during reset.",
+    "BAT+ / BAT- pads on the underside charge a 3.7 V LiPo over USB."
+  ],
+  "headers": {
+    "leftRailHoles": 7,
+    "rightRailHoles": 7,
+    "left": [
+      { "gpio": 2 },
+      { "gpio": 3 },
+      { "gpio": 4 },
+      { "gpio": 5 },
+      { "gpio": 6 },
+      { "gpio": 7 },
+      { "gpio": 21 }
+    ],
+    "right": [
+      { "gpio": 10 },
+      { "gpio": 9 },
+      { "gpio": 8 },
+      { "gpio": 20 },
+      { "label": "3V3" },
+      { "label": "5V" },
+      { "label": "GND" }
+    ]
+  },
+  "overrides": {
+    "2": { "label": "D0", "note": "Silk D0 / A0. Strapping pin - avoid holding low at reset." },
+    "3": { "label": "D1", "note": "Silk D1 / A1." },
+    "4": { "label": "D2", "note": "Silk D2 / A2." },
+    "5": { "label": "D3", "note": "Silk D3 / A3. ADC2 channel - unreliable while Wi-Fi is on." },
+    "6": { "label": "D4", "note": "Silk D4. Default I2C SDA." },
+    "7": { "label": "D5", "note": "Silk D5. Default I2C SCL." },
+    "21": { "label": "D6", "note": "Silk D6. Default UART TX." },
+    "20": { "label": "D7", "note": "Silk D7. Default UART RX." },
+    "8": { "label": "D8", "note": "Silk D8. Default SPI SCK. Strapping pin." },
+    "9": { "label": "D9", "note": "Silk D9. Default SPI MISO. BOOT button / strapping pin." },
+    "10": { "label": "D10", "note": "Silk D10. Default SPI MOSI." }
+  },
+  "usbEdge": "top",
+  "bare": true,
+  "aspect": 0.83
+}

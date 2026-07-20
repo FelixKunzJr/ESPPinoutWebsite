@@ -8,6 +8,9 @@ import { esp32wrover } from './esp32wrover'
 import esp32S3ZeroJson from '../../../contrib/boards/esp32-s3-zero.board.json'
 import esp32Devkit38Json from '../../../contrib/boards/esp32-devkit-38pin.board.json'
 import esp32DevkitcJson from '../../../contrib/boards/esp32-devkitc.board.json'
+import xiaoEsp32c3Json from '../../../contrib/boards/xiao-esp32c3.board.json'
+import xiaoEsp32s3Json from '../../../contrib/boards/xiao-esp32s3.board.json'
+import xiaoEsp32c6Json from '../../../contrib/boards/xiao-esp32c6.board.json'
 import { resolveBoard } from '../boards/resolveBoard'
 import { enrichPins } from './enrich'
 import type { BoardSpec } from '../boards/types'
@@ -199,6 +202,11 @@ export const esp32Devkit38 = resolveBoard(esp32Devkit38Json as unknown as BoardS
 // instead of the sparse KiCad-generated set. Same silicon, same functions.
 export const esp32Devkitc = resolveBoard(esp32DevkitcJson as unknown as BoardSpec, esp32).chip!
 
+// Seeed Studio XIAO boards - same tiny footprint, different GPIO map per silicon.
+export const xiaoEsp32c3 = resolveBoard(xiaoEsp32c3Json as unknown as BoardSpec, byId('esp32c3')).chip!
+export const xiaoEsp32s3 = resolveBoard(xiaoEsp32s3Json as unknown as BoardSpec, byId('esp32s3')).chip!
+export const xiaoEsp32c6 = resolveBoard(xiaoEsp32c6Json as unknown as BoardSpec, byId('esp32c6')).chip!
+
 
 // Ordered, grouped by family for the selector.
 export const CHIPS: Chip[] = [
@@ -228,6 +236,9 @@ export const CHIPS: Chip[] = [
   esp32S3Zero,
   byId('esp32c3devkitm'),
   byId('esp32c6devkitc'),
+  xiaoEsp32c3,
+  xiaoEsp32s3,
+  xiaoEsp32c6,
 ]
 
 export function getChip(id: string): Chip | undefined {

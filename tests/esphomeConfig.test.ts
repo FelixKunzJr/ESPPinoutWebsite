@@ -61,6 +61,12 @@ describe('generateEsphomeConfig', () => {
     expect(yaml).not.toMatch(/Heads-up/)
   })
 
+  it('emits the verified Seeed board key for the XIAO boards', () => {
+    expect(generateEsphomeConfig(getChip('xiao-esp32c3')!, [])!).toMatch(/board: seeed_xiao_esp32c3/)
+    expect(generateEsphomeConfig(getChip('xiao-esp32s3')!, [])!).toMatch(/board: seeed_xiao_esp32s3/)
+    expect(generateEsphomeConfig(getChip('xiao-esp32c6')!, [])!).toMatch(/board: seeed_xiao_esp32c6/)
+  })
+
   it('every board id in ESPHOME_BOARD resolves to a real board chip', () => {
     for (const id of Object.keys(ESPHOME_BOARD)) {
       const chip = getChip(id)

@@ -14,6 +14,9 @@ export const ESPHOME_BOARD: Record<string, string> = {
   esp32s3devkitc: 'esp32-s3-devkitc-1',
   esp32c3devkitm: 'esp32-c3-devkitm-1',
   esp32c6devkitc: 'esp32-c6-devkitc-1',
+  'xiao-esp32c3': 'seeed_xiao_esp32c3',
+  'xiao-esp32s3': 'seeed_xiao_esp32s3',
+  'xiao-esp32c6': 'seeed_xiao_esp32c6',
 }
 
 // ESPHome chip variant per family. A board without a verified board: key falls

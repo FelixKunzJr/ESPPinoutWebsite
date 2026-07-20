@@ -57,16 +57,19 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 - [ESP32-S3-MINI-1](https://esp32pin.com/esp32s3mini1)
 - [Waveshare ESP32-S3-Zero](https://esp32pin.com/esp32-s3-zero)
 - [ESP32-S3-DevKitC-1](https://esp32pin.com/esp32s3devkitc)
+- [Seeed XIAO ESP32-S3](https://esp32pin.com/xiao-esp32s3)
 
 ### ESP32-C3 (RISC-V, Wi-Fi + BLE)
 - [ESP32-C3-MINI-1](https://esp32pin.com/esp32c3)
 - [ESP32-C3-WROOM-02](https://esp32pin.com/esp32c3wroom02)
 - [ESP32-C3-DevKitM-1](https://esp32pin.com/esp32c3devkitm)
+- [Seeed XIAO ESP32-C3](https://esp32pin.com/xiao-esp32c3)
 
 ### ESP32-C6 (RISC-V, Wi-Fi 6 + BLE + 802.15.4)
 - [ESP32-C6-MINI-1](https://esp32pin.com/esp32c6)
 - [ESP32-C6-WROOM-1](https://esp32pin.com/esp32c6wroom1)
 - [ESP32-C6-DevKitC-1](https://esp32pin.com/esp32c6devkitc)
+- [Seeed XIAO ESP32-C6](https://esp32pin.com/xiao-esp32c6)
 
 ### ESP32-C5 (RISC-V, dual-band Wi-Fi 6)
 - [ESP32-C5-WROOM-1](https://esp32pin.com/esp32c5wroom1)

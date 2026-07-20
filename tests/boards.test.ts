@@ -64,3 +64,29 @@ describe('board spec pipeline', () => {
     expect(chip!.pins).toEqual(base.pins)
   })
 })
+
+describe('Seeed XIAO boards', () => {
+  // Each XIAO shares the D0-D10 silkscreen but maps to a different GPIO per chip.
+  // Values are from the Seeed wiki / mischianti pinout references.
+  const xiaoMap: Record<string, Record<string, number>> = {
+    'xiao-esp32c3': { D0: 2, D1: 3, D2: 4, D3: 5, D4: 6, D5: 7, D6: 21, D7: 20, D8: 8, D9: 9, D10: 10 },
+    'xiao-esp32s3': { D0: 1, D1: 2, D2: 3, D3: 4, D4: 5, D5: 6, D6: 43, D7: 44, D8: 7, D9: 8, D10: 9 },
+    'xiao-esp32c6': { D0: 0, D1: 1, D2: 2, D3: 21, D4: 22, D5: 23, D6: 16, D7: 17, D8: 19, D9: 20, D10: 18 },
+  }
+
+  for (const [id, map] of Object.entries(xiaoMap)) {
+    it(`${id} is in the catalog with all 11 D-pins mapped to the right GPIO`, () => {
+      const chip = findChip(id)
+      expect(chip).toBeDefined()
+      expect(chip!.module?.form).toBe('board')
+      // 7 castellated pads per side (11 GPIO + 3V3 + 5V + GND).
+      expect(chip!.packageLayout!.left.length).toBe(7)
+      expect(chip!.packageLayout!.right.length).toBe(7)
+      for (const [silk, gpio] of Object.entries(map)) {
+        const pin = chip!.pins.find(p => p.gpio === gpio)
+        expect(pin, `${id} ${silk} -> GPIO${gpio}`).toBeDefined()
+        expect(pin!.names[0], `${id} ${silk} label`).toBe(silk)
+      }
+    })
+  }
+})
