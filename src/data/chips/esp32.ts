@@ -37,6 +37,13 @@ const BOOT_FLOAT = {
   description: 'This pin must not be driven LOW or HIGH by external circuitry at boot or the ESP32 may enter an unexpected boot mode.',
 }
 
+const SERIAL_CONSOLE = {
+  id: 'serial_console' as const,
+  severity: 'warning' as const,
+  title: 'UART0 / serial console',
+  description: 'Default UART0, used for flashing and the serial monitor. On dev boards these two pins are wired to the onboard USB-to-serial chip. You can use them as GPIO, but you lose USB serial upload/debug, and GPIO1 (U0TXD) outputs the boot log at every reset.',
+}
+
 // ESP-WROOM-32 / WROOM-32D / WROOM-32U 38-pad castellated package
 export const WROOM32_LAYOUT = {
   name: 'ESP-WROOM-32',
@@ -102,7 +109,7 @@ export const ESP32_BASE_PINS = [
     gpio: 1,
     names: ['GPIO1', 'U0TXD', 'CLK_OUT3'],
     capabilities: ['gpio', 'uart', 'pwm'],
-    constraints: [],
+    constraints: [SERIAL_CONSOLE],
     isUsable: true,
     notes: 'Default UART0 TX. Busy during programming and outputs boot log at 115200 baud.',
   },
@@ -120,7 +127,7 @@ export const ESP32_BASE_PINS = [
     gpio: 3,
     names: ['GPIO3', 'U0RXD'],
     capabilities: ['gpio', 'uart', 'pwm'],
-    constraints: [],
+    constraints: [SERIAL_CONSOLE],
     isUsable: true,
     notes: 'Default UART0 RX. HIGH at boot.',
   },

@@ -17,6 +17,7 @@ export type ConstraintId =
   | 'boot_must_high'
   | 'boot_must_low'
   | 'usb_jtag'
+  | 'serial_console'
   | 'limited_current'
   | 'no_pullup'
 

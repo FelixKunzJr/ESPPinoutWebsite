@@ -120,6 +120,7 @@ export const AFFECTED_WORD: Record<ConstraintId, string> = {
   boot_must_high:  'Boot',
   boot_must_low:   'Boot',
   usb_jtag:        'USB',
+  serial_console:  'Serial',
   limited_current: 'Current',
   no_pullup:       'Pull-up',
 }
