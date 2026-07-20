@@ -9,10 +9,16 @@ describe('generateEsphomeConfig', () => {
     expect(generateEsphomeConfig(getChip('esp32c6')!, [])).toBeNull()
   })
 
-  it('emits the board block for a board with no mapping', () => {
+  it('emits the verified board key for an official dev board', () => {
     const yaml = generateEsphomeConfig(getChip('esp32devkitc')!, [])!
     expect(yaml).toMatch(/board: esp32dev/)
     expect(yaml).toMatch(/Assign pins in the mapping builder/)
+  })
+
+  it('falls back to variant for a board with no verified board key (S3-Zero)', () => {
+    const yaml = generateEsphomeConfig(getChip('esp32-s3-zero')!, [])!
+    expect(yaml).toMatch(/variant: esp32s3/)
+    expect(yaml).not.toMatch(/board:/)
   })
 
   it('generates components from the pin mapping', () => {

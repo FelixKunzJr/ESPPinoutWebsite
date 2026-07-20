@@ -4,13 +4,29 @@ import type { Chip, PinAssignment } from '../../types/chip'
 // (with USB + regulator), not a bare module, so only board entries appear here -
 // a chip id absent from this map has no ESPHome config (generateEsphomeConfig
 // returns null), which is how the Export panel hides it on modules.
+// Only boards whose ESPHome board key we have VERIFIED belong here. A board that
+// is `form: 'board'` but absent from this map (e.g. the Waveshare S3-Zero) has no
+// trustworthy key, so the Export panel shows a contribute prompt rather than a
+// guessed config - a wrong board key is worse than none.
 export const ESPHOME_BOARD: Record<string, string> = {
   esp32devkitc: 'esp32dev',
   esp32devkit38: 'esp32dev',
   esp32s3devkitc: 'esp32-s3-devkitc-1',
   esp32c3devkitm: 'esp32-c3-devkitm-1',
   esp32c6devkitc: 'esp32-c6-devkitc-1',
-  'esp32-s3-zero': 'esp32-s3-devkitc-1',
+}
+
+// ESPHome chip variant per family. A board without a verified board: key falls
+// back to `variant:` - the generic-but-correct config ESPHome itself uses for
+// boards with no dedicated PlatformIO definition (e.g. the Waveshare S3-Zero).
+export const FAMILY_VARIANT: Record<string, string> = {
+  'ESP32': 'esp32',
+  'ESP32-S2': 'esp32s2',
+  'ESP32-S3': 'esp32s3',
+  'ESP32-C3': 'esp32c3',
+  'ESP32-C6': 'esp32c6',
+  'ESP32-C5': 'esp32c5',
+  'ESP32-H2': 'esp32h2',
 }
 
 function slug(label: string, gpio: number): string {
@@ -29,15 +45,21 @@ function first(mapping: PinAssignment[], role: PinAssignment['role']): PinAssign
 // block plus components derived from the assigned pins. Returns null for anything
 // that is not a known board (modules have no ESPHome board key).
 export function generateEsphomeConfig(chip: Chip, mapping: PinAssignment[]): string | null {
-  const board = ESPHOME_BOARD[chip.id]
-  if (!board) return null
+  // ESPHome targets a dev board, not a bare module.
+  if (chip.module?.form !== 'board') return null
+
+  const boardKey = ESPHOME_BOARD[chip.id]
+  const variant = FAMILY_VARIANT[chip.family]
+  if (!boardKey && !variant) return null
+  // Verified board key when we have one; otherwise the generic chip variant.
+  const platformLine = boardKey ? `  board: ${boardKey}` : `  variant: ${variant}`
 
   const out: string[] = [
     'esphome:',
     '  name: my-device',
     '',
     'esp32:',
-    `  board: ${board}`,
+    platformLine,
     '  framework:',
     '    type: esp-idf',
   ]
