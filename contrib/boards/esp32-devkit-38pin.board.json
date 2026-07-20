@@ -1,10 +1,10 @@
 {
   "id": "esp32devkit38",
-  "name": "ESP32 DevKit (38-pin)",
+  "name": "Elegoo ESP32",
   "baseChip": "esp32",
   "pcb": "black",
   "notes": [
-    "Generic 38-pin ESP32-WROOM-32 development board. This exact layout is shared by the NodeMCU-32S, DOIT ESP32 DevKit V1 (38-pin), Elegoo ESP32, HiLetgo and most no-name AliExpress / Amazon clones.",
+    "The Elegoo ESP32 is a generic 38-pin ESP32-WROOM-32 development board. The identical layout is also sold as the NodeMCU-32S, DOIT ESP32 DevKit V1 (38-pin), HiLetgo and most no-name AliExpress / Amazon clones.",
     "19 pins per side. The board is wider than a DevKitC and does not fit on a single breadboard - straddle two, or let one rail overhang the edge.",
     "GPIO6-11 (CLK / SD0 / SD1 / SD2 / SD3 / CMD) are broken out on the header but are wired to the internal SPI flash. Using them crashes the chip.",
     "Silkscreen labels vary slightly between clones (some print Dnn, some just the GPIO number), but the pin positions match this layout."
