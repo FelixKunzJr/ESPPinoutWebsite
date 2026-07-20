@@ -20,7 +20,7 @@ export const FAMILY_SPECS: Record<string, ChipSpecs> = {
   'ESP32-S2': {
     cores: 1, arch: 'Single-core Xtensa LX7', cpuMaxMhz: 240, sramKb: 320, romKb: 128,
     flash: 'Up to 4 MB (module SKU)', psram: 'Up to 2 MB (module SKU)',
-    notable: ['Native USB-OTG', '14 touch channels', '1x DAC'],
+    notable: ['Native USB-OTG', '14 touch channels', '2x DAC'],
   },
   'ESP32-S3': {
     cores: 2, arch: 'Dual-core Xtensa LX7', cpuMaxMhz: 240, sramKb: 512, romKb: 384,
