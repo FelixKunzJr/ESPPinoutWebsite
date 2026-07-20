@@ -10,7 +10,7 @@ export function FlashingSection() {
   const isBoard = chip.module?.form === 'board'
 
   return (
-    <CollapsibleCard title="\u{1F517} Flashing / wiring" defaultOpen={false}>
+    <CollapsibleCard title="🔗 Flashing / wiring" defaultOpen={false}>
       {flashing ? (
         <div className="space-y-2 text-xs text-gray-300">
           {flashing.autoFlash

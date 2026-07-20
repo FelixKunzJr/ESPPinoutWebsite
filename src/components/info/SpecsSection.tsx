@@ -6,7 +6,7 @@ export function SpecsSection() {
   const { chip } = useApp()
   const { specs } = resolveInfo(chip)
   const rows: Array<[string, string]> = [
-    ['CPU', `${specs.cores}x ${specs.arch}, up to ${specs.cpuMaxMhz} MHz`],
+    ['CPU', `${specs.arch}, up to ${specs.cpuMaxMhz} MHz`],
     ['SRAM', `${specs.sramKb} KB`],
     ['ROM', `${specs.romKb} KB`],
     ...(specs.flash ? [['Flash', specs.flash] as [string, string]] : []),
