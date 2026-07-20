@@ -11,6 +11,7 @@ import { ContributePage } from './components/ContributePage'
 import { BoardBuilderPage } from './components/BoardBuilderPage'
 import { useApp }          from './context/AppContext'
 import { Logo }            from './components/Logo'
+import { SpecsSection }    from './components/info/SpecsSection'
 
 export default function App() {
   const { chip, page, navigate, theme, toggleTheme } = useApp()
@@ -84,6 +85,8 @@ export default function App() {
             </div>
 
             <RoutingCard />
+
+            <SpecsSection />
 
             <FilterBar />
 
