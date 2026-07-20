@@ -18,9 +18,11 @@ describe('EsphomeSection', () => {
     await userEvent.click(screen.getByRole('button', { name: /ESPHome/i }))
     expect(screen.getByText(/board: esp32dev/)).toBeInTheDocument()
   })
-  it('shows a contribute button when there is no config', async () => {
+  it('shows a slim contribute line (no card) when there is no config', () => {
     renderWith('esp32h2')
-    await userEvent.click(screen.getByRole('button', { name: /ESPHome/i }))
+    // Empty state is a slim always-visible line, not a collapsible card - no toggle button.
+    expect(screen.queryByRole('button', { name: /ESPHome/i })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /add esphome/i })).toBeInTheDocument()
+    expect(screen.getByText(/not documented yet/i)).toBeInTheDocument()
   })
 })

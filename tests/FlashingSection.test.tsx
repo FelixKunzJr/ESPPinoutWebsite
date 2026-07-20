@@ -23,9 +23,11 @@ describe('FlashingSection', () => {
     await userEvent.click(screen.getByRole('button', { name: /Flashing/i }))
     expect(screen.getByText(/auto-reset|BOOT/i)).toBeInTheDocument()
   })
-  it('shows a contribute button for a bare module family with no overlay', async () => {
+  it('shows a slim contribute line (no card) for a bare module family with no overlay', () => {
     renderWith('esp32h2')
-    await userEvent.click(screen.getByRole('button', { name: /Flashing/i }))
+    // Empty state is a slim always-visible line, not a collapsible card - no toggle button.
+    expect(screen.queryByRole('button', { name: /Flashing/i })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /add flashing/i })).toBeInTheDocument()
+    expect(screen.getByText(/not documented yet/i)).toBeInTheDocument()
   })
 })
