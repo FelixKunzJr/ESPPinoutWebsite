@@ -37,6 +37,16 @@ describe('generateEsphomeConfig', () => {
     expect(yaml).toMatch(/i2c:\n {2}sda: GPIO21\n {2}scl: GPIO22/)
   })
 
+  it('produces a valid identifier id even for a numeric label', () => {
+    const mapping: PinAssignment[] = [{ gpio: 8, role: 'LED', label: '4' }]
+    const yaml = generateEsphomeConfig(getChip('esp32c3devkitm')!, mapping)!
+    // id/output must be a valid C++/ESPHome identifier - never a bare digit.
+    expect(yaml).not.toMatch(/id: \d/)
+    expect(yaml).not.toMatch(/output: \d/)
+    expect(yaml).toMatch(/id: io_4/)
+    expect(yaml).toMatch(/output: io_4/)
+  })
+
   it('every board id in ESPHOME_BOARD resolves to a real board chip', () => {
     for (const id of Object.keys(ESPHOME_BOARD)) {
       const chip = getChip(id)

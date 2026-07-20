@@ -29,9 +29,12 @@ export const FAMILY_VARIANT: Record<string, string> = {
   'ESP32-H2': 'esp32h2',
 }
 
+// Produce a valid ESPHome/C++ identifier: must start with a letter or underscore,
+// so a numeric or empty label ("4", "") cannot become an invalid id like `4`.
 function slug(label: string, gpio: number): string {
-  const s = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
-  return s || `gpio${gpio}`
+  const s = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+  if (!s) return `gpio${gpio}`
+  return /^[0-9]/.test(s) ? `io_${s}` : s
 }
 
 function pick(mapping: PinAssignment[], role: PinAssignment['role']): PinAssignment[] {
