@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { toCanvas } from 'html-to-image'
 import { useApp } from '../context/AppContext'
 import type { PinAssignment } from '../types/chip'
+import { generateEsphomeConfig } from '../data/info/esphome'
 
 function generateArduinoDefines(chip: { name: string }, mapping: PinAssignment[]): string {
   if (mapping.length === 0) return '// No pins mapped yet'
@@ -47,11 +48,12 @@ async function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
 
 export function ExportPanel() {
   const { chip, mapping, shareUrl, view } = useApp()
-  const [copied, setCopied] = useState<'url' | 'code' | null>(null)
+  const [copied, setCopied] = useState<'url' | 'code' | 'esphome' | null>(null)
 
   const code = generateArduinoDefines(chip, mapping)
+  const esphome = generateEsphomeConfig(chip, mapping)
 
-  const copyText = async (text: string, type: 'url' | 'code') => {
+  const copyText = async (text: string, type: 'url' | 'code' | 'esphome') => {
     await navigator.clipboard.writeText(text)
     setCopied(type)
     setTimeout(() => setCopied(null), 2000)
@@ -260,6 +262,28 @@ export function ExportPanel() {
         >
           {copied === 'code' ? '✓ Copied' : 'Copy code'}
         </button>
+      </div>
+
+      {/* ESPHome config - boards only (ESPHome targets a dev board, not a bare module) */}
+      <div>
+        <label className="text-xs text-gray-500 block mb-1">ESPHome</label>
+        {esphome ? (
+          <>
+            <pre className="bg-gray-800 border border-gray-700 rounded p-3 text-xs font-mono text-green-400 overflow-x-auto whitespace-pre max-h-64">
+              {esphome}
+            </pre>
+            <button
+              onClick={() => copyText(esphome, 'esphome')}
+              className="mt-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs text-gray-200 transition-colors"
+            >
+              {copied === 'esphome' ? '✓ Copied' : 'Copy config'}
+            </button>
+          </>
+        ) : (
+          <p className="text-xs text-gray-600">
+            Select a dev board (BOARDS tab) to generate an ESPHome config. ESPHome runs on boards, not bare modules.
+          </p>
+        )}
       </div>
 
       {/* PNG Download */}

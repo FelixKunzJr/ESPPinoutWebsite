@@ -5,12 +5,6 @@ export interface FlashingInfo {
   note?: string
 }
 
-export interface EsphomeInfo {
-  yaml: string
-  notes?: string[]
-}
-
 export interface InfoOverlay {
   flashing?: FlashingInfo
-  esphome?: EsphomeInfo
 }

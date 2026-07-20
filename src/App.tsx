@@ -13,7 +13,6 @@ import { useApp }          from './context/AppContext'
 import { Logo }            from './components/Logo'
 import { SpecsSection }    from './components/info/SpecsSection'
 import { FlashingSection } from './components/info/FlashingSection'
-import { EsphomeSection }  from './components/info/EsphomeSection'
 
 export default function App() {
   const { chip, page, navigate, theme, toggleTheme } = useApp()
@@ -91,8 +90,6 @@ export default function App() {
             <SpecsSection />
 
             <FlashingSection />
-
-            <EsphomeSection />
 
             <FilterBar />
 

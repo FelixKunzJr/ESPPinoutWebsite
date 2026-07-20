@@ -15,10 +15,9 @@ describe('resolveInfo', () => {
     expect(resolveInfo(wrover).specs.psram).toMatch(/WROVER/)
   })
 
-  it('leaves flashing and esphome undefined when no overlay exists', () => {
+  it('leaves flashing undefined when no overlay exists', () => {
     // esp32h2 has no seeded overlay in Task 3
     const info = resolveInfo(getChip('esp32h2')!)
     expect(info.flashing).toBeUndefined()
-    expect(info.esphome).toBeUndefined()
   })
 })

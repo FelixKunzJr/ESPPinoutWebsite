@@ -6,7 +6,6 @@ import type { InfoOverlay } from './types'
 export interface BoardInfo {
   specs: ChipSpecs
   flashing?: InfoOverlay['flashing']
-  esphome?: InfoOverlay['esphome']
 }
 
 // Community-contributable content: one JSON file per chip/board id under
@@ -26,5 +25,5 @@ export function resolveInfo(chip: Chip): BoardInfo {
   const sku = SKU_OVERRIDES[chip.id]
   const specs: ChipSpecs = { ...base, ...(sku ?? {}) }
   const overlay = OVERLAY[chip.id]
-  return { specs, flashing: overlay?.flashing, esphome: overlay?.esphome }
+  return { specs, flashing: overlay?.flashing }
 }

@@ -10,14 +10,8 @@ describe('seeded board info', () => {
     expect(f?.wiring).toMatch(/GPIO0/)
   })
 
-  it('DevKitC has a minimal ESPHome config', () => {
-    const e = resolveInfo(getChip('esp32devkitc')!).esphome
-    expect(e?.yaml).toMatch(/esp32:/)
-    expect(e?.yaml).toMatch(/board:/)
-  })
-
   it('builds a prefilled contribute issue url', () => {
-    const url = boardInfoIssueUrl(getChip('esp32c6')!, 'esphome')
+    const url = boardInfoIssueUrl(getChip('esp32c6')!, 'flashing')
     expect(url).toMatch(/github\.com/)
     expect(decodeURIComponent(url)).toMatch(/esp32c6/)
   })
