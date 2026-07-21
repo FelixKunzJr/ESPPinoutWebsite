@@ -33,12 +33,13 @@ const tabOf = (c: Chip) => (isBoard(c) ? BOARDS : c.family)
 
 export function ChipSelector() {
   const { chip, setChip, theme } = useApp()
-  // Wrapping put the Boards list on four rows, pushing the diagram most of a
-  // screen down. On phones each row scrolls sideways on one line instead.
+  // The pill grid is the desktop selector and stays exactly as it was. On a
+  // phone it wrapped to five rows, pushing the diagram most of a screen down,
+  // and putting each row on a sideways-scrolling line only traded that for
+  // options hidden off the edge. There it collapses to one native select
+  // instead: a single row, nothing hidden, and iOS gives it a full-height
+  // picker that is easier to thumb through than a row of small targets.
   const isPhone = useMediaQuery('(max-width: 767px)')
-  const rowClass = isPhone
-    ? 'flex gap-1.5 flex-nowrap overflow-x-auto -mx-1 px-1 pb-0.5'
-    : 'flex flex-wrap gap-1.5'
 
   // Tab order: families in catalog order, then Boards.
   const tabs: string[] = []
@@ -72,10 +73,30 @@ export function ChipSelector() {
     return (c.name.startsWith(c.family) ? c.name.slice(c.family.length).replace(/^-/, '') : c.name) || c.name
   }
 
+  if (isPhone) {
+    return (
+      <select
+        aria-label="Chip or board"
+        value={chip.id}
+        onChange={e => setChip(e.target.value)}
+        className="w-full rounded-md bg-gray-900 border border-gray-700 px-3 py-2.5 text-sm font-semibold text-gray-100"
+        style={{ borderLeft: `3px solid ${accentOf(tabOf(chip))}` }}
+      >
+        {tabs.map(t => (
+          <optgroup key={t} label={t === BOARDS ? t.toUpperCase() : t}>
+            {CHIPS.filter(c => tabOf(c) === t).map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {/* Family tabs */}
-      <div className={rowClass}>
+      <div className="flex flex-wrap gap-1.5">
         {tabs.map(t => {
           const accent = accentOf(t)
           const active = tab === t
@@ -84,7 +105,7 @@ export function ChipSelector() {
             <button
               key={t}
               onClick={() => selectTab(t)}
-              className="rounded-md font-bold tracking-wide transition-all duration-150 flex items-center gap-1.5 leading-none flex-shrink-0 whitespace-nowrap"
+              className="rounded-md font-bold tracking-wide transition-all duration-150 flex items-center gap-1.5 leading-none"
               style={{
                 fontSize: 11.5, padding: '6px 10px',
                 color: active ? '#fff' : accent,
@@ -103,7 +124,7 @@ export function ChipSelector() {
       <div style={{ height: 1, background: 'var(--selector-sep)' }} />
 
       {/* Modules within the selected tab */}
-      <div className={rowClass}>
+      <div className="flex flex-wrap gap-1.5">
         {shown.map(c => {
           const accent = accentOf(tab)
           const active = chip.id === c.id
@@ -111,7 +132,7 @@ export function ChipSelector() {
             <button
               key={c.id}
               onClick={() => setChip(c.id)}
-              className="rounded-md text-[12.5px] font-semibold transition-all duration-150 leading-none flex-shrink-0 whitespace-nowrap"
+              className="rounded-md text-[12.5px] font-semibold transition-all duration-150 leading-none"
               style={{
                 padding: '6px 11px',
                 color: active ? '#fff' : 'var(--pill-text)',
