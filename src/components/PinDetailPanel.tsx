@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import { ConstraintBadge } from './ConstraintBadge'
 import { reportMistakeUrl } from '../utils/github'
+import { IconWarning } from './icons'
 import { specialInterfaces, matrixPeripherals } from '../data/routing'
 
 const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
@@ -108,8 +109,8 @@ export function PinDetailPanel() {
 
         {selectedPin.constraints.length > 0 && (
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-              Constraints &amp; Gotchas
+            <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+              <IconWarning size={13} />Constraints &amp; Gotchas
             </h3>
             <div className="space-y-2">
               {selectedPin.constraints.map(c => (
@@ -178,7 +179,7 @@ export function PinDetailPanel() {
           className="link-plain report-mistake block text-center text-xs rounded-lg px-3 py-2 transition-colors"
           style={{ color: '#fbbf24', border: '1px solid #78350f', background: 'rgba(120,53,15,0.2)' }}
         >
-          Report a mistake with this pin
+          <span className="inline-flex items-center gap-1.5"><IconWarning size={12} />Report a mistake with this pin</span>
         </a>
       </div>
     </div>

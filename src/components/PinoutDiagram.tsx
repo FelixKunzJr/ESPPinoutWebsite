@@ -3,6 +3,7 @@ import { ModuleDiagram } from './pinout/ModuleDiagram'
 import { SchematicDiagram } from './pinout/SchematicDiagram'
 import { legendFor } from './pinout/shared'
 import { reportMistakeUrl } from '../utils/github'
+import { IconWarning } from './icons'
 
 const VIEWS = [
   { id: 'schematic', label: 'Schematic' },
@@ -31,7 +32,7 @@ export function PinoutDiagram() {
             color: '#fbbf24', border: '1px solid #78350f', background: 'rgba(120,53,15,0.25)',
           }}
         >
-          Report mistake
+          <span className="inline-flex items-center gap-1.5"><IconWarning size={12} />Report mistake</span>
         </a>
         <div className="flex rounded-md overflow-hidden flex-shrink-0" style={{ border: '1px solid var(--dg-toggle-border)' }}>
           {VIEWS.map(v => (

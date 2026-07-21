@@ -2,6 +2,7 @@
 import { useApp } from '../../context/AppContext'
 import { resolveInfo } from '../../data/info/resolveInfo'
 import { CollapsibleCard } from '../CollapsibleCard'
+import { IconPlug } from '../icons'
 import { EmptyInfoLine } from './EmptyInfoLine'
 
 export function FlashingSection() {
@@ -16,7 +17,9 @@ export function FlashingSection() {
   }
 
   return (
-    <CollapsibleCard title="Flashing / wiring" defaultOpen={false}>
+    <CollapsibleCard title={
+      <span className="inline-flex items-center gap-2"><IconPlug size={15} />Flashing / wiring</span>
+    } defaultOpen={false}>
       {flashing ? (
         <div className="space-y-2 text-xs text-gray-300">
           {flashing.autoFlash

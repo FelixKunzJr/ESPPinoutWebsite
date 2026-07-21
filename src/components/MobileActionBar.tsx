@@ -5,6 +5,7 @@ import { PinTable } from './PinTable'
 import { MappingBuilder } from './MappingBuilder'
 import { ExportPanel } from './ExportPanel'
 import { CommunitySubmit } from './CommunitySubmit'
+import { IconList, IconSliders, IconDownload, IconMore } from './icons'
 
 // On a phone the studio was one long scroll: diagram, gotchas, specs,
 // flashing, filters, a 40-row pin table, then the mapping builder and export
@@ -14,13 +15,13 @@ import { CommunitySubmit } from './CommunitySubmit'
 
 type SheetId = 'pins' | 'map' | 'export' | 'more'
 
-// Text labels, no icons: the emoji glyphs iOS substituted here read as
-// clip-art next to the rest of the interface.
-const SHEETS: { id: SheetId; label: string; title: string }[] = [
-  { id: 'pins',   label: 'Pins',   title: 'Pin table' },
-  { id: 'map',    label: 'Mapping', title: 'Pin mapping' },
-  { id: 'export', label: 'Export', title: 'Export' },
-  { id: 'more',   label: 'More',   title: 'Contribute' },
+// Stroke icons rather than emoji: iOS substituted full-color glyphs for the
+// emoji, which read as clip-art and could not follow the label's color.
+const SHEETS: { id: SheetId; Icon: typeof IconList; label: string; title: string }[] = [
+  { id: 'pins',   Icon: IconList,     label: 'Pins',    title: 'Pin table' },
+  { id: 'map',    Icon: IconSliders,  label: 'Mapping', title: 'Pin mapping' },
+  { id: 'export', Icon: IconDownload, label: 'Export',  title: 'Export' },
+  { id: 'more',   Icon: IconMore,     label: 'More',    title: 'Contribute' },
 ]
 
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
@@ -72,7 +73,7 @@ export function MobileActionBar() {
   return (
     <>
       {/* Reserve the bar's height so the footer can still be scrolled clear. */}
-      <div aria-hidden="true" style={{ height: 'calc(52px + env(safe-area-inset-bottom))' }} />
+      <div aria-hidden="true" style={{ height: 'calc(60px + env(safe-area-inset-bottom))' }} />
 
       <nav
         aria-label="Sections"
@@ -84,14 +85,17 @@ export function MobileActionBar() {
             <button
               key={s.id}
               onClick={() => setOpen(s.id)}
-              className="flex items-center justify-center gap-1 py-3.5 text-sm font-medium text-gray-200 hover:text-white transition-colors"
+              className="flex flex-col items-center justify-center gap-1 py-2 text-gray-200 hover:text-white transition-colors"
             >
-              {s.label}
-              {s.id === 'map' && mapping.length > 0 && (
-                <span className="rounded-full bg-indigo-600 px-1.5 text-xs text-white">
-                  {mapping.length}
-                </span>
-              )}
+              <span className="relative">
+                <s.Icon size={20} />
+                {s.id === 'map' && mapping.length > 0 && (
+                  <span className="absolute -right-2.5 -top-1.5 rounded-full bg-indigo-600 px-1.5 text-[11px] font-semibold text-white">
+                    {mapping.length}
+                  </span>
+                )}
+              </span>
+              <span className="text-xs font-medium">{s.label}</span>
             </button>
           ))}
         </div>

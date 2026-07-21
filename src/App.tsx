@@ -14,6 +14,7 @@ import { CollapsibleCard } from './components/CollapsibleCard'
 import { ExportActions }   from './components/ExportActions'
 import { MobileActionBar } from './components/MobileActionBar'
 import { useMediaQuery }   from './utils/useMediaQuery'
+import { IconWarning, IconSun, IconMoon } from './components/icons'
 import { useApp }          from './context/AppContext'
 import { Logo }            from './components/Logo'
 import { SpecsSection }    from './components/info/SpecsSection'
@@ -68,12 +69,11 @@ export default function App() {
                 className="text-xs text-gray-400 hover:text-gray-100"
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                {/* U+FE0E forces the monochrome text glyph - iOS otherwise
-                    renders the sun as a full-color emoji. Icon-only on small
-                    screens: the header has no room for the label there. */}
-                <span className="whitespace-nowrap text-sm sm:text-xs">
-                  {theme === 'dark' ? '☀︎' : '☾︎'}
-                  <span className="hidden sm:inline">{theme === 'dark' ? ' Light' : ' Dark'}</span>
+                {/* Icon-only on small screens: the header has no room for
+                    the label there. */}
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                  {theme === 'dark' ? <IconSun size={15} /> : <IconMoon size={15} />}
+                  <span className="hidden sm:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
                 </span>
               </button>
               <button
@@ -107,7 +107,12 @@ export default function App() {
               <CollapsibleCard
                 tone="warning"
                 defaultOpen={!isPhone}
-                title={`${chip.name} - Known Gotchas (${chip.notes.length})`}
+                title={
+                  <span className="inline-flex items-center gap-2">
+                    <IconWarning size={16} />
+                    {chip.name} - Known Gotchas ({chip.notes.length})
+                  </span>
+                }
               >
                 <ul className="text-sm text-yellow-300/80 space-y-1 list-disc pl-4">
                   {chip.notes.map((n, i) => <li key={i}>{n}</li>)}

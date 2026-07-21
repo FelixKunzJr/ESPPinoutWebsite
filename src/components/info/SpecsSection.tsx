@@ -1,6 +1,7 @@
 import { useApp } from '../../context/AppContext'
 import { resolveInfo } from '../../data/info/resolveInfo'
 import { CollapsibleCard } from '../CollapsibleCard'
+import { IconSpecs } from '../icons'
 
 export function SpecsSection() {
   const { chip } = useApp()
@@ -14,7 +15,9 @@ export function SpecsSection() {
     ['Radios', chip.module?.radios ?? ''],
   ]
   return (
-    <CollapsibleCard title={`Specs - ${chip.name}`}>
+    <CollapsibleCard title={
+      <span className="inline-flex items-center gap-2"><IconSpecs size={15} />Specs - {chip.name}</span>
+    }>
       <table className="w-full text-xs">
         <tbody>
           {rows.map(([k, v]) => (
