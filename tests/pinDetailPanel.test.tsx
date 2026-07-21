@@ -94,3 +94,27 @@ describe('export strips interactivity', () => {
     expect(out.textContent).toContain('y')
   })
 })
+
+describe('pin table on a phone', () => {
+  function mockPhone(matches: boolean) {
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      configurable: true,
+      value: () => ({ matches, addEventListener() {}, removeEventListener() {} }),
+    })
+  }
+
+  it('renders stacked cards instead of the five-column table', () => {
+    mockPhone(true)
+    const { container } = render(<Studio />)
+    // The table cut the constraints column off the right edge on a phone.
+    expect(container.querySelector('table')).toBeNull()
+    expect(container.querySelectorAll('[data-pin-anchor]').length).toBeGreaterThan(0)
+  })
+
+  it('still renders the table on wider screens', () => {
+    mockPhone(false)
+    const { container } = render(<Studio />)
+    expect(container.querySelector('table')).not.toBeNull()
+  })
+})

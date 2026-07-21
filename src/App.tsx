@@ -107,7 +107,7 @@ export default function App() {
               <CollapsibleCard
                 tone="warning"
                 defaultOpen={!isPhone}
-                title={`⚠️ ${chip.name} - Known Gotchas (${chip.notes.length})`}
+                title={`${chip.name} - Known Gotchas (${chip.notes.length})`}
               >
                 <ul className="text-sm text-yellow-300/80 space-y-1 list-disc pl-4">
                   {chip.notes.map((n, i) => <li key={i}>{n}</li>)}

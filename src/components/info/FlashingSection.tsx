@@ -12,11 +12,11 @@ export function FlashingSection() {
   // No content to show (not seeded, not an auto-flash dev board): render a slim
   // muted contribute line instead of an empty card.
   if (!flashing && !isBoard) {
-    return <EmptyInfoLine chip={chip} section="flashing" label="🔗 Flashing / wiring" addText="Add flashing steps →" />
+    return <EmptyInfoLine chip={chip} section="flashing" label="Flashing / wiring" addText="Add flashing steps →" />
   }
 
   return (
-    <CollapsibleCard title="🔗 Flashing / wiring" defaultOpen={false}>
+    <CollapsibleCard title="Flashing / wiring" defaultOpen={false}>
       {flashing ? (
         <div className="space-y-2 text-xs text-gray-300">
           {flashing.autoFlash

@@ -19,14 +19,14 @@ export function ExportActions({ variant }: { variant: 'header' | 'panel' }) {
           title="Download the current diagram as a PNG"
           className="rounded-md border border-gray-700 bg-gray-800 px-2.5 py-1.5 text-xs font-medium text-gray-200 hover:bg-gray-700 transition-colors whitespace-nowrap"
         >
-          ⬇ <span className="hidden sm:inline">PNG</span>
+          PNG
         </button>
         <button
           onClick={pdf}
           title="Open an A4 cheat sheet to print or save as PDF"
           className="rounded-md border border-gray-700 bg-gray-800 px-2.5 py-1.5 text-xs font-medium text-gray-200 hover:bg-gray-700 transition-colors whitespace-nowrap"
         >
-          🖨 <span className="hidden sm:inline">PDF</span>
+          PDF
         </button>
       </div>
     )
@@ -38,13 +38,13 @@ export function ExportActions({ variant }: { variant: 'header' | 'panel' }) {
         onClick={png}
         className="w-full px-3 py-2 bg-blue-800 hover:bg-blue-700 rounded text-sm text-white font-medium transition-colors"
       >
-        ⬇ Download Pinout PNG
+        Download Pinout PNG
       </button>
       <button
         onClick={pdf}
         className="w-full mt-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded text-sm text-gray-200 font-medium transition-colors"
       >
-        🖨 Print / Save as PDF
+        Print / Save as PDF
       </button>
       <p className="text-xs text-gray-500 mt-2">
         PNG captures the diagram; PDF makes an A4 cheat sheet with the gotcha list.

@@ -31,7 +31,7 @@ export function PinoutDiagram() {
             color: '#fbbf24', border: '1px solid #78350f', background: 'rgba(120,53,15,0.25)',
           }}
         >
-          ⚠ Report mistake
+          Report mistake
         </a>
         <div className="flex rounded-md overflow-hidden flex-shrink-0" style={{ border: '1px solid var(--dg-toggle-border)' }}>
           {VIEWS.map(v => (

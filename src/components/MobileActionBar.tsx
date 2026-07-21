@@ -14,11 +14,13 @@ import { CommunitySubmit } from './CommunitySubmit'
 
 type SheetId = 'pins' | 'map' | 'export' | 'more'
 
-const SHEETS: { id: SheetId; icon: string; label: string; title: string }[] = [
-  { id: 'pins',   icon: '☰', label: 'Pins',   title: 'Pin table' },
-  { id: 'map',    icon: '⚙', label: 'Map',    title: 'Pin mapping' },
-  { id: 'export', icon: '⬇', label: 'Export', title: 'Export' },
-  { id: 'more',   icon: '···', label: 'More', title: 'Contribute' },
+// Text labels, no icons: the emoji glyphs iOS substituted here read as
+// clip-art next to the rest of the interface.
+const SHEETS: { id: SheetId; label: string; title: string }[] = [
+  { id: 'pins',   label: 'Pins',   title: 'Pin table' },
+  { id: 'map',    label: 'Mapping', title: 'Pin mapping' },
+  { id: 'export', label: 'Export', title: 'Export' },
+  { id: 'more',   label: 'More',   title: 'Contribute' },
 ]
 
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
@@ -70,7 +72,7 @@ export function MobileActionBar() {
   return (
     <>
       {/* Reserve the bar's height so the footer can still be scrolled clear. */}
-      <div aria-hidden="true" style={{ height: 'calc(58px + env(safe-area-inset-bottom))' }} />
+      <div aria-hidden="true" style={{ height: 'calc(52px + env(safe-area-inset-bottom))' }} />
 
       <nav
         aria-label="Sections"
@@ -82,17 +84,14 @@ export function MobileActionBar() {
             <button
               key={s.id}
               onClick={() => setOpen(s.id)}
-              className="flex flex-col items-center justify-center gap-0.5 py-2.5 text-gray-300 hover:text-white transition-colors"
+              className="flex items-center justify-center gap-1 py-3.5 text-sm font-medium text-gray-200 hover:text-white transition-colors"
             >
-              <span className="text-base leading-none" aria-hidden="true">{s.icon}</span>
-              <span className="text-xs font-medium">
-                {s.label}
-                {s.id === 'map' && mapping.length > 0 && (
-                  <span className="ml-1 rounded-full bg-indigo-600 px-1.5 text-[11px] text-white">
-                    {mapping.length}
-                  </span>
-                )}
-              </span>
+              {s.label}
+              {s.id === 'map' && mapping.length > 0 && (
+                <span className="rounded-full bg-indigo-600 px-1.5 text-xs text-white">
+                  {mapping.length}
+                </span>
+              )}
             </button>
           ))}
         </div>

@@ -14,7 +14,7 @@ export function SpecsSection() {
     ['Radios', chip.module?.radios ?? ''],
   ]
   return (
-    <CollapsibleCard title={`\u{1F4CB} Specs - ${chip.name}`}>
+    <CollapsibleCard title={`Specs - ${chip.name}`}>
       <table className="w-full text-xs">
         <tbody>
           {rows.map(([k, v]) => (

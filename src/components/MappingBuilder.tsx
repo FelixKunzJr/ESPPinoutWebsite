@@ -91,7 +91,7 @@ export function MappingBuilder() {
                   : 'bg-yellow-950/40 border-yellow-600 text-yellow-300'
               }`}
             >
-              {c.severity === 'danger' ? '⛔' : '⚠️'} {c.message}
+              {c.severity === 'danger' ? '\u2715' : '\u26A0'} {c.message}
             </div>
           ))}
         </div>

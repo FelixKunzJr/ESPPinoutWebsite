@@ -6,7 +6,7 @@ const SEVERITY_STYLES = {
   info:    'bg-blue-900/40 border border-blue-400 text-blue-300',
 }
 
-const SEVERITY_ICON = { danger: '⛔', warning: '⚠️', info: 'ℹ️' }
+const SEVERITY_ICON = { danger: '\u2715', warning: '\u26A0', info: '\u2139' }
 
 interface Props {
   constraint: Constraint

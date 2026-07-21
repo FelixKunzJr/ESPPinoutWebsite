@@ -3,12 +3,12 @@ import type { FilterKey } from '../types/chip'
 
 const FILTERS: { key: FilterKey; label: string; title: string }[] = [
   { key: 'all',          label: 'All pins',         title: 'Show all pins' },
-  { key: 'safe_output',  label: '✅ Safe output',    title: 'Input-only and flash-reserved pins hidden' },
-  { key: 'adc_wifi_safe',label: '📶 ADC + WiFi',     title: 'ADC1 pins only - safe while WiFi is active' },
-  { key: 'pwm',          label: '〰️ PWM',             title: 'Pins capable of PWM output' },
-  { key: 'touch',        label: '👆 Touch',           title: 'Capacitive touch pins' },
-  { key: 'free',         label: '🟢 No constraints',  title: 'Pins with zero restrictions' },
-  { key: 'strapping',    label: '🔧 Strapping',       title: 'Boot-strapping pins - handle with care' },
+  { key: 'safe_output',  label: 'Safe output',    title: 'Input-only and flash-reserved pins hidden' },
+  { key: 'adc_wifi_safe',label: 'ADC + WiFi',     title: 'ADC1 pins only - safe while WiFi is active' },
+  { key: 'pwm',          label: 'PWM',             title: 'Pins capable of PWM output' },
+  { key: 'touch',        label: 'Touch',           title: 'Capacitive touch pins' },
+  { key: 'free',         label: 'No constraints',  title: 'Pins with zero restrictions' },
+  { key: 'strapping',    label: 'Strapping',       title: 'Boot-strapping pins - handle with care' },
 ]
 
 export function FilterBar() {
