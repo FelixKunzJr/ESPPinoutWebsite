@@ -3,6 +3,13 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        // IBM Plex: an engineering type family that suits a tool built on
+        // KiCad data. Sans carries the UI; Mono carries the technical labels
+        // (pin names, GPIO numbers) so the data reads like schematic annotation.
+        sans: ['"IBM Plex Sans"', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
       // Bumped one notch off the Tailwind defaults. Nearly every string in
       // the app chrome is text-xs, which at the stock 12px was reported as
       // hard to read; 13px keeps the layout dense while clearing the floor.

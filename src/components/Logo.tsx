@@ -41,7 +41,7 @@ export function Logo({ iconSize = 58 }: { iconSize?: number }) {
         <span className="font-extrabold leading-none" style={{ fontSize: 33, letterSpacing: 0.2, color: 'var(--logo-ink)' }}>
           ESP<span style={{ color: 'var(--logo-green)' }}>32</span>
         </span>
-        <span className="font-semibold leading-none" style={{ fontSize: 12, letterSpacing: 5.4, color: 'var(--logo-ink)', opacity: 0.8 }}>
+        <span className="font-medium leading-none" style={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 11.5, letterSpacing: 5, color: 'var(--logo-ink)', opacity: 0.8 }}>
           PINOUT STUDIO
         </span>
       </span>

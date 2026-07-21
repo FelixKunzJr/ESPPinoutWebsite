@@ -136,7 +136,7 @@ export function BoardBuilderPage() {
   const fieldCls = 'bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-gray-100'
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
+    <div className="app-shell min-h-screen bg-gray-950 text-gray-100 flex flex-col">
       <header className="border-b border-gray-800 px-6 py-4 sticky top-0 bg-gray-950/95 backdrop-blur z-40">
         <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
           <button onClick={() => navigate('studio')} className="text-left">

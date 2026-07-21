@@ -40,7 +40,7 @@ export default function App() {
   if (page === 'build') return <BoardBuilderPage />
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
+    <div className="app-shell min-h-screen bg-gray-950 text-gray-100 flex flex-col">
       {/* Header */}
       <header className="border-b border-gray-800 px-6 py-4 sticky top-0 bg-gray-950/95 backdrop-blur z-40">
         <div className="max-w-screen-2xl mx-auto">
@@ -143,13 +143,13 @@ export default function App() {
           {/* Right sidebar */}
           {sidebarOpen && !isPhone && (
             <div className="space-y-6 min-w-0">
-              <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
+              <div className="panel p-4">
                 <MappingBuilder />
               </div>
-              <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
+              <div className="panel p-4">
                 <ExportPanel />
               </div>
-              <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
+              <div className="panel p-4">
                 <CommunitySubmit />
               </div>
             </div>

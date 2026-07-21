@@ -41,6 +41,13 @@
   --logo-ring: rgba(148, 163, 184, 0.45);
   --logo-ink: #f1f5f9;
   --logo-green: #22c55e;
+  /* EDA-bench chrome: a faint graph-paper grid behind the app and gently
+     raised panels, so the UI belongs to the same world as the schematic sheet
+     instead of reading as a flat dark dashboard. */
+  --grid-dot: rgba(148, 163, 184, 0.05);
+  --panel-bg: rgba(17, 24, 39, 0.55);
+  --panel-border: rgba(148, 163, 184, 0.11);
+  --panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 12px 32px -20px rgba(0, 0, 0, 0.7);
 }
 html.light {
   --focus-ring: #1d4ed8;
@@ -69,6 +76,36 @@ html.light {
   --logo-ring: transparent;
   --logo-ink: #0e1a2b;
   --logo-green: #16a34a;
+  --grid-dot: rgba(15, 23, 42, 0.05);
+  --panel-bg: #ffffff;
+  --panel-border: #e3e8ef;
+  --panel-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 14px 32px -22px rgba(15, 23, 42, 0.2);
+}
+
+/* IBM Plex is the app's type voice; the diagram SVGs keep their own inline
+   fonts. Set after @tailwind base so it wins the cascade. */
+html { font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+/* Graph-paper signature: a faint dot grid fixed behind the whole app, echoing
+   the schematic sheet's own grid. Sits above the page color, below content. */
+.app-shell { position: relative; }
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1.5px);
+  background-size: 23px 23px;
+}
+.app-shell > * { position: relative; z-index: 1; }
+
+/* Panels read as gently raised surfaces instead of flat outlined boxes. */
+.panel {
+  border-radius: 14px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  box-shadow: var(--panel-shadow);
 }
 
 /* Diagram row states (Tailwind classes inside the themed diagram card) */

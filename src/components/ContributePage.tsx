@@ -53,7 +53,7 @@ export function ContributePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
+    <div className="app-shell min-h-screen bg-gray-950 text-gray-100 flex flex-col">
       <header className="border-b border-gray-800 px-6 py-4 sticky top-0 bg-gray-950/95 backdrop-blur z-40">
         <div className="max-w-screen-lg mx-auto flex items-center justify-between">
           <button
