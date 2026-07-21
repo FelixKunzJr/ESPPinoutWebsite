@@ -2,7 +2,9 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { AppProvider } from '../src/context/AppContext'
+import { AppProvider, AppContext, type AppState, type DiagramView } from '../src/context/AppContext'
+import { CHIPS } from '../src/data/chips/index'
+import { ModuleDiagram } from '../src/components/pinout/ModuleDiagram'
 import { PinTable } from '../src/components/PinTable'
 import { PinDetailPanel } from '../src/components/PinDetailPanel'
 import { MobileActionBar } from '../src/components/MobileActionBar'
@@ -165,5 +167,46 @@ describe('pin table on a phone', () => {
     const dialog = screen.getByRole('dialog')
     expect(dialog.getAttribute('aria-modal')).toBeNull()
     expect(dialog.className).toContain('right-0')
+  })
+})
+
+describe('module diagram on a phone', () => {
+  function mockPhone(matches: boolean) {
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      configurable: true,
+      value: () => ({ matches, addEventListener() {}, removeEventListener() {} }),
+    })
+  }
+
+  const ctx = (view: DiagramView): AppState => ({
+    chip: CHIPS[0], setChip: () => {}, page: 'studio', navigate: () => {},
+    view, setView: () => {}, theme: 'dark', toggleTheme: () => {},
+    selectedPin: null, setSelectedPin: () => {},
+    filter: 'all', setFilter: () => {}, mapping: [], assignPin: () => {},
+    unassignPin: () => {}, clearMapping: () => {}, shareUrl: '',
+  })
+
+  const render_ = (phone: boolean) => {
+    mockPhone(phone)
+    return render(
+      <AppContext.Provider value={ctx('module')}>
+        <ModuleDiagram />
+      </AppContext.Provider>,
+    )
+  }
+
+  // The full badge stacks made the diagram ~900px wide, so on a phone it was
+  // a scrolling strip with the labels cut off both edges.
+  it('drops the alternate-function badges on a phone', () => {
+    const { container } = render_(true)
+    const text = container.textContent ?? ''
+    expect(text).toContain('GPIO36')
+    expect(text).not.toContain('ADC1_CH0')
+  })
+
+  it('keeps the full badge stacks on wider screens', () => {
+    const { container } = render_(false)
+    expect(container.textContent ?? '').toContain('ADC1_CH0')
   })
 })

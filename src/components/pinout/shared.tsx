@@ -196,7 +196,29 @@ export function primaryConstraint(pin: Pin): { word: string; sev: Severity; titl
 
 // ─── Shared row content: constraint chips + function badges ───────────────────
 
-export function ConstraintChips({ pin }: { pin: Pin }) {
+// On a phone the full badge stacks make the diagram roughly 900px wide, so
+// the module ends up as a horizontally scrolling strip with the labels cut
+// off both edges. Compact rows carry only what identifies the pin - the silk
+// or GPIO name, and a single severity marker - which is all the physical view
+// needs to be; the full detail is one tap away in the pin sheet.
+export function compactNames(pin: Pin): string[] {
+  const gpio = pin.names.find(n => /^GPIO\d/.test(n))
+  const first = pin.names[0]
+  return first === gpio || !gpio ? [first] : [first, gpio]
+}
+
+export function ConstraintChips({ pin, compact }: { pin: Pin; compact?: boolean }) {
+  if (compact) {
+    const c = primaryConstraint(pin)
+    if (!c) return null
+    const s = sevStyle(c.sev)
+    return (
+      <span title={c.title} className="font-mono font-bold rounded-sm flex-shrink-0 flex items-center justify-center"
+        style={{ background: s.bg, color: s.fg, border: `1px solid ${s.bd}`, width: 15, height: 15, fontSize: 10, lineHeight: 1 }}>
+        {s.icon}
+      </span>
+    )
+  }
   return (
     <>
       {constraintWords(pin).map(({ word, sev }) => {
@@ -212,8 +234,10 @@ export function ConstraintChips({ pin }: { pin: Pin }) {
   )
 }
 
-export function FunctionBadges({ pin, side, mappingLabel }: { pin: Pin; side: 'left' | 'right'; mappingLabel?: string }) {
-  const names = sortedNames(pin.names, side)
+export function FunctionBadges({ pin, side, mappingLabel, compact }: {
+  pin: Pin; side: 'left' | 'right'; mappingLabel?: string; compact?: boolean
+}) {
+  const names = compact ? compactNames(pin) : sortedNames(pin.names, side)
   return (
     <>
       {mappingLabel && (

@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
+import { useMediaQuery } from '../../utils/useMediaQuery'
 import type { Pin, Chip, LayoutPin } from '../../types/chip'
 import { ROW_H, getBadge, connectorColor, sevStyle, SpecialBadge, ConstraintChips, FunctionBadges, primaryConstraint, resolveModule, pinActivationProps, pinAriaLabel } from './shared'
 
@@ -13,19 +14,20 @@ interface PinRowProps {
   isSelected: boolean
   isFiltered: boolean
   mappingLabel?: string
+  compact?: boolean
   onClick: () => void
 }
 
-function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, onClick }: PinRowProps) {
+function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, compact, onClick }: PinRowProps) {
   const color = pin ? connectorColor(pin) : '#4b5563'
 
   const hasDanger  = !!pin?.constraints.some(c => c.severity === 'danger')
   const hasWarning = !hasDanger && !!pin?.constraints.length
 
-  const constraintChips = pin ? <ConstraintChips pin={pin} /> : null
+  const constraintChips = pin ? <ConstraintChips pin={pin} compact={compact} /> : null
 
   const functionBadges = pin
-    ? <FunctionBadges pin={pin} side={side} mappingLabel={mappingLabel} />
+    ? <FunctionBadges pin={pin} side={side} mappingLabel={mappingLabel} compact={compact} />
     : <SpecialBadge label={layoutPin.label ?? 'NC'} />
 
   const pinNumBox = (
@@ -46,7 +48,7 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
   )
 
   const connLine = (
-    <div className="flex-shrink-0" style={{ width: 14, height: 1.5, background: color + '80' }} />
+    <div className="flex-shrink-0" style={{ width: compact ? 8 : 14, height: 1.5, background: color + '80' }} />
   )
 
   const isActive = isFiltered || !pin
@@ -79,13 +81,13 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
           </div>
           {connLine}
           {pinNumBox}
-          <div style={{ width: 5, flexShrink: 0 }} />
+          <div style={{ width: compact ? 3 : 5, flexShrink: 0 }} />
           {solderDot}
         </>
       ) : (
         <>
           {solderDot}
-          <div style={{ width: 5, flexShrink: 0 }} />
+          <div style={{ width: compact ? 3 : 5, flexShrink: 0 }} />
           {pinNumBox}
           {connLine}
           <div className="flex-1 flex items-center justify-start gap-[3px] min-w-0 overflow-hidden pl-1.5">
@@ -107,10 +109,11 @@ interface EdgePinColProps {
   edge: 'top' | 'bottom'
   isSelected: boolean
   isFiltered: boolean
+  compact?: boolean
   onClick: () => void
 }
 
-function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, onClick }: EdgePinColProps) {
+function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, compact, onClick }: EdgePinColProps) {
   const color = pin ? connectorColor(pin) : '#4b5563'
   const shortLabel = pin
     ? (pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0] ?? `${pin.gpio}`)
@@ -139,7 +142,7 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, on
   // name: every alternate function as its own vertical colored badge, GPIO name
   // first, stacked reading outward from the chip body.
   const orderedNames = pin
-    ? [shortLabel, ...pin.names.filter(n => n !== shortLabel)]
+    ? (compact ? [shortLabel] : [shortLabel, ...pin.names.filter(n => n !== shortLabel)])
     : [layoutPin.label ?? 'NC']
   const vbadge = (name: string, isPrimary: boolean) => {
     const b = getBadge(name)
@@ -656,6 +659,8 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
 
 export function ModuleDiagram() {
   const { chip, selectedPin, setSelectedPin, filter, mapping } = useApp()
+  // Compact rows on phones - see compactNames in ./shared for why.
+  const compact = useMediaQuery('(max-width: 767px)')
   const filteredSet = new Set(filterPins(chip.pins, filter).map(p => p.gpio))
   const pinByGpio   = new Map(chip.pins.map(p => [p.gpio, p]))
 
@@ -713,11 +718,12 @@ export function ModuleDiagram() {
   // real proportions. Boards may declare an explicit aspect in their spec.
   const bodyMm = chip.packageLayout?.bodyMm
   const boardAspect = chip.module?.aspect ?? (bodyMm ? bodyMm.w / bodyMm.h : undefined)
-  const chipWidth  = isBoard
+  const rawChipWidth = isBoard
     ? (boardAspect ? Math.round(Math.min(340, Math.max(150, sideHeight * boardAspect))) : 150)
     : bodyMm
       ? Math.max(Math.round(sideHeight * bodyMm.w / bodyMm.h), padCount * 20, 190)
       : Math.max(240, padCount * 30)
+  const chipWidth  = compact ? Math.min(rawChipWidth, 160) : rawChipWidth
   const colWidth   = bottomLayout.length > 0 ? chipWidth / bottomLayout.length : 30
   const topColWidth = topLayout.length > 0 ? chipWidth / topLayout.length : 30
 
@@ -730,8 +736,8 @@ export function ModuleDiagram() {
   }, [chip.id])
 
   return (
-    <div ref={scrollRef} className="p-4 pb-2 overflow-x-auto">
-      <div id="module-diagram-canvas" className="flex flex-col items-center min-w-fit mx-auto p-2">
+    <div ref={scrollRef} className={`${compact ? 'p-2' : 'p-4'} pb-2 overflow-x-auto`}>
+      <div id="module-diagram-canvas" className={`flex flex-col items-center min-w-fit mx-auto ${compact ? 'p-0' : 'p-2'}`}>
 
         {/* The banks + body + edge rows live in one grid: the two 1fr bank
             tracks equalize, so the body column (and with it the thermal bar
@@ -770,6 +776,7 @@ export function ModuleDiagram() {
                   edge="top"
                   isSelected={!!pin && selectedPin?.gpio === pin.gpio}
                   isFiltered={!pin || filteredSet.has(pin.gpio)}
+                  compact={compact}
                   onClick={() => toggle(pin)}
                 />
               )
@@ -792,6 +799,7 @@ export function ModuleDiagram() {
                   isSelected={!!pin && selectedPin?.gpio === pin.gpio}
                   isFiltered={!pin || filteredSet.has(pin.gpio)}
                   mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
+                  compact={compact}
                   onClick={() => toggle(pin)}
                 />
               )
@@ -818,6 +826,7 @@ export function ModuleDiagram() {
                   isSelected={!!pin && selectedPin?.gpio === pin.gpio}
                   isFiltered={!pin || filteredSet.has(pin.gpio)}
                   mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
+                  compact={compact}
                   onClick={() => toggle(pin)}
                 />
               )
@@ -838,6 +847,7 @@ export function ModuleDiagram() {
                   edge="bottom"
                   isSelected={!!pin && selectedPin?.gpio === pin.gpio}
                   isFiltered={!pin || filteredSet.has(pin.gpio)}
+                  compact={compact}
                   onClick={() => toggle(pin)}
                 />
               )
