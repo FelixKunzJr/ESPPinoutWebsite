@@ -73,7 +73,7 @@ function fpPads(f) {
 }
 // Physical module outline in mm, from the footprint's courtyard bounding box
 // (falls back to silkscreen / fab outline). Drives true on-screen proportions.
-function fpBodyMm(f) {
+function fpOutline(f) {
   const t = fs.readFileSync(`${FP_DIR}/${f}.kicad_mod`, 'utf8')
   for (const layer of ['F.CrtYd', 'F.SilkS', 'F.Fab']) {
     const xs = [], ys = []
@@ -84,9 +84,29 @@ function fpBodyMm(f) {
     }
     if (!xs.length) continue
     const w = Math.max(...xs) - Math.min(...xs), h = Math.max(...ys) - Math.min(...ys)
-    if (w > 5 && h > 5) return { w: +w.toFixed(1), h: +h.toFixed(1) }
+    if (w > 5 && h > 5) return { w: +w.toFixed(1), h: +h.toFixed(1), y0: Math.min(...ys) }
   }
   return undefined
+}
+function fpBodyMm(f) {
+  const o = fpOutline(f)
+  return o && { w: o.w, h: o.h }
+}
+// The antenna keep-out: the strip at the top of the module outline that carries
+// no pads at all. Measured rather than assumed - it is 6.25 mm on a C3-MINI-1
+// but 17.16 mm on the dual-antenna WROOM-DA, so a per-form constant puts pin 1
+// well up alongside the antenna on the parts that need the clearance most.
+//
+// bodyMm may be overridden where the courtyard is larger than the module (again
+// WROOM-DA, whose courtyard includes the keep-out region); the gap is rebased
+// onto that outline so it stays a fraction of the body actually drawn.
+function fpAntennaMm(f, pads, bodyMm) {
+  const o = fpOutline(f)
+  if (!o || !bodyMm) return undefined
+  const ys = Object.values(pads).flat().map(p => p.y)
+  if (!ys.length) return undefined
+  const gap = Math.min(...ys) - o.y0 - (o.h - bodyMm.h)
+  return gap > 2 ? +gap.toFixed(2) : undefined
 }
 const specialLabel = name => {
   const u = (name || '').toUpperCase()
@@ -173,7 +193,8 @@ function buildModule(mod, fam) {
   // mm override for footprints whose courtyard is not the module outline
   // (WROOM-DA's courtyard includes the dual-antenna keep-out region).
   const bodyMm = mod.mm ? { w: mod.mm[0], h: mod.mm[1] } : fpBodyMm(mod.fp)
-  return { pins: pinObjs, layout: { name: mod.name, ...buildLayout(pins, pads), bodyMm } }
+  const antennaMm = fpAntennaMm(mod.fp, pads, bodyMm)
+  return { pins: pinObjs, layout: { name: mod.name, ...buildLayout(pins, pads), bodyMm, antennaMm } }
 }
 
 // Per-family boot/strapping rules (the lore KiCad doesn't encode).
@@ -262,6 +283,7 @@ for (const mod of MODULES) {
     out += `export const ${mod.prefix}_LAYOUT: PackageLayout = {\n  name: '${layout.name}',\n  left: ${fmtArr(layout.left)},\n  bottom: ${fmtArr(layout.bottom)},\n  right: ${fmtArr(layout.right)},\n`
     if (layout.top.length) out += `  top: ${fmtArr(layout.top)},\n`
     if (layout.bodyMm) out += `  bodyMm: { w: ${layout.bodyMm.w}, h: ${layout.bodyMm.h} },\n`
+    if (layout.antennaMm) out += `  antennaMm: ${layout.antennaMm},\n`
     out += `}\n\n`
     console.error(`${mod.name}: ${pins.length} pins | pads L${layout.left.length} B${layout.bottom.length} R${layout.right.length} T${layout.top.length} | sym L${sym.left.length} R${sym.right.length} B${sym.bottom.length} T${sym.top.length}`)
   } else {

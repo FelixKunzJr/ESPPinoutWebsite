@@ -57,6 +57,7 @@ export const ESP32_WROOM_DA_LAYOUT: PackageLayout = {
   bottom: [{ pinNumber: 15, label: 'NC' }, { pinNumber: 16, label: 'GND' }, { pinNumber: 17, gpio: 13 }, { pinNumber: 18, label: 'NC' }, { pinNumber: 19, label: 'NC' }, { pinNumber: 20, label: 'NC' }, { pinNumber: 21, label: 'NC' }, { pinNumber: 22, label: 'NC' }, { pinNumber: 23, label: 'NC' }, { pinNumber: 24, gpio: 15 }, { pinNumber: 25, label: 'NC' }, { pinNumber: 26, label: 'NC' }],
   right: [{ pinNumber: 40, label: 'GND' }, { pinNumber: 39, gpio: 23 }, { pinNumber: 38, gpio: 22 }, { pinNumber: 37, gpio: 1 }, { pinNumber: 36, gpio: 3 }, { pinNumber: 35, gpio: 21 }, { pinNumber: 34, label: 'NC' }, { pinNumber: 33, gpio: 19 }, { pinNumber: 32, gpio: 18 }, { pinNumber: 31, gpio: 5 }, { pinNumber: 30, gpio: 17 }, { pinNumber: 29, gpio: 16 }, { pinNumber: 28, gpio: 4 }, { pinNumber: 27, gpio: 0 }],
   bodyMm: { w: 18, h: 31.4 },
+  antennaMm: 12.56,
 }
 
 export const ESP32_WROOM_DA_SYMBOL: SymbolLayout = {
@@ -104,6 +105,7 @@ export const ESP32_MINI_1_LAYOUT: PackageLayout = {
   right: [{ pinNumber: 40, label: 'GND' }, { pinNumber: 39, label: 'GND' }, { pinNumber: 38, label: 'GND' }, { pinNumber: 37, label: 'NC' }, { pinNumber: 36, gpio: 1 }, { pinNumber: 35, gpio: 3 }, { pinNumber: 34, gpio: 21 }, { pinNumber: 33, gpio: 22 }, { pinNumber: 32, gpio: 19 }, { pinNumber: 31, gpio: 23 }, { pinNumber: 30, gpio: 18 }, { pinNumber: 29, gpio: 5 }, { pinNumber: 28, label: 'NC' }],
   top: [{ pinNumber: 54, label: 'GND' }, { pinNumber: 53, label: 'GND' }, { pinNumber: 52, label: 'GND' }, { pinNumber: 51, label: 'GND' }, { pinNumber: 50, label: 'GND' }, { pinNumber: 49, label: 'GND' }, { pinNumber: 48, label: 'GND' }, { pinNumber: 47, label: 'GND' }, { pinNumber: 46, label: 'GND' }, { pinNumber: 45, label: 'GND' }, { pinNumber: 44, label: 'GND' }, { pinNumber: 43, label: 'GND' }, { pinNumber: 42, label: 'GND' }, { pinNumber: 41, label: 'GND' }],
   bodyMm: { w: 13.8, h: 19.6 },
+  antennaMm: 6.45,
 }
 
 export const ESP32_MINI_1_SYMBOL: SymbolLayout = {
@@ -150,6 +152,7 @@ export const ESP32_PICO_MINI_02_LAYOUT: PackageLayout = {
   right: [{ pinNumber: 50, label: 'GND' }, { pinNumber: 35, gpio: 21 }, { pinNumber: 34, gpio: 22 }, { pinNumber: 33, gpio: 19 }, { pinNumber: 32, label: 'NC' }, { pinNumber: 31, gpio: 1 }, { pinNumber: 30, gpio: 3 }, { pinNumber: 29, gpio: 5 }, { pinNumber: 28, gpio: 8 }, { pinNumber: 27, gpio: 7 }, { pinNumber: 26, gpio: 20 }, { pinNumber: 25, label: 'NC' }, { pinNumber: 51, label: 'GND' }],
   top: [{ pinNumber: 48, label: 'GND' }, { pinNumber: 47, label: 'GND' }, { pinNumber: 46, label: 'GND' }, { pinNumber: 45, label: 'GND' }, { pinNumber: 44, label: 'GND' }, { pinNumber: 43, label: 'GND' }, { pinNumber: 42, label: 'GND' }, { pinNumber: 41, label: 'GND' }, { pinNumber: 40, label: 'GND' }, { pinNumber: 39, label: 'GND' }, { pinNumber: 38, label: 'GND' }, { pinNumber: 37, label: 'GND' }, { pinNumber: 36, label: 'GND' }],
   bodyMm: { w: 13.6, h: 17 },
+  antennaMm: 6.25,
 }
 
 export const ESP32_PICO_MINI_02_SYMBOL: SymbolLayout = {
@@ -205,6 +208,7 @@ export const S2_WROOM_LAYOUT: PackageLayout = {
   bottom: [{ pinNumber: 17, gpio: 14 }, { pinNumber: 18, gpio: 15 }, { pinNumber: 19, gpio: 16 }, { pinNumber: 20, gpio: 17 }, { pinNumber: 21, gpio: 18 }, { pinNumber: 22, gpio: 19 }, { pinNumber: 23, gpio: 20 }, { pinNumber: 24, gpio: 21 }, { pinNumber: 25, gpio: 26 }, { pinNumber: 26, label: 'GND' }],
   right: [{ pinNumber: 42, label: 'GND' }, { pinNumber: 41, label: 'EN' }, { pinNumber: 40, gpio: 46 }, { pinNumber: 39, gpio: 45 }, { pinNumber: 38, gpio: 44 }, { pinNumber: 37, gpio: 43 }, { pinNumber: 36, gpio: 42 }, { pinNumber: 35, gpio: 41 }, { pinNumber: 34, gpio: 40 }, { pinNumber: 33, gpio: 39 }, { pinNumber: 32, gpio: 38 }, { pinNumber: 31, gpio: 37 }, { pinNumber: 30, gpio: 36 }, { pinNumber: 29, gpio: 35 }, { pinNumber: 28, gpio: 34 }, { pinNumber: 27, gpio: 33 }],
   bodyMm: { w: 19.6, h: 32.2 },
+  antennaMm: 7.85,
 }
 
 export const S2_WROOM_SYMBOL: SymbolLayout = {
@@ -261,6 +265,7 @@ export const S2_MINI_1_LAYOUT: PackageLayout = {
   right: [{ pinNumber: 65, label: 'GND' }, { pinNumber: 45, label: 'EN' }, { pinNumber: 44, gpio: 46 }, { pinNumber: 43, label: 'GND' }, { pinNumber: 42, label: 'GND' }, { pinNumber: 41, gpio: 45 }, { pinNumber: 40, gpio: 44 }, { pinNumber: 39, gpio: 43 }, { pinNumber: 38, gpio: 42 }, { pinNumber: 37, gpio: 41 }, { pinNumber: 36, gpio: 40 }, { pinNumber: 35, gpio: 39 }, { pinNumber: 34, gpio: 38 }, { pinNumber: 33, gpio: 37 }, { pinNumber: 32, gpio: 36 }, { pinNumber: 31, gpio: 35 }, { pinNumber: 64, label: 'GND' }],
   top: [{ pinNumber: 60, label: 'GND' }, { pinNumber: 59, label: 'GND' }, { pinNumber: 58, label: 'GND' }, { pinNumber: 57, label: 'GND' }, { pinNumber: 56, label: 'GND' }, { pinNumber: 55, label: 'GND' }, { pinNumber: 54, label: 'GND' }, { pinNumber: 53, label: 'GND' }, { pinNumber: 52, label: 'GND' }, { pinNumber: 51, label: 'GND' }, { pinNumber: 50, label: 'GND' }, { pinNumber: 49, label: 'GND' }, { pinNumber: 48, label: 'GND' }, { pinNumber: 47, label: 'GND' }, { pinNumber: 46, label: 'GND' }],
   bodyMm: { w: 16, h: 20.6 },
+  antennaMm: 5.6,
 }
 
 export const S2_MINI_1_SYMBOL: SymbolLayout = {
@@ -315,6 +320,7 @@ export const S2_SOLO_LAYOUT: PackageLayout = {
   bottom: [{ pinNumber: 15, gpio: 3 }, { pinNumber: 16, gpio: 46 }, { pinNumber: 17, gpio: 9 }, { pinNumber: 18, gpio: 10 }, { pinNumber: 19, gpio: 11 }, { pinNumber: 20, gpio: 12 }, { pinNumber: 21, gpio: 13 }, { pinNumber: 22, gpio: 14 }, { pinNumber: 23, gpio: 21 }, { pinNumber: 24, gpio: 33 }, { pinNumber: 25, gpio: 34 }, { pinNumber: 26, gpio: 45 }],
   right: [{ pinNumber: 40, label: 'GND' }, { pinNumber: 39, gpio: 1 }, { pinNumber: 38, gpio: 2 }, { pinNumber: 37, gpio: 43 }, { pinNumber: 36, gpio: 44 }, { pinNumber: 35, gpio: 42 }, { pinNumber: 34, gpio: 41 }, { pinNumber: 33, gpio: 40 }, { pinNumber: 32, gpio: 39 }, { pinNumber: 31, gpio: 38 }, { pinNumber: 30, gpio: 37 }, { pinNumber: 29, gpio: 36 }, { pinNumber: 28, gpio: 35 }, { pinNumber: 27, gpio: 0 }],
   bodyMm: { w: 19.6, h: 26.6 },
+  antennaMm: 7.79,
 }
 
 export const S2_SOLO_SYMBOL: SymbolLayout = {
@@ -370,6 +376,7 @@ export const S2_WROVER_LAYOUT: PackageLayout = {
   bottom: [{ pinNumber: 17, gpio: 14 }, { pinNumber: 18, gpio: 15 }, { pinNumber: 19, gpio: 16 }, { pinNumber: 20, gpio: 17 }, { pinNumber: 21, gpio: 18 }, { pinNumber: 22, gpio: 19 }, { pinNumber: 23, gpio: 20 }, { pinNumber: 24, gpio: 21 }, { pinNumber: 25, gpio: 26 }, { pinNumber: 26, label: 'GND' }],
   right: [{ pinNumber: 42, label: 'GND' }, { pinNumber: 41, label: 'EN' }, { pinNumber: 40, gpio: 46 }, { pinNumber: 39, gpio: 45 }, { pinNumber: 38, gpio: 44 }, { pinNumber: 37, gpio: 43 }, { pinNumber: 36, gpio: 42 }, { pinNumber: 35, gpio: 41 }, { pinNumber: 34, gpio: 40 }, { pinNumber: 33, gpio: 39 }, { pinNumber: 32, gpio: 38 }, { pinNumber: 31, gpio: 37 }, { pinNumber: 30, gpio: 36 }, { pinNumber: 29, gpio: 35 }, { pinNumber: 28, gpio: 34 }, { pinNumber: 27, gpio: 33 }],
   bodyMm: { w: 19.6, h: 32 },
+  antennaMm: 7.85,
 }
 
 export const S2_WROVER_SYMBOL: SymbolLayout = {
@@ -424,6 +431,7 @@ export const S3_WROOM_1_LAYOUT: PackageLayout = {
   bottom: [{ pinNumber: 15, gpio: 3 }, { pinNumber: 16, gpio: 46 }, { pinNumber: 17, gpio: 9 }, { pinNumber: 18, gpio: 10 }, { pinNumber: 19, gpio: 11 }, { pinNumber: 20, gpio: 12 }, { pinNumber: 21, gpio: 13 }, { pinNumber: 22, gpio: 14 }, { pinNumber: 23, gpio: 21 }, { pinNumber: 24, gpio: 47 }, { pinNumber: 25, gpio: 48 }, { pinNumber: 26, gpio: 45 }],
   right: [{ pinNumber: 40, label: 'GND' }, { pinNumber: 39, gpio: 1 }, { pinNumber: 38, gpio: 2 }, { pinNumber: 37, gpio: 43 }, { pinNumber: 36, gpio: 44 }, { pinNumber: 35, gpio: 42 }, { pinNumber: 34, gpio: 41 }, { pinNumber: 33, gpio: 40 }, { pinNumber: 32, gpio: 39 }, { pinNumber: 31, gpio: 38 }, { pinNumber: 30, gpio: 37 }, { pinNumber: 29, gpio: 36 }, { pinNumber: 28, gpio: 35 }, { pinNumber: 27, gpio: 0 }],
   bodyMm: { w: 19.6, h: 26.6 },
+  antennaMm: 7.79,
 }
 
 export const S3_WROOM_1_SYMBOL: SymbolLayout = {
@@ -475,6 +483,7 @@ export const S3_WROOM_2_LAYOUT: PackageLayout = {
   bottom: [{ pinNumber: 15, gpio: 3 }, { pinNumber: 16, gpio: 46 }, { pinNumber: 17, gpio: 9 }, { pinNumber: 18, gpio: 10 }, { pinNumber: 19, gpio: 11 }, { pinNumber: 20, gpio: 12 }, { pinNumber: 21, gpio: 13 }, { pinNumber: 22, gpio: 14 }, { pinNumber: 23, gpio: 21 }, { pinNumber: 24, gpio: 47 }, { pinNumber: 25, gpio: 48 }, { pinNumber: 26, gpio: 45 }],
   right: [{ pinNumber: 40, label: 'GND' }, { pinNumber: 39, gpio: 1 }, { pinNumber: 38, gpio: 2 }, { pinNumber: 37, gpio: 43 }, { pinNumber: 36, gpio: 44 }, { pinNumber: 35, gpio: 42 }, { pinNumber: 34, gpio: 41 }, { pinNumber: 33, gpio: 40 }, { pinNumber: 32, gpio: 39 }, { pinNumber: 31, gpio: 38 }, { pinNumber: 30, label: 'NC' }, { pinNumber: 29, label: 'NC' }, { pinNumber: 28, label: 'NC' }, { pinNumber: 27, gpio: 0 }],
   bodyMm: { w: 19.6, h: 26.6 },
+  antennaMm: 7.79,
 }
 
 export const S3_WROOM_2_SYMBOL: SymbolLayout = {
@@ -533,6 +542,7 @@ export const S3_MINI_1_LAYOUT: PackageLayout = {
   right: [{ pinNumber: 65, label: 'GND' }, { pinNumber: 45, label: 'EN' }, { pinNumber: 44, gpio: 46 }, { pinNumber: 43, label: 'GND' }, { pinNumber: 42, label: 'GND' }, { pinNumber: 41, gpio: 45 }, { pinNumber: 40, gpio: 44 }, { pinNumber: 39, gpio: 43 }, { pinNumber: 38, gpio: 42 }, { pinNumber: 37, gpio: 41 }, { pinNumber: 36, gpio: 40 }, { pinNumber: 35, gpio: 39 }, { pinNumber: 34, gpio: 38 }, { pinNumber: 33, gpio: 37 }, { pinNumber: 32, gpio: 36 }, { pinNumber: 31, gpio: 35 }, { pinNumber: 64, label: 'GND' }],
   top: [{ pinNumber: 60, label: 'GND' }, { pinNumber: 59, label: 'GND' }, { pinNumber: 58, label: 'GND' }, { pinNumber: 57, label: 'GND' }, { pinNumber: 56, label: 'GND' }, { pinNumber: 55, label: 'GND' }, { pinNumber: 54, label: 'GND' }, { pinNumber: 53, label: 'GND' }, { pinNumber: 52, label: 'GND' }, { pinNumber: 51, label: 'GND' }, { pinNumber: 50, label: 'GND' }, { pinNumber: 49, label: 'GND' }, { pinNumber: 48, label: 'GND' }, { pinNumber: 47, label: 'GND' }, { pinNumber: 46, label: 'GND' }],
   bodyMm: { w: 16, h: 21.1 },
+  antennaMm: 6.1,
 }
 
 export const S3_MINI_1_SYMBOL: SymbolLayout = {
@@ -567,6 +577,7 @@ export const C3_MINI_1_LAYOUT: PackageLayout = {
   right: [{ pinNumber: 50, label: 'GND' }, { pinNumber: 35, label: 'NC' }, { pinNumber: 34, label: 'NC' }, { pinNumber: 33, label: 'NC' }, { pinNumber: 32, label: 'NC' }, { pinNumber: 31, gpio: 21 }, { pinNumber: 30, gpio: 20 }, { pinNumber: 29, label: 'NC' }, { pinNumber: 28, label: 'NC' }, { pinNumber: 27, gpio: 19 }, { pinNumber: 26, gpio: 18 }, { pinNumber: 25, label: 'NC' }, { pinNumber: 51, label: 'GND' }],
   top: [{ pinNumber: 48, label: 'GND' }, { pinNumber: 47, label: 'GND' }, { pinNumber: 46, label: 'GND' }, { pinNumber: 45, label: 'GND' }, { pinNumber: 44, label: 'GND' }, { pinNumber: 43, label: 'GND' }, { pinNumber: 42, label: 'GND' }, { pinNumber: 41, label: 'GND' }, { pinNumber: 40, label: 'GND' }, { pinNumber: 39, label: 'GND' }, { pinNumber: 38, label: 'GND' }, { pinNumber: 37, label: 'GND' }, { pinNumber: 36, label: 'GND' }],
   bodyMm: { w: 13.6, h: 17 },
+  antennaMm: 6.25,
 }
 
 export const C3_MINI_1_SYMBOL: SymbolLayout = {
@@ -600,6 +611,7 @@ export const C3_WROOM_02_LAYOUT: PackageLayout = {
   bottom: [],
   right: [{ pinNumber: 18, gpio: 0 }, { pinNumber: 17, gpio: 1 }, { pinNumber: 16, gpio: 2 }, { pinNumber: 15, gpio: 3 }, { pinNumber: 14, gpio: 19 }, { pinNumber: 13, gpio: 18 }, { pinNumber: 12, gpio: 21 }, { pinNumber: 11, gpio: 20 }, { pinNumber: 10, gpio: 10 }],
   bodyMm: { w: 19.6, h: 20.6 },
+  antennaMm: 7.4,
 }
 
 export const C3_WROOM_02_SYMBOL: SymbolLayout = {
@@ -641,6 +653,7 @@ export const C6_MINI_1_LAYOUT: PackageLayout = {
   right: [{ pinNumber: 50, label: 'GND' }, { pinNumber: 35, label: 'NC' }, { pinNumber: 34, label: 'NC' }, { pinNumber: 33, label: 'NC' }, { pinNumber: 32, label: 'NC' }, { pinNumber: 31, gpio: 16 }, { pinNumber: 30, gpio: 17 }, { pinNumber: 29, gpio: 23 }, { pinNumber: 28, gpio: 22 }, { pinNumber: 27, gpio: 21 }, { pinNumber: 26, gpio: 20 }, { pinNumber: 25, gpio: 19 }, { pinNumber: 51, label: 'GND' }],
   top: [{ pinNumber: 48, label: 'GND' }, { pinNumber: 47, label: 'GND' }, { pinNumber: 46, label: 'GND' }, { pinNumber: 45, label: 'GND' }, { pinNumber: 44, label: 'GND' }, { pinNumber: 43, label: 'GND' }, { pinNumber: 42, label: 'GND' }, { pinNumber: 41, label: 'GND' }, { pinNumber: 40, label: 'GND' }, { pinNumber: 39, label: 'GND' }, { pinNumber: 38, label: 'GND' }, { pinNumber: 37, label: 'GND' }, { pinNumber: 36, label: 'GND' }],
   bodyMm: { w: 13.6, h: 17 },
+  antennaMm: 6.25,
 }
 
 export const C6_MINI_1_SYMBOL: SymbolLayout = {
@@ -682,6 +695,7 @@ export const C6_WROOM_1_LAYOUT: PackageLayout = {
   bottom: [],
   right: [{ pinNumber: 28, label: 'GND' }, { pinNumber: 27, gpio: 2 }, { pinNumber: 26, gpio: 3 }, { pinNumber: 25, gpio: 16 }, { pinNumber: 24, gpio: 17 }, { pinNumber: 23, gpio: 15 }, { pinNumber: 22, label: 'NC' }, { pinNumber: 21, gpio: 23 }, { pinNumber: 20, gpio: 22 }, { pinNumber: 19, gpio: 21 }, { pinNumber: 18, gpio: 20 }, { pinNumber: 17, gpio: 19 }, { pinNumber: 16, gpio: 18 }, { pinNumber: 15, gpio: 9 }],
   bodyMm: { w: 19.6, h: 26.6 },
+  antennaMm: 7.79,
 }
 
 export const C6_WROOM_1_SYMBOL: SymbolLayout = {
@@ -722,6 +736,7 @@ export const C5_WROOM_1_LAYOUT: PackageLayout = {
   bottom: [],
   right: [{ pinNumber: 28, label: 'GND' }, { pinNumber: 27, gpio: 26 }, { pinNumber: 26, gpio: 25 }, { pinNumber: 25, gpio: 11 }, { pinNumber: 24, gpio: 12 }, { pinNumber: 23, gpio: 24 }, { pinNumber: 22, label: 'NC' }, { pinNumber: 21, gpio: 23 }, { pinNumber: 20, label: 'NC' }, { pinNumber: 19, gpio: 15 }, { pinNumber: 18, gpio: 27 }, { pinNumber: 17, gpio: 4 }, { pinNumber: 16, gpio: 5 }, { pinNumber: 15, gpio: 28 }],
   bodyMm: { w: 19.6, h: 28.6 },
+  antennaMm: 8.29,
 }
 
 export const C5_WROOM_1_SYMBOL: SymbolLayout = {
@@ -763,6 +778,7 @@ export const C5_MINI_1_LAYOUT: PackageLayout = {
   right: [{ pinNumber: 65, label: 'GND' }, { pinNumber: 45, label: 'EN' }, { pinNumber: 44, label: 'NC' }, { pinNumber: 43, label: 'GND' }, { pinNumber: 42, label: 'GND' }, { pinNumber: 41, label: 'NC' }, { pinNumber: 40, gpio: 12 }, { pinNumber: 39, gpio: 11 }, { pinNumber: 38, label: 'NC' }, { pinNumber: 37, label: 'NC' }, { pinNumber: 36, label: 'NC' }, { pinNumber: 35, gpio: 27 }, { pinNumber: 34, gpio: 26 }, { pinNumber: 33, gpio: 25 }, { pinNumber: 32, gpio: 24 }, { pinNumber: 31, gpio: 23 }, { pinNumber: 64, label: 'GND' }],
   top: [{ pinNumber: 60, label: 'GND' }, { pinNumber: 59, label: 'GND' }, { pinNumber: 58, label: 'GND' }, { pinNumber: 57, label: 'GND' }, { pinNumber: 56, label: 'GND' }, { pinNumber: 55, label: 'GND' }, { pinNumber: 54, label: 'GND' }, { pinNumber: 53, label: 'GND' }, { pinNumber: 52, label: 'GND' }, { pinNumber: 51, label: 'GND' }, { pinNumber: 50, label: 'GND' }, { pinNumber: 49, label: 'NC' }, { pinNumber: 48, label: 'GND' }, { pinNumber: 47, label: 'GND' }, { pinNumber: 46, label: 'GND' }],
   bodyMm: { w: 16, h: 21.9 },
+  antennaMm: 6.9,
 }
 
 export const C5_MINI_1_SYMBOL: SymbolLayout = {
@@ -801,6 +817,7 @@ export const H2_MINI_1_LAYOUT: PackageLayout = {
   right: [{ pinNumber: 50, label: 'GND' }, { pinNumber: 35, label: 'NC' }, { pinNumber: 34, label: 'NC' }, { pinNumber: 33, label: 'NC' }, { pinNumber: 32, label: 'NC' }, { pinNumber: 31, gpio: 24 }, { pinNumber: 30, gpio: 23 }, { pinNumber: 29, label: 'NC' }, { pinNumber: 28, label: 'NC' }, { pinNumber: 27, gpio: 27 }, { pinNumber: 26, gpio: 26 }, { pinNumber: 25, gpio: 25 }, { pinNumber: 51, label: 'GND' }],
   top: [{ pinNumber: 48, label: 'GND' }, { pinNumber: 47, label: 'GND' }, { pinNumber: 46, label: 'GND' }, { pinNumber: 45, label: 'GND' }, { pinNumber: 44, label: 'GND' }, { pinNumber: 43, label: 'GND' }, { pinNumber: 42, label: 'GND' }, { pinNumber: 41, label: 'GND' }, { pinNumber: 40, label: 'GND' }, { pinNumber: 39, label: 'GND' }, { pinNumber: 38, label: 'GND' }, { pinNumber: 37, label: 'GND' }, { pinNumber: 36, label: 'GND' }],
   bodyMm: { w: 13.6, h: 17 },
+  antennaMm: 6.25,
 }
 
 export const H2_MINI_1_SYMBOL: SymbolLayout = {
@@ -834,6 +851,7 @@ export const ESP8685_WROOM_06_LAYOUT: PackageLayout = {
   bottom: [{ pinNumber: 8, gpio: 3 }, { pinNumber: 9, gpio: 7 }, { pinNumber: 10, gpio: 6 }, { pinNumber: 11, gpio: 4 }, { pinNumber: 12, gpio: 5 }, { pinNumber: 13, label: 'GND' }, { pinNumber: 14, label: 'VDD33' }],
   right: [{ pinNumber: 21, gpio: 8 }, { pinNumber: 19, gpio: 10 }, { pinNumber: 18, label: 'CHIP_EN' }, { pinNumber: 17, label: 'NC' }, { pinNumber: 16, gpio: 19 }, { pinNumber: 15, gpio: 18 }],
   bodyMm: { w: 15.8, h: 20.3 },
+  antennaMm: 6.1,
 }
 
 export const ESP8685_WROOM_06_SYMBOL: SymbolLayout = {
@@ -866,6 +884,7 @@ export const ESP8684_WROOM_02C_LAYOUT: PackageLayout = {
   bottom: [],
   right: [{ pinNumber: 18, gpio: 0 }, { pinNumber: 17, gpio: 1 }, { pinNumber: 16, gpio: 2 }, { pinNumber: 15, gpio: 3 }, { pinNumber: 14, gpio: 18 }, { pinNumber: 13, label: 'NC' }, { pinNumber: 12, gpio: 20 }, { pinNumber: 11, gpio: 19 }, { pinNumber: 10, gpio: 10 }],
   bodyMm: { w: 19.6, h: 20.6 },
+  antennaMm: 7.4,
 }
 
 export const ESP8684_WROOM_02C_SYMBOL: SymbolLayout = {

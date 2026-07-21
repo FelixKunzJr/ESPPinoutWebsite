@@ -40,6 +40,33 @@ describe('chip data schema validation', () => {
   })
 })
 
+// The antenna keep-out is derived from the KiCad footprint rather than assumed
+// per form factor, so it is worth guarding: a bad measurement would silently
+// push the pin banks down the module instead of failing loudly.
+describe('antenna keep-out', () => {
+  const modules = CHIPS.filter(c => c.module?.form !== 'board' && c.packageLayout?.bodyMm)
+
+  it('covers every shielded module', () => {
+    expect(modules.length).toBeGreaterThan(0)
+    for (const chip of modules) {
+      expect(chip.packageLayout?.antennaMm, `${chip.name} has no antennaMm`).toBeGreaterThan(2)
+    }
+  })
+
+  it('never claims more than a third of the module body', () => {
+    for (const chip of modules) {
+      const { antennaMm, bodyMm } = chip.packageLayout!
+      expect(antennaMm! / bodyMm!.h, `${chip.name} keep-out is implausibly large`).toBeLessThan(0.45)
+    }
+  })
+
+  it('leaves the dev boards alone - their headers do start at the board edge', () => {
+    for (const chip of CHIPS.filter(c => c.module?.form === 'board')) {
+      expect(chip.packageLayout?.antennaMm, `${chip.name} should have no keep-out`).toBeUndefined()
+    }
+  })
+})
+
 describe('filterPins', () => {
   it('safe_output excludes input_only and flash_reserved pins', () => {
     const result = filterPins(esp32.pins, 'safe_output')

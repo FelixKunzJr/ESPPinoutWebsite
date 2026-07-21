@@ -13,6 +13,9 @@ const WROVER_LAYOUT = {
   ...WROOM32_LAYOUT,
   name: 'ESP-WROVER-32',
   bodyMm: { w: 18, h: 31.4 }, // WROVER-E datasheet outline (taller than WROOM)
+  // Antenna keep-out, rebased onto that outline from the KiCad ESP32-WROVER-E
+  // courtyard (32.5 mm tall, first pad 8.04 mm down).
+  antennaMm: 6.94,
 }
 
 export const esp32wrover: Chip = {

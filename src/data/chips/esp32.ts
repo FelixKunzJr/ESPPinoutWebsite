@@ -92,6 +92,9 @@ export const WROOM32_LAYOUT = {
     { pinNumber: 25, gpio:  0 },
   ],
   bodyMm: { w: 18, h: 25.5 }, // WROOM-32E datasheet outline
+  // Antenna keep-out, rebased onto that outline from the KiCad ESP32-WROOM-32E
+  // courtyard (26.6 mm tall, first pad 7.79 mm down).
+  antennaMm: 6.69,
 }
 
 export const ESP32_BASE_PINS = [

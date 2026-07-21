@@ -121,6 +121,7 @@ export interface PackageLayout {
   leftRailHoles?: number  // limit count of edge through-holes to render on left rail
   rightRailHoles?: number // limit count of edge through-holes to render on right rail
   bodyMm?: { w: number; h: number } // physical outline in mm (from the KiCad footprint courtyard) - drives true rendered proportions
+  antennaMm?: number   // pad-free strip at the top of the outline (the antenna keep-out), in mm
 }
 
 // Add packageLayout?: PackageLayout to Chip (optional; falls back to 50/50 split)

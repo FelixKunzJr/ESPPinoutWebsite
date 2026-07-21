@@ -507,12 +507,14 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
           ? chip.packageLayout?.leftRailHoles
           : chip.packageLayout?.rightRailHoles
         const limitHoles = overrideCount !== undefined ? overrideCount : rows
-        const railH = overrideCount !== undefined
-          ? limitHoles * ROW_H + 4
-          : H - modTop - 8
+        // The holes sit on the pin rows, so the rail has to be derived from
+        // them rather than from the module: anchoring it at modTop left the
+        // first hole floating just above the rail it belongs to.
+        const railY = ROW_H / 2 - 5
+        const railH = (limitHoles - 1) * ROW_H + 10
         return (
           <g key={si}>
-            <rect x={x - 3.5} y={modTop} width={7} height={railH} rx="3" fill="#0c1119" stroke="#2a333f" strokeWidth="0.6" />
+            <rect x={x - 3.5} y={railY} width={7} height={railH} rx="3" fill="#0c1119" stroke="#2a333f" strokeWidth="0.6" />
             {Array.from({ length: limitHoles }, (_, i) => (
               <circle key={i} cx={x} cy={i * ROW_H + ROW_H / 2} r={2.6} fill="#0a0d12" stroke="#caa83a" strokeWidth="1.1" />
             ))}
@@ -727,8 +729,12 @@ export function ModuleDiagram() {
   // drawn against the full body, which ran pin 1 up beside the antenna. The
   // body is now taller than the pad span by the keep-out, and the banks are
   // offset down by the same amount so each row sits on a pad that exists.
-  const antennaMm = resolveModule(chip).form === 'mini' ? 4.6 : 6.2
-  const antFrac = !isBoard && bodyMm ? antennaMm / bodyMm.h : 0
+  //
+  // The keep-out is measured from the footprint (see antennaMm in the
+  // generator), not assumed per form factor: it ranges from 5.6 mm on an
+  // S2-MINI-1 to 12.56 mm on the dual-antenna WROOM-DA.
+  const antennaMm = chip.packageLayout?.antennaMm ?? 0
+  const antFrac = !isBoard && bodyMm && antennaMm ? antennaMm / bodyMm.h : 0
   const antennaH = antFrac > 0 ? Math.round(sideHeight * antFrac / (1 - antFrac)) : 0
   const bodyH = sideHeight + antennaH
   const chipWidth  = isBoard
