@@ -109,7 +109,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       document.documentElement.classList.toggle('light', next === 'light')
       try { localStorage.setItem('theme', next) } catch { /* ignore */ }
       const meta = document.querySelector('meta[name="theme-color"]')
-      if (meta) meta.setAttribute('content', next === 'light' ? '#eef1f5' : '#030712')
+      if (meta) meta.setAttribute('content', next === 'light' ? '#f1ead9' : '#15120d')
       return next
     })
   }, [])

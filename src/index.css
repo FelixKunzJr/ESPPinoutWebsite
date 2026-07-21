@@ -37,17 +37,21 @@
   --map-chip-bg: rgba(99, 102, 241, 0.4);
   --map-chip-text: #a5b4fc;
   /* Brand logo (Logo.tsx + favicon.svg keeps a fixed copy of these) */
-  --logo-body: #101d31;
-  --logo-ring: rgba(148, 163, 184, 0.45);
-  --logo-ink: #f1f5f9;
-  --logo-green: #22c55e;
+  --logo-body: #241d12;
+  --logo-ring: rgba(217, 154, 60, 0.40);
+  --logo-ink: #efe9dc;
+  --logo-green: #d99a3c;
   /* EDA-bench chrome: a faint graph-paper grid behind the app and gently
      raised panels, so the UI belongs to the same world as the schematic sheet
      instead of reading as a flat dark dashboard. */
-  --grid-dot: rgba(148, 163, 184, 0.05);
-  --panel-bg: rgba(17, 24, 39, 0.55);
-  --panel-border: rgba(148, 163, 184, 0.11);
-  --panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 12px 32px -20px rgba(0, 0, 0, 0.7);
+  --grid-dot: rgba(217, 154, 60, 0.055);
+  --panel-bg: rgba(32, 27, 20, 0.55);
+  --panel-border: rgba(217, 154, 60, 0.14);
+  --panel-shadow: inset 0 1px 0 rgba(255, 236, 200, 0.04), 0 14px 34px -20px rgba(0, 0, 0, 0.75);
+  --accent: #d99a3c;
+  --accent-ink: #15120d;
+  --frame: rgba(217, 154, 60, 0.30);
+  --field-bg: rgba(217, 154, 60, 0.06);
 }
 html.light {
   --focus-ring: #1d4ed8;
@@ -72,14 +76,18 @@ html.light {
   --dg-underside-border: #94a3b8;
   --map-chip-bg: #e0e7ff;
   --map-chip-text: #4338ca;
-  --logo-body: #101d31;
+  --logo-body: #7c1c00;
   --logo-ring: transparent;
-  --logo-ink: #0e1a2b;
-  --logo-green: #16a34a;
-  --grid-dot: rgba(15, 23, 42, 0.05);
-  --panel-bg: #ffffff;
-  --panel-border: #e3e8ef;
-  --panel-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 14px 32px -22px rgba(15, 23, 42, 0.2);
+  --logo-ink: #2a2018;
+  --logo-green: #7c1c00;
+  --grid-dot: rgba(124, 28, 0, 0.06);
+  --panel-bg: #fbf6ea;
+  --panel-border: #ddd0b4;
+  --panel-shadow: 0 1px 2px rgba(80, 50, 20, 0.06), 0 14px 30px -22px rgba(80, 50, 20, 0.18);
+  --accent: #7c1c00;
+  --accent-ink: #fbf6ea;
+  --frame: rgba(124, 28, 0, 0.35);
+  --field-bg: rgba(124, 28, 0, 0.05);
 }
 
 /* IBM Plex is the app's type voice; the diagram SVGs keep their own inline
@@ -107,6 +115,56 @@ html { font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Robot
   background: var(--panel-bg);
   box-shadow: var(--panel-shadow);
 }
+
+/* ─── Dark = instrument bench ─────────────────────────────────────────────────
+   Warms the cool Tailwind gray ramp to charcoal and swaps the brand green for
+   bronze. Only chrome moves: the diagram's semantic colors are hex in the
+   components, so pin warnings/functions keep their meaning. */
+html:not(.light) .bg-gray-950 { background-color: #15120d; }
+html:not(.light) .bg-gray-950\/95 { background-color: rgba(21, 18, 13, 0.9); }
+html:not(.light) .bg-gray-900 { background-color: #201b14; }
+html:not(.light) .bg-gray-900\/40 { background-color: rgba(32, 27, 20, 0.5); }
+html:not(.light) .bg-gray-900\/60 { background-color: rgba(32, 27, 20, 0.7); }
+html:not(.light) .bg-gray-800 { background-color: #2c2519; }
+html:not(.light) .bg-gray-800\/60,
+html:not(.light) .bg-gray-800\/50,
+html:not(.light) .bg-gray-800\/40 { background-color: rgba(44, 37, 25, 0.5); }
+html:not(.light) .bg-gray-700,
+html:not(.light) .bg-gray-700\/80 { background-color: #3a3020; }
+html:not(.light) .bg-gray-600 { background-color: #4a3f2a; }
+html:not(.light) .hover\:bg-gray-800:hover { background-color: #37301f; }
+html:not(.light) .hover\:bg-gray-700:hover { background-color: #473b26; }
+html:not(.light) .hover\:bg-gray-600:hover { background-color: #574a30; }
+html:not(.light) .border-gray-800 { border-color: #2e281d; }
+html:not(.light) .border-gray-800\/60 { border-color: #2a2419; }
+html:not(.light) .border-gray-700,
+html:not(.light) .border-gray-700\/60 { border-color: #3d3427; }
+html:not(.light) .text-gray-100 { color: #efe9dc; }
+html:not(.light) .text-gray-200 { color: #e3dccb; }
+html:not(.light) .text-gray-300 { color: #cec3ab; }
+html:not(.light) .text-gray-400 { color: #ab9f86; }
+html:not(.light) .text-gray-500 { color: #8a7f68; }
+html:not(.light) .text-gray-600 { color: #6d6350; }
+html:not(.light) .text-gray-700 { color: #564d3d; }
+html:not(.light) .hover\:text-gray-100:hover,
+html:not(.light) .hover\:text-gray-200:hover,
+html:not(.light) .hover\:text-gray-300:hover,
+html:not(.light) .hover\:text-white:hover { color: #f4eee1; }
+/* Brand accent = bronze (semantic pin green in the diagram is hex, untouched) */
+html:not(.light) .text-green-400 { color: #d99a3c; }
+html:not(.light) .text-green-300 { color: #c98a2c; }
+html:not(.light) .bg-green-800 { background-color: #8a5f1f; }
+html:not(.light) .bg-green-700 { background-color: #a5741f; }
+html:not(.light) .hover\:bg-green-700:hover { background-color: #b9812c; }
+html:not(.light) .hover\:bg-green-600:hover { background-color: #c8933a; }
+html:not(.light) .bg-green-950\/25,
+html:not(.light) .bg-green-950\/20 { background-color: rgba(217, 154, 60, 0.08); }
+html:not(.light) .border-green-800\/50,
+html:not(.light) .border-green-700\/60 { border-color: rgba(217, 154, 60, 0.3); }
+html:not(.light) .text-green-100\/75 { color: rgba(240, 224, 198, 0.82); }
+html:not(.light) .text-green-100\/70 { color: rgba(240, 224, 198, 0.78); }
+html:not(.light) .bg-green-600 { background-color: #a5741f; }
+html:not(.light) .hover\:bg-green-500:hover { background-color: #b9812c; }
 
 /* Diagram row states (Tailwind classes inside the themed diagram card) */
 html.light .bg-violet-950\/40 { background-color: #ede9fe; }
@@ -157,52 +215,58 @@ select {
 }
 
 /* Page + card chrome */
-html.light .bg-gray-950 { background-color: #eef1f5; }
-html.light .bg-gray-950\/95 { background-color: rgba(248, 250, 252, 0.92); }
-html.light .bg-gray-900 { background-color: #ffffff; }
-html.light .bg-gray-900\/40 { background-color: #ffffff; }
-html.light .bg-gray-900\/60 { background-color: #f8fafc; }
-html.light .bg-gray-800 { background-color: #e7ebf1; }
+html.light .bg-gray-950 { background-color: #f1ead9; }
+html.light .bg-gray-950\/95 { background-color: rgba(243, 237, 224, 0.92); }
+html.light .bg-gray-900 { background-color: #fbf6ea; }
+html.light .bg-gray-900\/40 { background-color: #fbf6ea; }
+html.light .bg-gray-900\/60 { background-color: #f6efe0; }
+html.light .bg-gray-800 { background-color: #e6dcc3; }
 html.light .bg-gray-800\/60,
 html.light .bg-gray-800\/50,
-html.light .bg-gray-800\/40 { background-color: #eef1f6; }
+html.light .bg-gray-800\/40 { background-color: #efe7d5; }
 html.light .bg-gray-700,
-html.light .bg-gray-700\/80 { background-color: #dbe2ea; }
-html.light .bg-gray-600 { background-color: #c6d0db; }
-html.light .hover\:bg-gray-800:hover { background-color: #dde3ec; }
-html.light .hover\:bg-gray-700:hover { background-color: #cdd6e0; }
-html.light .hover\:bg-gray-600:hover { background-color: #b9c5d2; }
+html.light .bg-gray-700\/80 { background-color: #d8ccb0; }
+html.light .bg-gray-600 { background-color: #c3b492; }
+html.light .hover\:bg-gray-800:hover { background-color: #ddd2b7; }
+html.light .hover\:bg-gray-700:hover { background-color: #ccbf9f; }
+html.light .hover\:bg-gray-600:hover { background-color: #b7a680; }
 
-html.light .border-gray-800 { border-color: #d9dfe7; }
-html.light .border-gray-800\/60 { border-color: #e0e5ec; }
+html.light .border-gray-800 { border-color: #ddd0b4; }
+html.light .border-gray-800\/60 { border-color: #e2d7bf; }
 html.light .border-gray-700,
-html.light .border-gray-700\/60 { border-color: #c9d2dd; }
+html.light .border-gray-700\/60 { border-color: #ccbf9f; }
 
 /* The muted end of this ramp used to bottom out around #808b9b, which fails
    WCAG AA against the #eef1f5 page. Every step from 300 down is darkened so
    the lightest text still clears 4.5:1 on both the page and the white cards. */
-html.light .text-gray-100 { color: #020617; }
-html.light .text-gray-200 { color: #0f172a; }
-html.light .text-gray-300 { color: #1e293b; }
-html.light .text-gray-400 { color: #334155; }
-html.light .text-gray-500 { color: #47566b; }
-html.light .text-gray-600 { color: #55637a; }
-html.light .text-gray-700 { color: #64748b; }
-html.light .hover\:text-gray-200:hover { color: #0f172a; }
-html.light .hover\:text-gray-300:hover { color: #1e293b; }
-html.light .hover\:text-white:hover { color: #0f172a; }
-html.light .group:hover .group-hover\:text-gray-300 { color: #1e293b; }
-html.light .group:hover .group-hover\:text-white { color: #0f172a; }
+html.light .text-gray-100 { color: #201911; }
+html.light .text-gray-200 { color: #2c2317; }
+html.light .text-gray-300 { color: #3d3220; }
+html.light .text-gray-400 { color: #5c4f38; }
+html.light .text-gray-500 { color: #72654a; }
+html.light .text-gray-600 { color: #837458; }
+html.light .text-gray-700 { color: #94855f; }
+html.light .hover\:text-gray-200:hover { color: #2c2317; }
+html.light .hover\:text-gray-300:hover { color: #3d3220; }
+html.light .hover\:text-white:hover { color: #201911; }
+html.light .group:hover .group-hover\:text-gray-300 { color: #3d3220; }
+html.light .group:hover .group-hover\:text-white { color: #201911; }
 
-/* Brand green needs more pigment on white */
-html.light .text-green-400 { color: #15803d; }
-html.light .text-green-300 { color: #166534; }
-html.light .text-green-100\/75 { color: rgba(20, 83, 45, 0.85); }
-html.light .text-green-100\/70 { color: rgba(20, 83, 45, 0.8); }
+/* Brand accent on the drafting sheet is oxblood, the schematic symbol ink */
+html.light .text-green-400 { color: #7c1c00; }
+html.light .text-green-300 { color: #641600; }
+html.light .text-green-100\/75 { color: rgba(124, 28, 0, 0.85); }
+html.light .text-green-100\/70 { color: rgba(124, 28, 0, 0.8); }
 html.light .bg-green-950\/25,
-html.light .bg-green-950\/20 { background-color: #f0fdf4; }
+html.light .bg-green-950\/20 { background-color: #f6e9dc; }
 html.light .border-green-800\/50,
-html.light .border-green-700\/60 { border-color: #bbf7d0; }
+html.light .border-green-700\/60 { border-color: rgba(124, 28, 0, 0.28); }
+html.light .bg-green-800 { background-color: #7c1c00; }
+html.light .bg-green-700 { background-color: #8f2a06; }
+html.light .hover\:bg-green-700:hover { background-color: #a03308; }
+html.light .hover\:bg-green-600:hover { background-color: #b23c0c; }
+html.light .bg-green-600 { background-color: #8f2a06; }
+html.light .hover\:bg-green-500:hover { background-color: #a03308; }
 
 /* Gotchas banner + yellow accents: the same yellow as the KiCad schematic
    symbol body (#fff9c9), so the two surfaces read as one family. */
