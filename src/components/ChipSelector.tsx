@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { CHIPS } from '../data/chips/index'
 import { useApp } from '../context/AppContext'
+import { useMediaQuery } from '../utils/useMediaQuery'
 import type { Chip } from '../types/chip'
 
 const FAMILY_ACCENT: Record<string, string> = {
@@ -32,6 +33,12 @@ const tabOf = (c: Chip) => (isBoard(c) ? BOARDS : c.family)
 
 export function ChipSelector() {
   const { chip, setChip, theme } = useApp()
+  // Wrapping put the Boards list on four rows, pushing the diagram most of a
+  // screen down. On phones each row scrolls sideways on one line instead.
+  const isPhone = useMediaQuery('(max-width: 767px)')
+  const rowClass = isPhone
+    ? 'flex gap-1.5 flex-nowrap overflow-x-auto -mx-1 px-1 pb-0.5'
+    : 'flex flex-wrap gap-1.5'
 
   // Tab order: families in catalog order, then Boards.
   const tabs: string[] = []
@@ -68,7 +75,7 @@ export function ChipSelector() {
   return (
     <div className="flex flex-col gap-2">
       {/* Family tabs */}
-      <div className="flex flex-wrap gap-1.5">
+      <div className={rowClass}>
         {tabs.map(t => {
           const accent = accentOf(t)
           const active = tab === t
@@ -77,7 +84,7 @@ export function ChipSelector() {
             <button
               key={t}
               onClick={() => selectTab(t)}
-              className="rounded-md font-bold tracking-wide transition-all duration-150 flex items-center gap-1.5 leading-none"
+              className="rounded-md font-bold tracking-wide transition-all duration-150 flex items-center gap-1.5 leading-none flex-shrink-0 whitespace-nowrap"
               style={{
                 fontSize: 11.5, padding: '6px 10px',
                 color: active ? '#fff' : accent,
@@ -96,7 +103,7 @@ export function ChipSelector() {
       <div style={{ height: 1, background: 'var(--selector-sep)' }} />
 
       {/* Modules within the selected tab */}
-      <div className="flex flex-wrap gap-1.5">
+      <div className={rowClass}>
         {shown.map(c => {
           const accent = accentOf(tab)
           const active = chip.id === c.id
@@ -104,7 +111,7 @@ export function ChipSelector() {
             <button
               key={c.id}
               onClick={() => setChip(c.id)}
-              className="rounded-md text-[12.5px] font-semibold transition-all duration-150 leading-none"
+              className="rounded-md text-[12.5px] font-semibold transition-all duration-150 leading-none flex-shrink-0 whitespace-nowrap"
               style={{
                 padding: '6px 11px',
                 color: active ? '#fff' : 'var(--pill-text)',

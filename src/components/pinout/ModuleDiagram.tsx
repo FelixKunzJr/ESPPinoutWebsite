@@ -75,7 +75,8 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, co
     >
       {side === 'left' ? (
         <>
-          <div className="flex-1 flex items-center justify-end gap-[3px] min-w-0 overflow-hidden pr-1.5">
+          <div className={`flex items-center justify-end gap-[3px] pr-1.5 ${
+            compact ? 'grow shrink-0 basis-auto' : 'flex-1 min-w-0 overflow-hidden'}`}>
             {constraintChips}
             {functionBadges}
           </div>
@@ -90,7 +91,8 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, co
           <div style={{ width: compact ? 3 : 5, flexShrink: 0 }} />
           {pinNumBox}
           {connLine}
-          <div className="flex-1 flex items-center justify-start gap-[3px] min-w-0 overflow-hidden pl-1.5">
+          <div className={`flex items-center justify-start gap-[3px] pl-1.5 ${
+            compact ? 'grow shrink-0 basis-auto' : 'flex-1 min-w-0 overflow-hidden'}`}>
             {functionBadges}
             {constraintChips}
           </div>
@@ -739,30 +741,68 @@ export function ModuleDiagram() {
   // than being clipped at both edges or squashed out of shape. 1:1 stays
   // available for reading the labels at full size.
   const canvasRef = useRef<HTMLDivElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const reserveRef = useRef<HTMLDivElement>(null)
   const [fit, setFit] = useState(true)
-  const [box, setBox] = useState({ s: 1, h: 0, x: 0 })
   const scaled = compact && fit
 
+  // Applied imperatively rather than through state. Two reasons: the measure
+  // has to run against an untransformed layout, which means clearing the
+  // transform first - impossible if the transform is the render output it
+  // feeds - and it avoids a setState per measurement.
   useLayoutEffect(() => {
-    // No reset when unscaled: the styles below are gated on `scaled`, so a
-    // stale box is never read, and clearing it here would be a synchronous
-    // setState in an effect.
-    if (!scaled) return
-    const measure = () => {
-      const avail = scrollRef.current?.clientWidth ?? 0
-      const el = canvasRef.current
-      if (!el || !avail) return
-      // A transform does not change the element's own layout box, so these
-      // stay the intrinsic dimensions however far it has been scaled.
-      const w = el.scrollWidth
-      const h = el.scrollHeight
-      const s = Math.min(1, avail / w)
-      setBox({ s, h: h * s, x: Math.max(0, (avail - w * s) / 2) })
+    const cont = scrollRef.current
+    const el = canvasRef.current
+    const wrap = wrapRef.current
+    const reserve = reserveRef.current
+    if (!cont || !el || !wrap || !reserve) return
+
+    const apply = () => {
+      // Always measure from a clean slate. The clipping in particular has to
+      // come off: it is what keeps the untransformed layout box from showing
+      // a scrollbar, but while it is on, the canvas is sized against the
+      // clipped box and the outermost badges get cut.
+      wrap.style.transform = 'none'
+      reserve.style.height = ''
+      reserve.style.overflow = ''
+      if (!scaled) return
+
+      // scrollWidth is not enough: it counts what spills to the right of the
+      // box but not to the left, and the left bank's rows do exactly that.
+      // The union of the descendant rects is the real drawn extent.
+      const base = el.getBoundingClientRect()
+      let left = base.left, right = base.right, bottom = base.bottom
+      for (const n of el.querySelectorAll<HTMLElement>('*')) {
+        const r = n.getBoundingClientRect()
+        if (r.width === 0 && r.height === 0) continue
+        if (r.left < left) left = r.left
+        if (r.right > right) right = r.right
+        if (r.bottom > bottom) bottom = r.bottom
+      }
+      const w = right - left
+      const avail = cont.clientWidth
+      const s = w > 0 ? Math.min(1, avail / w) : 1
+      if (s >= 1) return
+
+      // Scaling happens about the wrapper's top-left, so a point p lands at
+      // origin + x + (p - origin) * s. Solve x for the leftmost content to
+      // sit centred in the available width.
+      const origin = wrap.getBoundingClientRect().left
+      const target = cont.getBoundingClientRect().left + cont.clientLeft + (avail - w * s) / 2
+      const x = target - origin - (left - origin) * s
+
+      wrap.style.transform = `translateX(${x}px) scale(${s})`
+      // The transform leaves the layout box at full size, so the row has to
+      // be told what the scaled drawing actually occupies, and the leftover
+      // box clipped away. Only ever with a scale in effect - see above.
+      reserve.style.height = `${(bottom - base.top) * s}px`
+      reserve.style.overflow = 'hidden'
     }
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [scaled, chip.id, filter, mapping.length])
+
+    apply()
+    window.addEventListener('resize', apply)
+    return () => window.removeEventListener('resize', apply)
+  }, [scaled, chip.id, filter, mapping.length, selectedPin?.gpio])
 
   return (
     <>
@@ -777,13 +817,9 @@ export function ModuleDiagram() {
         </button>
       </div>
     )}
-    <div ref={scrollRef} className={`${compact ? 'px-2 pt-2' : 'p-4'} pb-2 ${scaled ? 'overflow-hidden' : 'overflow-x-auto'}`}>
-      <div style={scaled ? { height: box.h } : undefined}>
-      <div style={scaled ? {
-        transform: `translateX(${box.x}px) scale(${box.s})`,
-        transformOrigin: 'top left',
-        width: 'max-content',
-      } : undefined}>
+    <div ref={scrollRef} className={`${compact ? 'px-2 pt-2' : 'p-4'} pb-2 overflow-x-auto`}>
+      <div ref={reserveRef}>
+      <div ref={wrapRef} style={scaled ? { transformOrigin: 'top left', width: 'max-content' } : undefined}>
       <div ref={canvasRef} id="module-diagram-canvas" className={`flex flex-col items-center min-w-fit mx-auto ${compact ? 'p-0' : 'p-2'}`}>
 
         {/* The banks + body + edge rows live in one grid: the two 1fr bank
@@ -791,7 +827,13 @@ export function ModuleDiagram() {
             and the top/bottom pin rows) is always exactly centered - with a
             plain centered flex column, unequal bank widths shifted the bottom
             pins off the module's pads. */}
-        <div className="grid" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+        {/* 1fr banks equalize, which centers the body - but an fr track is
+            sized from the space available, not from its content, so on a
+            narrow screen the banks came up short and the rows spilled past
+            their track (the warning markers went first). Compact sizes the
+            banks to their content instead: nothing overflows, so the width
+            the fit-to-width measurement reads back is the real one. */}
+        <div className="grid" style={{ gridTemplateColumns: compact ? 'max-content auto max-content' : '1fr auto 1fr' }}>
 
         {/* ── Exposed thermal pad (EPAD) - a ground paddle on the back, not an edge ── */}
         {topIsThermal && (
