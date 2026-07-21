@@ -5,15 +5,17 @@ import userEvent from '@testing-library/user-event'
 import { AppProvider } from '../src/context/AppContext'
 import { PinTable } from '../src/components/PinTable'
 import { PinDetailPanel } from '../src/components/PinDetailPanel'
+import { MobileActionBar } from '../src/components/MobileActionBar'
 import { deinteractivize } from '../src/utils/exportDiagram'
 
 afterEach(cleanup)
 
-function Studio() {
+function Studio({ phone = false }: { phone?: boolean } = {}) {
   return (
     <AppProvider>
       <PinTable />
       <PinDetailPanel />
+      {phone && <MobileActionBar />}
     </AppProvider>
   )
 }
@@ -121,7 +123,7 @@ describe('pin table on a phone', () => {
   it('opens pin details as a modal bottom sheet, not the side panel', async () => {
     mockPhone(true)
     const user = userEvent.setup()
-    render(<Studio />)
+    render(<Studio phone />)
 
     await user.click(document.querySelector('[data-pin-anchor]') as HTMLElement)
     const dialog = screen.getByRole('dialog')
@@ -129,6 +131,29 @@ describe('pin table on a phone', () => {
     // modal and shares the shell the bottom action bar already uses.
     expect(dialog.getAttribute('aria-modal')).toBe('true')
     expect(dialog.className).not.toContain('right-0')
+  })
+
+  it('drills down inside the pin-table sheet instead of stacking a second one', async () => {
+    mockPhone(true)
+    const user = userEvent.setup()
+    render(<Studio phone />)
+
+    await user.click(screen.getByRole('button', { name: 'Pins' }))
+    expect(screen.getAllByRole('dialog')).toHaveLength(1)
+
+    // Pick a pin row from inside the sheet.
+    const sheet = screen.getByRole('dialog')
+    await user.click(sheet.querySelector('[data-pin-anchor]') as HTMLElement)
+
+    // Still exactly one sheet - the table did not get stranded behind a
+    // second one - and it now shows the pin with a way back.
+    const dialogs = screen.getAllByRole('dialog')
+    expect(dialogs).toHaveLength(1)
+    expect(dialogs[0].getAttribute('aria-label')).toMatch(/^GPIO\d+ details$/)
+
+    const back = screen.getByRole('button', { name: /back to the pin table/i })
+    await user.click(back)
+    expect(screen.getByRole('dialog').getAttribute('aria-label')).toBe('Pin table')
   })
 
   it('keeps the docked side panel on desktop', async () => {
