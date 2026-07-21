@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
 import type { Pin, Chip, LayoutPin } from '../../types/chip'
-import { ROW_H, getBadge, connectorColor, sevStyle, SpecialBadge, ConstraintChips, FunctionBadges, primaryConstraint, resolveModule } from './shared'
+import { ROW_H, getBadge, connectorColor, sevStyle, SpecialBadge, ConstraintChips, FunctionBadges, primaryConstraint, resolveModule, pinActivationProps, pinAriaLabel } from './shared'
 
 // ─── Left / right pin row ─────────────────────────────────────────────────────
 
@@ -60,10 +60,10 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, on
 
   return (
     <div
-      onClick={onClick}
-      className={`flex items-center cursor-pointer select-none transition-colors
+      {...pinActivationProps(onClick, pinAriaLabel(pin, layoutPin.label ?? 'NC'), pin?.gpio)}
+      className={`pin-row flex items-center select-none transition-colors
         ${isActive ? '' : 'opacity-[0.07]'}
-        ${isSelected ? 'bg-violet-950/40' : 'hover:bg-white/[0.03]'}
+        ${isSelected ? 'bg-violet-950/40 is-selected' : ''}
       `}
       style={{
         height: ROW_H,
@@ -175,10 +175,10 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, on
 
   return (
     <div
-      onClick={onClick}
-      className={`flex flex-col items-center cursor-pointer select-none transition-colors
+      {...pinActivationProps(onClick, pinAriaLabel(pin, layoutPin.label ?? 'NC'), pin?.gpio)}
+      className={`pin-row rounded flex flex-col items-center select-none transition-colors
         ${isActive ? '' : 'opacity-[0.07]'}
-        ${isSelected ? 'bg-violet-950/40 rounded' : 'hover:bg-white/[0.03] rounded'}
+        ${isSelected ? 'bg-violet-950/40 is-selected' : ''}
       `}
       style={{ width: colWidth, gap: 3, paddingBottom: edge === 'bottom' ? 4 : 0, paddingTop: edge === 'top' ? 4 : 0 }}
     >
@@ -217,10 +217,10 @@ function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedP
           return (
             <div
               key={lp.pinNumber}
-              onClick={() => onToggle(pin)}
-              className={`flex items-center gap-1.5 cursor-pointer select-none rounded-md transition-colors
+              {...pinActivationProps(() => onToggle(pin), pinAriaLabel(pin, `pad ${lp.pinNumber}`), pin.gpio)}
+              className={`pin-pad flex items-center gap-1.5 select-none rounded-md transition-colors
                 ${isActive ? '' : 'opacity-[0.07]'}
-                ${isSelected ? 'bg-violet-950/60' : 'hover:bg-white/[0.05]'}`}
+                ${isSelected ? 'bg-violet-950/60 is-selected' : ''}`}
               style={{ padding: '3px 7px', border: `1px dashed ${borderColor}`, background: isSelected ? undefined : 'var(--dg-chip-bg)' }}
             >
               <span className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: color, boxShadow: `0 0 4px ${color}60` }} />

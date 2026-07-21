@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import { ConstraintBadge } from './ConstraintBadge'
 import { reportMistakeUrl } from '../utils/github'
+import { IconWarning } from './icons'
 import { specialInterfaces, matrixPeripherals } from '../data/routing'
 
 const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
@@ -27,10 +28,17 @@ export function PinDetailPanel() {
   // (not a backdrop) so a click on another pin selects it directly instead of
   // just dismissing. The pin-diagram click that opened the panel has already
   // finished before this effect attaches, so it won't self-close.
+  //
+  // Clicks that land on a pin are exempt: mousedown used to clear the
+  // selection a beat before the pin's own click handler ran, so the toggle
+  // saw an empty selection and re-opened instead of closing. Re-clicking the
+  // open pin now closes it, which is what the toggle always intended.
   useEffect(() => {
     if (!selectedPin) return
     const onDown = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+      const target = e.target as Element | null
+      if (target?.closest?.('[data-pin-anchor]')) return
+      if (panelRef.current && !panelRef.current.contains(target as Node)) {
         setSelectedPin(null)
       }
     }
@@ -59,20 +67,31 @@ export function PinDetailPanel() {
     .map(c => ({ cap: c, detail: CAP_DETAILS[c] ?? { label: c.toUpperCase(), desc: '' } }))
 
   return (
-    <div ref={panelRef} className="fixed right-0 top-0 h-full w-80 bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col z-50 overflow-y-auto">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+    <div
+      ref={panelRef}
+      role="dialog"
+      aria-label={`GPIO${selectedPin.gpio} details`}
+      className="fixed right-0 top-0 h-full w-80 max-w-[90vw] bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col z-50 overflow-y-auto"
+    >
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
         <div>
           <span className="text-2xl font-bold font-mono text-green-400">GPIO{selectedPin.gpio}</span>
           <p className="text-xs text-gray-400 mt-0.5">{chip.name}</p>
         </div>
-        <button onClick={() => setSelectedPin(null)} className="text-gray-500 hover:text-gray-200 text-xl">✕</button>
+        <button
+          onClick={() => setSelectedPin(null)}
+          aria-label="Close pin details"
+          className="text-gray-400 hover:text-gray-100 text-xl leading-none px-1"
+        >
+          ✕
+        </button>
       </div>
 
       <div className="p-4 flex-1 space-y-5">
         {padLocation && (
           <div className="rounded-lg bg-amber-950/40 border border-amber-700 px-3 py-2">
             <p className="text-xs text-amber-300 leading-relaxed">
-              🔧 <span className="font-semibold">Solder pad only</span> ({padLocation} of the board) - this
+              <span className="font-semibold">Solder pad only</span> ({padLocation} of the board) - this
               signal is not on the headers. No breadboard or header pin access; you must solder a wire
               directly to the pad.
             </p>
@@ -90,8 +109,8 @@ export function PinDetailPanel() {
 
         {selectedPin.constraints.length > 0 && (
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-              ⚠️ Constraints &amp; Gotchas
+            <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+              <IconWarning size={13} />Constraints &amp; Gotchas
             </h3>
             <div className="space-y-2">
               {selectedPin.constraints.map(c => (
@@ -133,8 +152,8 @@ export function PinDetailPanel() {
           <div className="rounded-lg bg-gray-800/40 border border-gray-700/60 px-3 py-2">
             <p className="text-[11px] text-gray-400 leading-relaxed">
               {selectedPin.constraints.some(c => c.id === 'input_only')
-                ? '🔀 Input-only, but the GPIO matrix can still route peripheral inputs here (UART RX, I2S data in, pulse counter and similar).'
-                : `🔀 Via the GPIO matrix this pin can also host ${matrixPeripherals(chip.family).join(' · ')} - most peripherals are not tied to specific pins.`}
+                ? 'Input-only, but the GPIO matrix can still route peripheral inputs here (UART RX, I2S data in, pulse counter and similar).'
+                : `Via the GPIO matrix this pin can also host ${matrixPeripherals(chip.family).join(' · ')} - most peripherals are not tied to specific pins.`}
             </p>
           </div>
         )}
@@ -148,7 +167,7 @@ export function PinDetailPanel() {
 
         {!selectedPin.isUsable && (
           <div className="rounded-lg bg-red-900/30 border border-red-600 p-3 text-center">
-            <span className="text-red-300 font-semibold text-sm">⛔ Do not use this pin</span>
+            <span className="text-red-300 font-semibold text-sm">Do not use this pin</span>
             <p className="text-xs text-red-400 mt-1">This GPIO is reserved by the chip and cannot be used for user code.</p>
           </div>
         )}
@@ -157,10 +176,10 @@ export function PinDetailPanel() {
           href={reportMistakeUrl(chip, selectedPin)}
           target="_blank"
           rel="noopener noreferrer"
-          className="report-mistake block text-center text-xs rounded-lg px-3 py-2 transition-colors"
+          className="link-plain report-mistake block text-center text-xs rounded-lg px-3 py-2 transition-colors"
           style={{ color: '#fbbf24', border: '1px solid #78350f', background: 'rgba(120,53,15,0.2)' }}
         >
-          ⚠ Report a mistake with this pin
+          <span className="inline-flex items-center gap-1.5"><IconWarning size={12} />Report a mistake with this pin</span>
         </a>
       </div>
     </div>

@@ -1,6 +1,37 @@
+import type { KeyboardEvent } from 'react'
 import type { Pin, Chip, ModuleInfo, ConstraintId, Severity } from '../../types/chip'
 
 export const ROW_H = 30
+
+// ─── Clickable pin rows ───────────────────────────────────────────────────────
+
+// The pin rows stay <div>s - they carry dense inline flex layout that a
+// <button> reset would fight - so they opt into button semantics by hand:
+// role, tab stop, Enter/Space activation, and a screen-reader label.
+//
+// data-pin-anchor is what the detail popover positions itself against, and
+// what tells the popover's outside-click handler "this click is a pin, let
+// the row's own toggle decide" - without it, mousedown closed the popover a
+// beat before the click could reopen it, so re-clicking a pin did nothing.
+export function pinActivationProps(onClick: () => void, label: string, gpio?: number) {
+  return {
+    onClick,
+    onKeyDown: (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() }
+    },
+    role: 'button',
+    tabIndex: 0,
+    'aria-label': label,
+    ...(gpio !== undefined ? { 'data-pin-anchor': String(gpio) } : {}),
+  } as const
+}
+
+// Screen-reader label for a pin row: the GPIO plus what it is called.
+export function pinAriaLabel(pin: Pin | undefined, fallback: string): string {
+  if (!pin) return `${fallback} pin`
+  const alt = pin.names.filter(n => !/^GPIO\d/.test(n))
+  return `GPIO${pin.gpio}${alt.length ? `, ${alt.join(', ')}` : ''}`
+}
 
 // ─── Function colors: single source of truth ──────────────────────────────────
 // Every view (schematic text, module badges, connector dots) and the legend

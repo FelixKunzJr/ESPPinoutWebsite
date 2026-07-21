@@ -10,6 +10,11 @@
    both themes (its palette is tuned like a photo of a physical board). */
 
 :root {
+  /* Focus ring + pin-row hover. The old hover was a 3% white wash, which was
+     invisible against the diagram canvas; both now read at a glance. */
+  --focus-ring: #60a5fa;
+  --pin-hover: rgba(255, 255, 255, 0.10);
+  --pin-hover-strong: rgba(255, 255, 255, 0.14);
   --pill-bg: rgba(255, 255, 255, 0.03);
   --pill-border: rgba(255, 255, 255, 0.10);
   --pill-border-dim: rgba(255, 255, 255, 0.09);
@@ -20,12 +25,12 @@
      keeps its physical colors; only the UI around it follows the theme. */
   --dg-bg: #060b12;
   --dg-border: #1a2535;
-  --dg-muted: #5a6b80;
-  --dg-muted2: #4a5a6e;
-  --dg-link: #6b7f99;
+  --dg-muted: #8296ad;
+  --dg-muted2: #74869c;
+  --dg-link: #93b4dd;
   --dg-chip-bg: #0d1520;
   --dg-chip-border: #1e2d40;
-  --dg-chip-text: #3d5068;
+  --dg-chip-text: #6d84a1;
   --dg-row-border: #050a10;
   --dg-toggle-border: #2a3a52;
   --dg-underside-border: #2a3a52;
@@ -38,6 +43,9 @@
   --logo-green: #22c55e;
 }
 html.light {
+  --focus-ring: #1d4ed8;
+  --pin-hover: rgba(15, 23, 42, 0.10);
+  --pin-hover-strong: rgba(15, 23, 42, 0.14);
   --pill-bg: rgba(15, 23, 42, 0.03);
   --pill-border: rgba(15, 23, 42, 0.16);
   --pill-border-dim: rgba(15, 23, 42, 0.14);
@@ -46,12 +54,12 @@ html.light {
   --selector-sep: rgba(15, 23, 42, 0.10);
   --dg-bg: #fbfcfe;
   --dg-border: #dbe1e8;
-  --dg-muted: #64748b;
-  --dg-muted2: #6b7a8f;
-  --dg-link: #47617e;
+  --dg-muted: #4b5769;
+  --dg-muted2: #55637a;
+  --dg-link: #1d4ed8;
   --dg-chip-bg: #eef1f6;
   --dg-chip-border: #d3dbe4;
-  --dg-chip-text: #5b6b7f;
+  --dg-chip-text: #47566b;
   --dg-row-border: #e8edf3;
   --dg-toggle-border: #c9d2dd;
   --dg-underside-border: #94a3b8;
@@ -64,10 +72,40 @@ html.light {
 }
 
 /* Diagram row states (Tailwind classes inside the themed diagram card) */
-html.light .hover\:bg-white\/\[0\.03\]:hover { background-color: rgba(15, 23, 42, 0.045); }
-html.light .hover\:bg-white\/\[0\.05\]:hover { background-color: rgba(15, 23, 42, 0.055); }
 html.light .bg-violet-950\/40 { background-color: #ede9fe; }
 html.light .bg-violet-950\/60 { background-color: #ddd6fe; }
+
+/* ─── Focus + links ──────────────────────────────────────────────────────────
+   Every interactive element in the app is either a <button>, an <a>, a form
+   control, or carries role="button" - so one rule covers the whole surface.
+   :focus-visible (not :focus) keeps the ring off mouse clicks. */
+:where(a, button, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Links inside prose are underlined so they are identifiable without relying
+   on color alone (WCAG 1.4.1). Navigation/toolbar links opt out with
+   .link-plain - there, position and grouping already carry the affordance. */
+a:not(.link-plain) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+a:not(.link-plain):hover { text-decoration-thickness: 2px; }
+
+/* Clickable pin rows and pads across both diagram views. Selected rows keep
+   their violet fill (set in the component) and opt out via .is-selected. */
+.pin-row:hover:not(.is-selected)    { background-color: var(--pin-hover); }
+.pin-pad:hover:not(.is-selected)    { background-color: var(--pin-hover-strong); }
+.pin-row, .pin-pad                  { cursor: pointer; }
+/* The ring sits inside the row so it can't be clipped by the diagram's
+   overflow-hidden card edge. */
+.pin-row:focus-visible, .pin-pad:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--focus-ring);
+}
 
 /* Native selects: kill the glossy OS widget, draw our own flat chevron.
    Colors come from the element's own (themed) bg/border classes. */
@@ -103,13 +141,16 @@ html.light .border-gray-800\/60 { border-color: #e0e5ec; }
 html.light .border-gray-700,
 html.light .border-gray-700\/60 { border-color: #c9d2dd; }
 
-html.light .text-gray-100 { color: #0f172a; }
-html.light .text-gray-200 { color: #1e293b; }
-html.light .text-gray-300 { color: #334155; }
-html.light .text-gray-400 { color: #475569; }
-html.light .text-gray-500 { color: #64748b; }
-html.light .text-gray-600 { color: #808b9b; }
-html.light .text-gray-700 { color: #98a3b3; }
+/* The muted end of this ramp used to bottom out around #808b9b, which fails
+   WCAG AA against the #eef1f5 page. Every step from 300 down is darkened so
+   the lightest text still clears 4.5:1 on both the page and the white cards. */
+html.light .text-gray-100 { color: #020617; }
+html.light .text-gray-200 { color: #0f172a; }
+html.light .text-gray-300 { color: #1e293b; }
+html.light .text-gray-400 { color: #334155; }
+html.light .text-gray-500 { color: #47566b; }
+html.light .text-gray-600 { color: #55637a; }
+html.light .text-gray-700 { color: #64748b; }
 html.light .hover\:text-gray-200:hover { color: #0f172a; }
 html.light .hover\:text-gray-300:hover { color: #1e293b; }
 html.light .hover\:text-white:hover { color: #0f172a; }

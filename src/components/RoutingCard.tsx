@@ -19,7 +19,7 @@ export function RoutingCard() {
       <div>
         <div className="flex items-baseline justify-between gap-2 mb-1">
           <p className="text-xs font-semibold text-gray-300">
-            🔀 Peripheral routing - GPIO matrix &amp; IO MUX
+            Peripheral routing - GPIO matrix &amp; IO MUX
           </p>
           {TRM_URLS[chip.family] && (
             <a
