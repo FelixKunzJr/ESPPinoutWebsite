@@ -751,11 +751,10 @@ export function ModuleDiagram() {
   // transform first - impossible if the transform is the render output it
   // feeds - and it avoids a setState per measurement.
   useLayoutEffect(() => {
-    const cont = scrollRef.current
     const el = canvasRef.current
     const wrap = wrapRef.current
     const reserve = reserveRef.current
-    if (!cont || !el || !wrap || !reserve) return
+    if (!el || !wrap || !reserve) return
 
     const apply = () => {
       // Always measure from a clean slate. The clipping in particular has to
@@ -780,15 +779,23 @@ export function ModuleDiagram() {
         if (r.bottom > bottom) bottom = r.bottom
       }
       const w = right - left
-      const avail = cont.clientWidth
-      const s = w > 0 ? Math.min(1, avail / w) : 1
+      // Measured against the reserve box, because that is the element that
+      // does the clipping. Going through the scroll container instead meant
+      // mixing its border-box left with its content-box width - clientLeft is
+      // the border, not the padding - which placed the diagram a padding's
+      // width to the left of the box that clips it, shaving the outermost
+      // badge off every row.
+      const frame = reserve.getBoundingClientRect()
+      const avail = reserve.clientWidth
+      if (!avail || w <= 0) return
+      const s = Math.min(1, avail / w)
       if (s >= 1) return
 
       // Scaling happens about the wrapper's top-left, so a point p lands at
       // origin + x + (p - origin) * s. Solve x for the leftmost content to
       // sit centred in the available width.
       const origin = wrap.getBoundingClientRect().left
-      const target = cont.getBoundingClientRect().left + cont.clientLeft + (avail - w * s) / 2
+      const target = frame.left + (avail - w * s) / 2
       const x = target - origin - (left - origin) * s
 
       wrap.style.transform = `translateX(${x}px) scale(${s})`
@@ -800,8 +807,35 @@ export function ModuleDiagram() {
     }
 
     apply()
-    window.addEventListener('resize', apply)
-    return () => window.removeEventListener('resize', apply)
+
+    // A single measurement at mount is not enough: it can land before the
+    // layout has settled, and the diagram then sits unscaled and overflowing
+    // for the life of the page. Re-measure whenever either box changes width,
+    // which also covers rotation and late font loads.
+    //
+    // Width only, and only on an actual change: applying a scale sets the
+    // reserve height, which resizes the container, which would otherwise
+    // notify us straight back into applying it again.
+    let lastAvail = reserve.clientWidth
+    let lastWidth = el.offsetWidth
+    const onResize = () => {
+      const avail = reserve.clientWidth
+      const width = el.offsetWidth
+      if (avail === lastAvail && width === lastWidth) return
+      lastAvail = avail
+      lastWidth = width
+      apply()
+    }
+    // Guarded: not every environment provides it (jsdom, older browsers).
+    // The resize listener below is the fallback.
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onResize) : null
+    ro?.observe(reserve)
+    ro?.observe(el)
+    window.addEventListener('resize', onResize)
+    return () => {
+      ro?.disconnect()
+      window.removeEventListener('resize', onResize)
+    }
   }, [scaled, chip.id, filter, mapping.length, selectedPin?.gpio])
 
   return (

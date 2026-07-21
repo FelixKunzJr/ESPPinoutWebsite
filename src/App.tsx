@@ -100,7 +100,7 @@ export default function App() {
       <div className="flex-1 max-w-screen-2xl mx-auto w-full px-4 py-8">
         <div className={`grid grid-cols-1 gap-8 ${sidebarOpen ? 'xl:grid-cols-[1fr_380px]' : ''}`}>
           {/* Left: diagram + filter + table */}
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0">
             {/* Chip notes. Collapsible, and closed by default on phones -
                 the list runs long enough to push the diagram off screen. */}
             {chip.notes.length > 0 && (
@@ -142,7 +142,7 @@ export default function App() {
 
           {/* Right sidebar */}
           {sidebarOpen && !isPhone && (
-            <div className="space-y-6">
+            <div className="space-y-6 min-w-0">
               <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
                 <MappingBuilder />
               </div>
