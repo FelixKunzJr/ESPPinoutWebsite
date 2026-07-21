@@ -13,8 +13,10 @@ export function ExportActions({ variant }: { variant: 'header' | 'panel' }) {
   const pdf = () => openPrintSheet(chip, view, mapping)
 
   if (variant === 'header') {
+    // Hidden on phones: they crowd the wordmark at 390px, and the bottom
+    // action bar already carries Export there.
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="hidden sm:flex items-center gap-1.5">
         <button
           onClick={png}
           title="Download the current diagram as a PNG"

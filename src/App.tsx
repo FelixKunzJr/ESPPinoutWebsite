@@ -44,8 +44,8 @@ export default function App() {
       {/* Header */}
       <header className="border-b border-gray-800 px-6 py-4 sticky top-0 bg-gray-950/95 backdrop-blur z-40">
         <div className="max-w-screen-2xl mx-auto">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <div className="flex items-center gap-3 min-w-0">
               <h1 className="m-0"><Logo /></h1>
               <p className="text-xs text-gray-500 hidden sm:block border-l border-gray-800 pl-3">
                 Free interactive pinout reference<br />for the maker community
