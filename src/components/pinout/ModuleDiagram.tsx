@@ -555,9 +555,20 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
           <circle cx={cx - 14} cy={chipCy - 14} r={1.6} fill="#39434f" />
           <text x={cx} y={chipCy - 2} textAnchor="middle" fontSize="5.6" fontFamily="monospace" fontWeight="700" fill="#5a6675" letterSpacing="0.4">ESPRESSIF</text>
           <text x={cx} y={chipCy + 7} textAnchor="middle" fontSize="5" fontFamily="monospace" fill="#495563">{chipShort}</text>
-          {/* ceramic antenna block at the far end from the USB */}
+          {/* Antenna at the far end from the USB. A ceramic chip antenna is a
+              soldered block (S3-Zero); a PCB antenna is etched into the board
+              itself, so it gets a copper meander on bare laminate instead. */}
           {(() => {
             const antY = usbTop ? H - 19 : 7
+            if (m.antenna === 'pcb') {
+              return (
+                <g>
+                  <rect x={cx - 30} y={antY} width={60} height={12} rx="1" fill="#0a1a12" stroke="#1d3a2a" strokeWidth="0.6" />
+                  <path d={meanderPath(cx - 26, cx + 26, antY + 3, antY + 10)} fill="none" stroke="#c9a227" strokeWidth="1.3" opacity="0.85" />
+                  <text x={cx + 36} y={antY + 9} fontSize="5.4" fontFamily="monospace" fill="#5a6675" letterSpacing="0.5">ANT</text>
+                </g>
+              )
+            }
             return (
               <g>
                 <rect x={cx - 30} y={antY} width={60} height={12} rx="1.5" fill="#d9d2c0" stroke="#8a8578" strokeWidth="0.8" />

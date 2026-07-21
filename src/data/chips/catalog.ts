@@ -11,6 +11,8 @@ import esp32DevkitcJson from '../../../contrib/boards/esp32-devkitc.board.json'
 import xiaoEsp32c3Json from '../../../contrib/boards/xiao-esp32c3.board.json'
 import xiaoEsp32s3Json from '../../../contrib/boards/xiao-esp32s3.board.json'
 import xiaoEsp32c6Json from '../../../contrib/boards/xiao-esp32c6.board.json'
+import c3SuperMiniJson from '../../../contrib/boards/esp32-c3-supermini.board.json'
+import c6SuperMiniJson from '../../../contrib/boards/esp32-c6-supermini.board.json'
 import { resolveBoard } from '../boards/resolveBoard'
 import { enrichPins } from './enrich'
 import type { BoardSpec } from '../boards/types'
@@ -229,6 +231,11 @@ export const xiaoEsp32c3 = resolveBoard(xiaoEsp32c3Json as unknown as BoardSpec,
 export const xiaoEsp32s3 = resolveBoard(xiaoEsp32s3Json as unknown as BoardSpec, byId('esp32s3')).chip!
 export const xiaoEsp32c6 = resolveBoard(xiaoEsp32c6Json as unknown as BoardSpec, byId('esp32c6')).chip!
 
+// SuperMini boards - unbranded, but the reference schematics are published and
+// the header order below is read off them plus the vendor pinout art.
+export const c3SuperMini = resolveBoard(c3SuperMiniJson as unknown as BoardSpec, byId('esp32c3')).chip!
+export const c6SuperMini = resolveBoard(c6SuperMiniJson as unknown as BoardSpec, byId('esp32c6')).chip!
+
 
 // Ordered, grouped by family for the selector.
 export const CHIPS: Chip[] = [
@@ -268,6 +275,8 @@ export const CHIPS: Chip[] = [
   xiaoEsp32c3,
   xiaoEsp32s3,
   xiaoEsp32c6,
+  c3SuperMini,
+  c6SuperMini,
 ]
 
 export function getChip(id: string): Chip | undefined {

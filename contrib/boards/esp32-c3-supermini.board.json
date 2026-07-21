@@ -1,0 +1,46 @@
+{
+  "id": "esp32-c3-supermini",
+  "name": "ESP32-C3 SuperMini",
+  "baseChip": "esp32c3",
+  "pcb": "black",
+  "notes": [
+    "ESP32-C3 SuperMini: 22.5 x 18 mm, bare ESP32-C3 die with a PCB trace antenna, USB-C. 13 GPIOs on two 8-pin castellated rows at 2.54 mm.",
+    "Sold unbranded by many sellers. The pin order here follows the reference schematic; check your own silkscreen, since some clones differ.",
+    "GPIO8 drives the blue user LED and is active LOW: writing LOW turns it on.",
+    "GPIO18/19 carry the native USB Serial/JTAG and are not broken out."
+  ],
+  "headers": {
+    "leftRailHoles": 8,
+    "rightRailHoles": 8,
+    "left": [
+      { "gpio": 5 },
+      { "gpio": 6 },
+      { "gpio": 7 },
+      { "gpio": 8 },
+      { "gpio": 9 },
+      { "gpio": 10 },
+      { "gpio": 20 },
+      { "gpio": 21 }
+    ],
+    "right": [
+      { "label": "5V" },
+      { "label": "GND" },
+      { "label": "3V3" },
+      { "gpio": 4 },
+      { "gpio": 3 },
+      { "gpio": 2 },
+      { "gpio": 1 },
+      { "gpio": 0 }
+    ]
+  },
+  "overrides": {
+    "8": { "label": "LED", "note": "Blue user LED, active LOW. Also a strapping pin, so avoid holding it at boot.", "severity": "warning" },
+    "9": { "label": "BOOT", "note": "Wired to the BOOT button. Held LOW at reset it enters the download mode.", "severity": "warning" },
+    "20": { "label": "RX" },
+    "21": { "label": "TX" }
+  },
+  "usbEdge": "top",
+  "bare": true,
+  "antenna": "pcb",
+  "aspect": 0.8
+}

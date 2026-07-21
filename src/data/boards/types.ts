@@ -36,7 +36,8 @@ export interface BoardSpec {
   overrides?: Record<string, BoardOverride>  // keyed by GPIO number (as a string)
   // Physical appearance hints for the board rendering:
   usbEdge?: 'top' | 'bottom'  // where the USB connector sits (default bottom, like the DevKits)
-  bare?: boolean              // bare chip + ceramic antenna instead of a shielded module (S3-Zero style)
+  bare?: boolean              // bare chip + antenna instead of a shielded module (S3-Zero style)
+  antenna?: 'ceramic' | 'pcb' // bare-board antenna: a ceramic block (S3-Zero) or an etched meander (SuperMini)
   aspect?: number             // board width / height ratio (e.g. 18mm/23.5mm = 0.77); default keeps the narrow DevKit look
 }
 

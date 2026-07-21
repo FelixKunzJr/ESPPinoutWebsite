@@ -91,6 +91,7 @@ export function resolveBoard(spec: BoardSpec, base: Chip | undefined): BoardResu
     radios: base.module?.radios ?? '',
     usbEdge: spec.usbEdge,
     bare: spec.bare,
+    antenna: spec.antenna,
     aspect: spec.aspect,
   }
 
