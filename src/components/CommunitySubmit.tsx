@@ -30,7 +30,7 @@ export function CommunitySubmit() {
           href={newChipUrl()}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3 py-1.5 bg-green-800 hover:bg-green-700 rounded text-xs text-white transition-colors"
+          className="link-plain px-3 py-1.5 bg-green-800 hover:bg-green-700 rounded text-xs text-white transition-colors"
         >
           Submit on GitHub →
         </a>

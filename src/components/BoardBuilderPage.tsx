@@ -283,7 +283,7 @@ export function BoardBuilderPage() {
                 Open GitHub issue &rarr;
               </a>
               <a href={CONTRIBUTING_URL} target="_blank" rel="noopener noreferrer"
-                className="px-3 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-xs">
+                className="link-plain px-3 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-xs">
                 Guide
               </a>
             </div>

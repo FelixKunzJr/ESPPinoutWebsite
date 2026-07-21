@@ -24,7 +24,7 @@ export function PinoutDiagram() {
           href={reportMistakeUrl(chip, selectedPin)}
           target="_blank"
           rel="noopener noreferrer"
-          className="report-mistake font-semibold rounded-md transition-colors"
+          className="link-plain report-mistake font-semibold rounded-md transition-colors"
           title="Something wrong on this diagram? Open a prefilled GitHub issue."
           style={{
             fontSize: 11, padding: '4px 10px', lineHeight: '16px',
@@ -62,7 +62,7 @@ export function PinoutDiagram() {
               style={{ background: bg, color: text, fontSize: 8, lineHeight: '14px', height: 14, padding: '0 4px' }}>
               {label.split(' ')[0]}
             </span>
-            <span style={{ color: '#6b7280' }}>{label}</span>
+            <span style={{ color: 'var(--dg-muted)' }}>{label}</span>
           </span>
         ))}
       </div>

@@ -39,11 +39,23 @@ export function PinTable() {
             return (
               <tr
                 key={pin.gpio}
+                // No role="button" here: overriding the row role would drop the
+                // cells out of the table for screen readers. The row still
+                // takes focus and activates from the keyboard.
                 onClick={() => setSelectedPin(isSelected ? null : pin)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setSelectedPin(isSelected ? null : pin)
+                  }
+                }}
+                tabIndex={0}
+                data-pin-anchor={pin.gpio}
                 className={`
-                  border-t border-gray-800/60 cursor-pointer transition-colors
+                  border-t border-gray-800/60 transition-colors
                   ${rowBg}
-                  ${isSelected ? 'ring-1 ring-inset ring-green-500 bg-green-950/20' : 'hover:bg-gray-800/40'}
+                  ${isSelected ? 'ring-1 ring-inset ring-green-500 bg-green-950/20 is-selected' : ''}
+                  pin-row
                 `}
               >
                 <td className="px-4 py-2.5 font-mono font-bold text-green-400">

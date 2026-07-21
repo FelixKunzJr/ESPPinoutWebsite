@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
 import type { Pin, Chip, LayoutPin, SymbolPin } from '../../types/chip'
-import { AFFECTED_WORD, resolveModule, fnColor, fnCategory } from './shared'
+import { AFFECTED_WORD, resolveModule, fnColor, fnCategory, pinAriaLabel } from './shared'
 
 // ─── EDA sheet palette (KiCad Eeschema classic) ───────────────────────────────
 
@@ -232,6 +232,23 @@ export function SchematicDiagram() {
     setSelectedPin(selectedPin?.gpio === pin.gpio ? null : pin)
   }
 
+  // Button semantics for a schematic row's <g>. SVG elements take tabindex,
+  // so the rows join the tab order alongside the rest of the page; the
+  // data-pin-anchor is what the detail popover positions against.
+  const rowProps = (pin: Pin | undefined) => pin
+    ? {
+        className: 'sch-row',
+        onClick: () => toggle(pin),
+        onKeyDown: (e: ReactKeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(pin) }
+        },
+        role: 'button',
+        tabIndex: 0,
+        'aria-label': pinAriaLabel(pin, ''),
+        'data-pin-anchor': String(pin.gpio),
+      }
+    : {}
+
   // Default to fit-width (whole sheet visible); 1:1 stays available as a
   // zoom-in toggle and starts the scroll centered on the symbol body.
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -302,9 +319,7 @@ export function SchematicDiagram() {
     const hitW = isLeft ? edgeX - hitX : svgW - FRAME_I - 10 - edgeX
 
     return (
-      <g key={row.key} className={row.pin ? 'sch-row' : undefined}
-        opacity={isActive ? 1 : 0.13}
-        onClick={() => toggle(row.pin)}>
+      <g key={row.key} {...rowProps(row.pin)} opacity={isActive ? 1 : 0.13}>
         {title && <title>{title}</title>}
         <rect className="sch-hit" x={hitX} y={cy - PITCH / 2} width={hitW} height={PITCH}
           fill={isSelected ? 'rgba(37,99,235,0.14)' : 'transparent'}
@@ -349,9 +364,7 @@ export function SchematicDiagram() {
     const title = rowTitle(row)
 
     return (
-      <g key={row.key} className={row.pin ? 'sch-row' : undefined}
-        opacity={isActive ? 1 : 0.13}
-        onClick={() => toggle(row.pin)}>
+      <g key={row.key} {...rowProps(row.pin)} opacity={isActive ? 1 : 0.13}>
         {title && <title>{title}</title>}
         <rect className="sch-hit" x={cx - HPITCH / 2} y={Math.min(edgeY, tipY) - 4} width={HPITCH} height={VPL + 8}
           fill={isSelected ? 'rgba(37,99,235,0.14)' : 'transparent'} />
@@ -423,7 +436,14 @@ export function SchematicDiagram() {
         className="mx-auto block rounded-sm"
         style={fit ? { maxWidth: svgW, height: 'auto' } : { minWidth: svgW }}
         xmlns="http://www.w3.org/2000/svg">
-        <style>{`.sch-row{cursor:pointer}.sch-row:hover .sch-hit{fill:rgba(37,99,235,0.07)}`}</style>
+        {/* Hover was a 7%-alpha wash on white paper - barely perceptible. It
+            now carries a border too, and keyboard focus gets its own ring. */}
+        <style>{`
+          .sch-row{cursor:pointer}
+          .sch-row:hover .sch-hit{fill:rgba(37,99,235,0.16);stroke:#2563eb;stroke-width:1}
+          .sch-row:focus{outline:none}
+          .sch-row:focus-visible .sch-hit{fill:rgba(37,99,235,0.14);stroke:var(--focus-ring, #1d4ed8);stroke-width:2}
+        `}</style>
         <defs>
           <pattern id={`schgrid-${chip.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
             <circle cx="0.6" cy="0.6" r="0.7" fill={GRID_DOT} />

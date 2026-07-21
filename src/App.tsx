@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { ChipSelector }    from './components/ChipSelector'
 import { RoutingCard }     from './components/RoutingCard'
 import { FilterBar }       from './components/FilterBar'
@@ -9,6 +10,10 @@ import { ExportPanel }     from './components/ExportPanel'
 import { CommunitySubmit } from './components/CommunitySubmit'
 import { ContributePage } from './components/ContributePage'
 import { BoardBuilderPage } from './components/BoardBuilderPage'
+import { CollapsibleCard } from './components/CollapsibleCard'
+import { ExportActions }   from './components/ExportActions'
+import { MobileActionBar } from './components/MobileActionBar'
+import { useMediaQuery }   from './utils/useMediaQuery'
 import { useApp }          from './context/AppContext'
 import { Logo }            from './components/Logo'
 import { SpecsSection }    from './components/info/SpecsSection'
@@ -16,6 +21,19 @@ import { FlashingSection } from './components/info/FlashingSection'
 
 export default function App() {
   const { chip, page, navigate, theme, toggleTheme } = useApp()
+
+  // Phones get the diagram plus a bottom action bar; everything else moves
+  // into sheets. Tablets and up keep the full page.
+  const isPhone = useMediaQuery('(max-width: 767px)')
+  // The right-hand column is collapsible so the diagram can have the full
+  // width - it only exists at xl, where the two-column grid applies.
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    try { return localStorage.getItem('sidebar-open') !== 'false' } catch { return true }
+  })
+  const toggleSidebar = () => setSidebarOpen(o => {
+    try { localStorage.setItem('sidebar-open', String(!o)) } catch { /* private mode */ }
+    return !o
+  })
 
   if (page === 'contribute') return <ContributePage />
   if (page === 'build') return <BoardBuilderPage />
@@ -32,10 +50,22 @@ export default function App() {
                 Free interactive pinout reference<br />for the maker community
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              {/* PNG / PDF live here as well as in the export panel: the
+                  header is sticky, so they are reachable from anywhere on
+                  the page instead of only after scrolling to the sidebar. */}
+              <ExportActions variant="header" />
+              <button
+                onClick={toggleSidebar}
+                aria-pressed={!sidebarOpen}
+                className="hidden xl:inline text-xs text-gray-400 hover:text-gray-100"
+                title={sidebarOpen ? 'Hide the side panel' : 'Show the side panel'}
+              >
+                {sidebarOpen ? '⇥ Hide panel' : '⇤ Show panel'}
+              </button>
               <button
                 onClick={toggleTheme}
-                className="text-xs text-gray-500 hover:text-gray-300"
+                className="text-xs text-gray-400 hover:text-gray-100"
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {/* U+FE0E forces the monochrome text glyph - iOS otherwise
@@ -48,7 +78,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => navigate('contribute')}
-                className="text-xs text-gray-500 hover:text-gray-300"
+                className="hidden sm:inline text-xs text-gray-400 hover:text-gray-100"
               >
                 Contribute
               </button>
@@ -56,7 +86,7 @@ export default function App() {
                 href="https://github.com/FelixKunzJr/ESPPinoutWebsite"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-gray-500 hover:text-gray-300 whitespace-nowrap"
+                className="link-plain hidden sm:inline text-xs text-gray-400 hover:text-gray-100 whitespace-nowrap"
               >
                 GitHub ↗
               </a>
@@ -67,18 +97,22 @@ export default function App() {
       </header>
 
       {/* Body */}
-      <div className="flex-1 max-w-screen-2xl mx-auto w-full px-4 py-6">
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
+      <div className="flex-1 max-w-screen-2xl mx-auto w-full px-4 py-8">
+        <div className={`grid grid-cols-1 gap-8 ${sidebarOpen ? 'xl:grid-cols-[1fr_380px]' : ''}`}>
           {/* Left: diagram + filter + table */}
-          <div className="space-y-4">
-            {/* Chip notes banner */}
+          <div className="space-y-6">
+            {/* Chip notes. Collapsible, and closed by default on phones -
+                the list runs long enough to push the diagram off screen. */}
             {chip.notes.length > 0 && (
-              <div className="rounded-xl bg-yellow-950/30 border border-yellow-700/50 px-4 py-3">
-                <p className="text-xs font-semibold text-yellow-400 mb-1">⚠️ {chip.name} - Known Gotchas</p>
-                <ul className="text-xs text-yellow-300/80 space-y-0.5 list-disc pl-4">
+              <CollapsibleCard
+                tone="warning"
+                defaultOpen={!isPhone}
+                title={`⚠️ ${chip.name} - Known Gotchas (${chip.notes.length})`}
+              >
+                <ul className="text-sm text-yellow-300/80 space-y-1 list-disc pl-4">
                   {chip.notes.map((n, i) => <li key={i}>{n}</li>)}
                 </ul>
-              </div>
+              </CollapsibleCard>
             )}
 
             <div id="pinout-diagram-export">
@@ -91,23 +125,30 @@ export default function App() {
 
             <FlashingSection />
 
-            <FilterBar />
-
-            <PinTable />
+            {/* On phones the filters and the pin table move into the bottom
+                action bar's sheet instead of extending the scroll. */}
+            {!isPhone && (
+              <>
+                <FilterBar />
+                <PinTable />
+              </>
+            )}
           </div>
 
           {/* Right sidebar */}
-          <div className="space-y-6">
-            <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
-              <MappingBuilder />
+          {sidebarOpen && !isPhone && (
+            <div className="space-y-6">
+              <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
+                <MappingBuilder />
+              </div>
+              <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
+                <ExportPanel />
+              </div>
+              <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
+                <CommunitySubmit />
+              </div>
             </div>
-            <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
-              <ExportPanel />
-            </div>
-            <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-4">
-              <CommunitySubmit />
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -118,7 +159,7 @@ export default function App() {
             href="https://kunzengineering.ch/en"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-3"
+            className="link-plain group flex items-center gap-3"
             title="A free tool by Kunz Engineering"
           >
             <span className="flex items-center justify-center rounded-md bg-white px-2.5 py-1.5 shadow-sm">
@@ -142,7 +183,7 @@ export default function App() {
               href="https://github.com/FelixKunzJr/ESPPinoutWebsite"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-gray-300 transition-colors"
+              className="link-plain hover:text-gray-100 transition-colors"
             >
               Open source on GitHub ↗
             </a>
@@ -151,8 +192,10 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Pin detail slide-in panel */}
+      {/* Pin detail popover (docks to the edge when there is no room to float) */}
       <PinDetailPanel />
+
+      {isPhone && <MobileActionBar />}
     </div>
   )
 }

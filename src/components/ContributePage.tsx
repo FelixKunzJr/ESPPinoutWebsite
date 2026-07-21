@@ -117,7 +117,7 @@ export function ContributePage() {
                   href={p.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 inline-block text-center px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-medium text-gray-100 transition-colors"
+                  className="link-plain mt-4 inline-block text-center px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-medium text-gray-100 transition-colors"
                 >
                   {p.cta} &rarr;
                 </a>
@@ -157,7 +157,7 @@ export function ContributePage() {
               href={CONTRIBUTING_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-lg bg-green-800 hover:bg-green-700 text-sm font-medium text-white transition-colors"
+              className="link-plain px-4 py-2 rounded-lg bg-green-800 hover:bg-green-700 text-sm font-medium text-white transition-colors"
             >
               Read the contributor guide &rarr;
             </a>
@@ -165,7 +165,7 @@ export function ContributePage() {
               href={REPO_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-sm font-medium text-gray-100 transition-colors"
+              className="link-plain px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-sm font-medium text-gray-100 transition-colors"
             >
               Browse the repo on GitHub &rarr;
             </a>
