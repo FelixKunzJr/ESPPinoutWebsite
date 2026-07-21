@@ -42,6 +42,11 @@ export const FAMILY_SPECS: Record<string, ChipSpecs> = {
     flash: 'Up to 8 MB (module SKU)', psram: 'None',
     notable: ['Dual-band Wi-Fi 6 (2.4 + 5 GHz)', '802.15.4', 'USB Serial/JTAG'],
   },
+  'ESP32-C2': {
+    cores: 1, arch: 'Single-core RISC-V', cpuMaxMhz: 120, sramKb: 272, romKb: 576,
+    flash: '2 or 4 MB in-package', psram: 'None',
+    notable: ['Sold as ESP8684', '14 GPIOs', 'No native USB - UART0 only'],
+  },
   'ESP32-H2': {
     cores: 1, arch: 'Single-core RISC-V', cpuMaxMhz: 96, sramKb: 320, romKb: 128,
     flash: 'Up to 4 MB (module SKU)', psram: 'None',

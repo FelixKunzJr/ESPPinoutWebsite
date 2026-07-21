@@ -120,6 +120,19 @@ const FAMILIES: Record<string, Family> = {
       'No DAC, no capacitive touch.',
     ],
   },
+  c2: {
+    family: 'ESP32-C2', cores: 1, hasWifi: true, hasBle: true, hasBluetooth: false,
+    arch: 'Single-core RISC-V', radios: 'Wi-Fi 4 · BLE 5', accent: '#ef4444', totalGpio: 14,
+    datasheetUrl: 'https://www.espressif.com/sites/default/files/documentation/esp8684_datasheet_en.pdf',
+    notes: [
+      'The ESP32-C2 group is sold as ESP8684. RISC-V single-core up to 120 MHz.',
+      'Only 14 GPIOs - the smallest pin budget of any ESP32.',
+      'GPIO8 and GPIO9 are the only strapping pins.',
+      'All 5 ADC channels are ADC1 - no ADC/Wi-Fi conflict.',
+      'No native USB. Flashing and the boot log go over UART0.',
+      'No DAC, no capacitive touch, no classic Bluetooth.',
+    ],
+  },
 }
 
 interface ModuleSpec {
@@ -157,12 +170,21 @@ const MODULES: ModuleSpec[] = [
   { id: 'esp32c5mini1',   fam: 'c5', name: 'ESP32-C5-MINI-1',  form: 'mini',  pcb: 'black', prefix: 'C5_MINI_1' },
   // ESP32-H2
   { id: 'esp32h2',        fam: 'h2', name: 'ESP32-H2-MINI-1',  form: 'mini',  pcb: 'black', prefix: 'H2_MINI_1' },
+  // ESP8685 carries ESP32-C3 silicon, so it inherits the C3 family rules.
+  { id: 'esp8685wroom06', fam: 'c3', name: 'ESP8685-WROOM-06',  form: 'wroom', pcb: 'black', prefix: 'ESP8685_WROOM_06', arch: 'Single-core RISC-V · ESP32-C3 silicon' },
+  // ESP32-C2
+  { id: 'esp8684wroom02c', fam: 'c2', name: 'ESP8684-WROOM-02C', form: 'wroom', pcb: 'black', prefix: 'ESP8684_WROOM_02C' },
   // Development boards
   // esp32devkitc is built from a contrib board spec below (rich WROOM-32 base),
   // not from the sparse KiCad-generated ESP32_DEVKITC_* set.
+  { id: 'esp32devkitm1',  fam: 'esp32', name: 'ESP32-DevKitM-1',     form: 'board', pcb: 'black', prefix: 'ESP32_DEVKITM_1', arch: 'Dev board · ESP32-MINI-1' },
+  { id: 'esp32s2devkitc', fam: 's2',    name: 'ESP32-S2-DevKitC-1',  form: 'board', pcb: 'black', prefix: 'S2_DEVKITC_1',  arch: 'Dev board · ESP32-S2-WROOM' },
   { id: 'esp32s3devkitc', fam: 's3',    name: 'ESP32-S3-DevKitC-1',  form: 'board', pcb: 'black', prefix: 'S3_DEVKITC',    arch: 'Dev board · ESP32-S3-WROOM-1' },
   { id: 'esp32c3devkitm', fam: 'c3',    name: 'ESP32-C3-DevKitM-1',  form: 'board', pcb: 'black', prefix: 'C3_DEVKITM',    arch: 'Dev board · ESP32-C3-MINI-1' },
+  { id: 'esp32c3devkitc', fam: 'c3',    name: 'ESP32-C3-DevKitC-02', form: 'board', pcb: 'black', prefix: 'C3_DEVKITC_02', arch: 'Dev board · ESP32-C3-WROOM-02' },
   { id: 'esp32c6devkitc', fam: 'c6',    name: 'ESP32-C6-DevKitC-1',  form: 'board', pcb: 'black', prefix: 'C6_DEVKITC',    arch: 'Dev board · ESP32-C6-WROOM-1' },
+  { id: 'esp32c6devkitm', fam: 'c6',    name: 'ESP32-C6-DevKitM-1',  form: 'board', pcb: 'black', prefix: 'C6_DEVKITM_1',  arch: 'Dev board · ESP32-C6-MINI-1' },
+  { id: 'esp32c5devkitc', fam: 'c5',    name: 'ESP32-C5-DevKitC-1',  form: 'board', pcb: 'black', prefix: 'C5_DEVKITC_1',  arch: 'Dev board · ESP32-C5-WROOM-1' },
 ]
 
 function build(spec: ModuleSpec): Chip {
@@ -224,18 +246,25 @@ export const CHIPS: Chip[] = [
   byId('esp32s3mini1'),
   byId('esp32c3'),
   byId('esp32c3wroom02'),
+  byId('esp8685wroom06'),
   byId('esp32c6'),
   byId('esp32c6wroom1'),
   byId('esp32c5wroom1'),
   byId('esp32c5mini1'),
   byId('esp32h2'),
+  byId('esp8684wroom02c'),
   // Dev boards
   esp32Devkitc,
   esp32Devkit38,
+  byId('esp32devkitm1'),
+  byId('esp32s2devkitc'),
   byId('esp32s3devkitc'),
   esp32S3Zero,
   byId('esp32c3devkitm'),
+  byId('esp32c3devkitc'),
   byId('esp32c6devkitc'),
+  byId('esp32c6devkitm'),
+  byId('esp32c5devkitc'),
   xiaoEsp32c3,
   xiaoEsp32s3,
   xiaoEsp32c6,

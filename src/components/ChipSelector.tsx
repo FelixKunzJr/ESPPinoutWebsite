@@ -12,6 +12,7 @@ const FAMILY_ACCENT: Record<string, string> = {
   'ESP32-C6': '#f97316',
   'ESP32-C5': '#14b8a6',
   'ESP32-H2': '#ec4899',
+  'ESP32-C2': '#ef4444',
 }
 // One shade darker per family for light mode - the dark-tuned accents (the
 // C3 yellow especially) wash out as a filled tab with white text on white.
@@ -23,6 +24,7 @@ const LIGHT_ACCENT: Record<string, string> = {
   '#f97316': '#ea580c',
   '#14b8a6': '#0d9488',
   '#ec4899': '#db2777',
+  '#ef4444': '#dc2626',
   '#94a3b8': '#64748b',
 }
 const BOARDS = 'Boards'
