@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
 import { useMediaQuery } from '../../utils/useMediaQuery'
@@ -718,12 +718,11 @@ export function ModuleDiagram() {
   // real proportions. Boards may declare an explicit aspect in their spec.
   const bodyMm = chip.packageLayout?.bodyMm
   const boardAspect = chip.module?.aspect ?? (bodyMm ? bodyMm.w / bodyMm.h : undefined)
-  const rawChipWidth = isBoard
+  const chipWidth  = isBoard
     ? (boardAspect ? Math.round(Math.min(340, Math.max(150, sideHeight * boardAspect))) : 150)
     : bodyMm
       ? Math.max(Math.round(sideHeight * bodyMm.w / bodyMm.h), padCount * 20, 190)
       : Math.max(240, padCount * 30)
-  const chipWidth  = compact ? Math.min(rawChipWidth, 160) : rawChipWidth
   const colWidth   = bottomLayout.length > 0 ? chipWidth / bottomLayout.length : 30
   const topColWidth = topLayout.length > 0 ? chipWidth / topLayout.length : 30
 
@@ -735,9 +734,54 @@ export function ModuleDiagram() {
     if (el) el.scrollLeft = Math.max(0, (el.scrollWidth - el.clientWidth) / 2)
   }, [chip.id])
 
+  // Phones default to fit-width, the same way the schematic view does: the
+  // module keeps its true proportions and is scaled down as a whole, rather
+  // than being clipped at both edges or squashed out of shape. 1:1 stays
+  // available for reading the labels at full size.
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const [fit, setFit] = useState(true)
+  const [box, setBox] = useState({ s: 1, h: 0, x: 0 })
+  const scaled = compact && fit
+
+  useLayoutEffect(() => {
+    if (!scaled) { setBox({ s: 1, h: 0, x: 0 }); return }
+    const measure = () => {
+      const avail = scrollRef.current?.clientWidth ?? 0
+      const el = canvasRef.current
+      if (!el || !avail) return
+      // A transform does not change the element's own layout box, so these
+      // stay the intrinsic dimensions however far it has been scaled.
+      const w = el.scrollWidth
+      const h = el.scrollHeight
+      const s = Math.min(1, avail / w)
+      setBox({ s, h: h * s, x: Math.max(0, (avail - w * s) / 2) })
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [scaled, chip.id, filter, mapping.length])
+
   return (
-    <div ref={scrollRef} className={`${compact ? 'p-2' : 'p-4'} pb-2 overflow-x-auto`}>
-      <div id="module-diagram-canvas" className={`flex flex-col items-center min-w-fit mx-auto ${compact ? 'p-0' : 'p-2'}`}>
+    <>
+    {compact && (
+      <div className="flex justify-end px-3 pt-2">
+        <button
+          onClick={() => setFit(f => !f)}
+          className="font-mono rounded"
+          style={{ fontSize: 10, padding: '3px 9px', color: 'var(--dg-muted)', border: '1px solid var(--dg-toggle-border)', background: 'transparent' }}
+        >
+          {fit ? 'View 1:1' : 'Fit width'}
+        </button>
+      </div>
+    )}
+    <div ref={scrollRef} className={`${compact ? 'px-2 pt-2' : 'p-4'} pb-2 ${scaled ? 'overflow-hidden' : 'overflow-x-auto'}`}>
+      <div style={scaled ? { height: box.h } : undefined}>
+      <div style={scaled ? {
+        transform: `translateX(${box.x}px) scale(${box.s})`,
+        transformOrigin: 'top left',
+        width: 'max-content',
+      } : undefined}>
+      <div ref={canvasRef} id="module-diagram-canvas" className={`flex flex-col items-center min-w-fit mx-auto ${compact ? 'p-0' : 'p-2'}`}>
 
         {/* The banks + body + edge rows live in one grid: the two 1fr bank
             tracks equalize, so the body column (and with it the thermal bar
@@ -884,6 +928,9 @@ export function ModuleDiagram() {
         )}
 
       </div>
+      </div>
+      </div>
     </div>
+    </>
   )
 }
