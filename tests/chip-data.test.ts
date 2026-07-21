@@ -67,6 +67,35 @@ describe('antenna keep-out', () => {
   })
 })
 
+// A bare module breaks out every GPIO the silicon has, so a GPIO in the pin
+// list with no pad on the package means the layout lost one. That is what
+// happened to the ESP8685-WROOM-06: its pad 20 is a right-edge castellation
+// AND an underside land, and the generator's "one instance only" rule (there
+// to drop the thermal EPAD) threw it out, taking GPIO9 with it.
+//
+// Dev boards are excluded: they genuinely leave GPIOs off the headers.
+describe('package layout completeness', () => {
+  const modules = CHIPS.filter(c => c.module?.form !== 'board' && c.packageLayout)
+
+  it('gives every GPIO in the pin list a pad on the package', () => {
+    for (const chip of modules) {
+      const L = chip.packageLayout!
+      const onPackage = new Set(
+        [...L.left, ...L.right, ...L.bottom, ...(L.top ?? [])]
+          .map(p => p.gpio)
+          .filter((g): g is number => g !== undefined),
+      )
+      const missing = chip.pins.map(p => p.gpio).filter(g => !onPackage.has(g))
+      expect(missing, `${chip.name} has no pad for GPIO ${missing.join(', ')}`).toEqual([])
+    }
+  })
+
+  it('keeps GPIO9 on the ESP8685-WROOM-06 right bank', () => {
+    const right = CHIPS.find(c => c.id === 'esp8685wroom06')!.packageLayout!.right
+    expect(right.find(p => p.pinNumber === 20)?.gpio).toBe(9)
+  })
+})
+
 describe('filterPins', () => {
   it('safe_output excludes input_only and flash_reserved pins', () => {
     const result = filterPins(esp32.pins, 'safe_output')

@@ -849,7 +849,7 @@ export const ESP8685_WROOM_06_LAYOUT: PackageLayout = {
   name: 'ESP8685-WROOM-06',
   left: [{ pinNumber: 1, gpio: 1 }, { pinNumber: 2, gpio: 2 }, { pinNumber: 3, label: 'NC' }, { pinNumber: 4, label: 'NC' }, { pinNumber: 5, gpio: 0 }, { pinNumber: 6, gpio: 20 }, { pinNumber: 7, gpio: 21 }],
   bottom: [{ pinNumber: 8, gpio: 3 }, { pinNumber: 9, gpio: 7 }, { pinNumber: 10, gpio: 6 }, { pinNumber: 11, gpio: 4 }, { pinNumber: 12, gpio: 5 }, { pinNumber: 13, label: 'GND' }, { pinNumber: 14, label: 'VDD33' }],
-  right: [{ pinNumber: 21, gpio: 8 }, { pinNumber: 19, gpio: 10 }, { pinNumber: 18, label: 'CHIP_EN' }, { pinNumber: 17, label: 'NC' }, { pinNumber: 16, gpio: 19 }, { pinNumber: 15, gpio: 18 }],
+  right: [{ pinNumber: 21, gpio: 8 }, { pinNumber: 20, gpio: 9 }, { pinNumber: 19, gpio: 10 }, { pinNumber: 18, label: 'CHIP_EN' }, { pinNumber: 17, label: 'NC' }, { pinNumber: 16, gpio: 19 }, { pinNumber: 15, gpio: 18 }],
   bodyMm: { w: 15.8, h: 20.3 },
   antennaMm: 6.1,
 }

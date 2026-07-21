@@ -145,16 +145,32 @@ function caps(toks, inputOnly) {
   return order.filter(o => c.has(o))
 }
 function buildLayout(pins, pads) {
-  const cand = Object.entries(pads).filter(([, p]) => p.length === 1)
-    .map(([num, p]) => ({ num: +num, x: p[0].x, y: p[0].y })).filter(c => Number.isFinite(c.num))
+  // Every drawn instance of every numbered pad. A pad number can appear more
+  // than once: the thermal/EPAD ground is a whole array of lands, and a signal
+  // pad may pair its edge castellation with an underside land (ESP8685-WROOM-06
+  // pad 20). Keeping only single-instance pads dropped both, which silently
+  // punched a hole in the middle of that module's right-hand bank.
+  const cand = Object.entries(pads).flatMap(([num, ps]) =>
+    ps.map(p => ({ num: +num, x: p.x, y: p.y }))).filter(c => Number.isFinite(c.num))
   const xs = cand.map(c => c.x), ys = cand.map(c => c.y)
   const minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys), eps = 0.7
-  const L = [], R = [], B = [], T = []
+  const edgeOf = c =>
+    Math.abs(c.x - minx) < eps ? 'L' :
+    Math.abs(c.x - maxx) < eps ? 'R' :
+    Math.abs(c.y - maxy) < eps ? 'B' :
+    Math.abs(c.y - miny) < eps ? 'T' : null
+  // One entry per pad number, from whichever instance sits on an edge. A pad
+  // with no edge instance at all - the EPAD array - drops out here, which is
+  // still what we want.
+  const onEdge = new Map()
   for (const c of cand) {
-    if (Math.abs(c.x - minx) < eps) L.push(c)
-    else if (Math.abs(c.x - maxx) < eps) R.push(c)
-    else if (Math.abs(c.y - maxy) < eps) B.push(c)
-    else if (Math.abs(c.y - miny) < eps) T.push(c)
+    const e = edgeOf(c)
+    if (!e || onEdge.has(c.num)) continue
+    onEdge.set(c.num, { c, e })
+  }
+  const L = [], R = [], B = [], T = []
+  for (const { c, e } of onEdge.values()) {
+    ({ L, R, B, T })[e].push(c)
   }
   L.sort((a, b) => a.y - b.y); R.sort((a, b) => a.y - b.y); B.sort((a, b) => a.x - b.x); T.sort((a, b) => a.x - b.x)
   const lp = c => {
