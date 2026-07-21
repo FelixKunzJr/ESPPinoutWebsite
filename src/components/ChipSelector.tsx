@@ -28,17 +28,20 @@ const LIGHT_ACCENT: Record<string, string> = {
 const BOARDS = 'Boards'
 const BOARD_ACCENT = '#94a3b8'
 
+// The stylesheet draws one flat chevron on every select, in a fixed grey.
+// These two carry their family's colour, so they need their own.
+const chevron = (color: string) =>
+  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='${encodeURIComponent(color)}' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`
+
 const isBoard = (c: Chip) => c.module?.form === 'board'
 const tabOf = (c: Chip) => (isBoard(c) ? BOARDS : c.family)
 
 export function ChipSelector() {
   const { chip, setChip, theme } = useApp()
   // The pill grid is the desktop selector and stays exactly as it was. On a
-  // phone it wrapped to five rows, pushing the diagram most of a screen down,
-  // and putting each row on a sideways-scrolling line only traded that for
-  // options hidden off the edge. There it collapses to one native select
-  // instead: a single row, nothing hidden, and iOS gives it a full-height
-  // picker that is easier to thumb through than a row of small targets.
+  // phone it wrapped to five rows and pushed the diagram most of a screen
+  // down. There it collapses to the same two levels the pills have, as two
+  // selects on one row: family, then the module within it.
   const isPhone = useMediaQuery('(max-width: 767px)')
 
   // Tab order: families in catalog order, then Boards.
@@ -74,22 +77,38 @@ export function ChipSelector() {
   }
 
   if (isPhone) {
+    const accent = accentOf(tab)
     return (
-      <select
-        aria-label="Chip or board"
-        value={chip.id}
-        onChange={e => setChip(e.target.value)}
-        className="w-full rounded-md bg-gray-900 border border-gray-700 px-3 py-2.5 text-sm font-semibold text-gray-100"
-        style={{ borderLeft: `3px solid ${accentOf(tabOf(chip))}` }}
-      >
-        {tabs.map(t => (
-          <optgroup key={t} label={t === BOARDS ? t.toUpperCase() : t}>
-            {CHIPS.filter(c => tabOf(c) === t).map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
+      <div className="flex gap-2">
+        {/* Family: filled in its own accent, the way the active pill is. */}
+        <select
+          aria-label="Chip family"
+          value={tab}
+          onChange={e => selectTab(e.target.value)}
+          className="w-[42%] flex-shrink-0 rounded-md px-3 py-2.5 text-sm font-bold text-white"
+          // backgroundColor, not the background shorthand: the shorthand
+          // resets the repeat, position and size the stylesheet sets for the
+          // chevron, which then tiles across the whole control.
+          style={{ backgroundColor: accent, border: `1px solid ${accent}`, backgroundImage: chevron('#ffffff') }}
+        >
+          {tabs.map(t => (
+            <option key={t} value={t}>{t === BOARDS ? t.toUpperCase() : t}</option>
+          ))}
+        </select>
+
+        {/* Module within that family: outlined in the same accent. */}
+        <select
+          aria-label="Module or board"
+          value={chip.id}
+          onChange={e => setChip(e.target.value)}
+          className="flex-1 min-w-0 rounded-md bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-100"
+          style={{ border: `1.5px solid ${accent}`, backgroundImage: chevron(accent) }}
+        >
+          {shown.map(c => (
+            <option key={c.id} value={c.id}>{shortLabel(c)}</option>
+          ))}
+        </select>
+      </div>
     )
   }
 
