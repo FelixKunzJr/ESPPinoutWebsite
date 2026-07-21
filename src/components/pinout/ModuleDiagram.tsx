@@ -281,13 +281,15 @@ function dataMatrix(seed: string, x: number, y: number, cell: number): ReactNode
   return <g opacity="0.85">{cells}</g>
 }
 
-function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHeight: number; bottomCount: number; width: number }) {
+function ChipBody({ chip, height, antennaH: antennaHProp, bottomCount, width }: {
+  chip: Chip; height: number; antennaH: number; bottomCount: number; width: number
+}) {
   const m = resolveModule(chip)
   const isMini = m.form === 'mini'
   const uid = chip.id
 
   const W = width
-  const H = sideHeight
+  const H = height
   const cx = W / 2
 
   // Layout zones
@@ -295,10 +297,9 @@ function ChipBody({ chip, sideHeight, bottomCount, width }: { chip: Chip; sideHe
   // The antenna keep-out is a fixed physical size (about 6.2 mm on WROOM and
   // WROVER, the notched tab about 4.6 mm on MINI), so with known real module
   // dimensions its share of the render scales like the real thing.
-  const mm = chip.packageLayout?.bodyMm
-  const antennaH  = mm
-    ? Math.round(Math.min(130, Math.max(40, H * (isMini ? 4.6 : 6.2) / mm.h)))
-    : isMini ? 56 : 46
+  // Passed in, because the pin banks have to be pushed down by exactly this
+  // much to line up with the pads below it.
+  const antennaH = antennaHProp || (isMini ? 56 : 46)
   const padH      = 14                  // bottom gold castellated pads
   const shieldL   = pcbBorder
   const shieldW   = W - pcbBorder * 2
@@ -720,10 +721,20 @@ export function ModuleDiagram() {
   // real proportions. Boards may declare an explicit aspect in their spec.
   const bodyMm = chip.packageLayout?.bodyMm
   const boardAspect = chip.module?.aspect ?? (bodyMm ? bodyMm.w / bodyMm.h : undefined)
+
+  // A real module carries no castellations alongside its antenna: the top of
+  // the PCB is keep-out, and the side pads start below it. The banks were
+  // drawn against the full body, which ran pin 1 up beside the antenna. The
+  // body is now taller than the pad span by the keep-out, and the banks are
+  // offset down by the same amount so each row sits on a pad that exists.
+  const antennaMm = resolveModule(chip).form === 'mini' ? 4.6 : 6.2
+  const antFrac = !isBoard && bodyMm ? antennaMm / bodyMm.h : 0
+  const antennaH = antFrac > 0 ? Math.round(sideHeight * antFrac / (1 - antFrac)) : 0
+  const bodyH = sideHeight + antennaH
   const chipWidth  = isBoard
     ? (boardAspect ? Math.round(Math.min(340, Math.max(150, sideHeight * boardAspect))) : 150)
     : bodyMm
-      ? Math.max(Math.round(sideHeight * bodyMm.w / bodyMm.h), padCount * 20, 190)
+      ? Math.max(Math.round(bodyH * bodyMm.w / bodyMm.h), padCount * 20, 190)
       : Math.max(240, padCount * 30)
   const colWidth   = bottomLayout.length > 0 ? chipWidth / bottomLayout.length : 30
   const topColWidth = topLayout.length > 0 ? chipWidth / topLayout.length : 30
@@ -910,7 +921,7 @@ export function ModuleDiagram() {
         {/* ── Middle row: left pins + chip body + right pins ── */}
 
           {/* Left pin bank */}
-          <div className="flex flex-col" style={{ gridColumn: 1, gridRow: 3 }}>
+          <div className="flex flex-col" style={{ gridColumn: 1, gridRow: 3, paddingTop: antennaH }}>
             {leftLayout.map(lp => {
               const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
               return (
@@ -933,11 +944,11 @@ export function ModuleDiagram() {
           <div style={{ gridColumn: 2, gridRow: 3, justifySelf: 'center' }}>
             {isBoard
               ? <BoardBody chip={chip} sideHeight={sideHeight} width={chipWidth} selectedPin={selectedPin} />
-              : <ChipBody chip={chip} sideHeight={sideHeight} bottomCount={bottomLayout.length || 10} width={chipWidth} />}
+              : <ChipBody chip={chip} height={bodyH} antennaH={antennaH} bottomCount={bottomLayout.length || 10} width={chipWidth} />}
           </div>
 
           {/* Right pin bank */}
-          <div className="flex flex-col" style={{ gridColumn: 3, gridRow: 3 }}>
+          <div className="flex flex-col" style={{ gridColumn: 3, gridRow: 3, paddingTop: antennaH }}>
             {rightLayout.map(lp => {
               const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
               return (
