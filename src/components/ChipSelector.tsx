@@ -28,17 +28,21 @@ const LIGHT_ACCENT: Record<string, string> = {
 const BOARDS = 'Boards'
 const BOARD_ACCENT = '#94a3b8'
 
+// The stylesheet draws one flat chevron on every select, in a fixed grey.
+// These two carry their family's colour, so they need their own.
+const chevron = (color: string) =>
+  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='${encodeURIComponent(color)}' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`
+
 const isBoard = (c: Chip) => c.module?.form === 'board'
 const tabOf = (c: Chip) => (isBoard(c) ? BOARDS : c.family)
 
 export function ChipSelector() {
   const { chip, setChip, theme } = useApp()
-  // Wrapping put the Boards list on four rows, pushing the diagram most of a
-  // screen down. On phones each row scrolls sideways on one line instead.
+  // The pill grid is the desktop selector and stays exactly as it was. On a
+  // phone it wrapped to five rows and pushed the diagram most of a screen
+  // down. There it collapses to the same two levels the pills have, as two
+  // selects on one row: family, then the module within it.
   const isPhone = useMediaQuery('(max-width: 767px)')
-  const rowClass = isPhone
-    ? 'flex gap-1.5 flex-nowrap overflow-x-auto -mx-1 px-1 pb-0.5'
-    : 'flex flex-wrap gap-1.5'
 
   // Tab order: families in catalog order, then Boards.
   const tabs: string[] = []
@@ -72,10 +76,46 @@ export function ChipSelector() {
     return (c.name.startsWith(c.family) ? c.name.slice(c.family.length).replace(/^-/, '') : c.name) || c.name
   }
 
+  if (isPhone) {
+    const accent = accentOf(tab)
+    return (
+      <div className="flex gap-2">
+        {/* Family: filled in its own accent, the way the active pill is. */}
+        <select
+          aria-label="Chip family"
+          value={tab}
+          onChange={e => selectTab(e.target.value)}
+          className="w-[42%] flex-shrink-0 rounded-md px-3 py-2.5 text-sm font-bold text-white"
+          // backgroundColor, not the background shorthand: the shorthand
+          // resets the repeat, position and size the stylesheet sets for the
+          // chevron, which then tiles across the whole control.
+          style={{ backgroundColor: accent, border: `1px solid ${accent}`, backgroundImage: chevron('#ffffff') }}
+        >
+          {tabs.map(t => (
+            <option key={t} value={t}>{t === BOARDS ? t.toUpperCase() : t}</option>
+          ))}
+        </select>
+
+        {/* Module within that family: outlined in the same accent. */}
+        <select
+          aria-label="Module or board"
+          value={chip.id}
+          onChange={e => setChip(e.target.value)}
+          className="flex-1 min-w-0 rounded-md bg-gray-900 px-3 py-2.5 text-sm font-semibold text-gray-100"
+          style={{ border: `1.5px solid ${accent}`, backgroundImage: chevron(accent) }}
+        >
+          {shown.map(c => (
+            <option key={c.id} value={c.id}>{shortLabel(c)}</option>
+          ))}
+        </select>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-2">
       {/* Family tabs */}
-      <div className={rowClass}>
+      <div className="flex flex-wrap gap-1.5">
         {tabs.map(t => {
           const accent = accentOf(t)
           const active = tab === t
@@ -84,7 +124,7 @@ export function ChipSelector() {
             <button
               key={t}
               onClick={() => selectTab(t)}
-              className="rounded-md font-bold tracking-wide transition-all duration-150 flex items-center gap-1.5 leading-none flex-shrink-0 whitespace-nowrap"
+              className="rounded-md font-bold tracking-wide transition-all duration-150 flex items-center gap-1.5 leading-none"
               style={{
                 fontSize: 11.5, padding: '6px 10px',
                 color: active ? '#fff' : accent,
@@ -103,7 +143,7 @@ export function ChipSelector() {
       <div style={{ height: 1, background: 'var(--selector-sep)' }} />
 
       {/* Modules within the selected tab */}
-      <div className={rowClass}>
+      <div className="flex flex-wrap gap-1.5">
         {shown.map(c => {
           const accent = accentOf(tab)
           const active = chip.id === c.id
@@ -111,7 +151,7 @@ export function ChipSelector() {
             <button
               key={c.id}
               onClick={() => setChip(c.id)}
-              className="rounded-md text-[12.5px] font-semibold transition-all duration-150 leading-none flex-shrink-0 whitespace-nowrap"
+              className="rounded-md text-[12.5px] font-semibold transition-all duration-150 leading-none"
               style={{
                 padding: '6px 11px',
                 color: active ? '#fff' : 'var(--pill-text)',
