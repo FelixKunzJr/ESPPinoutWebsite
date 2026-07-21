@@ -744,7 +744,10 @@ export function ModuleDiagram() {
   const scaled = compact && fit
 
   useLayoutEffect(() => {
-    if (!scaled) { setBox({ s: 1, h: 0, x: 0 }); return }
+    // No reset when unscaled: the styles below are gated on `scaled`, so a
+    // stale box is never read, and clearing it here would be a synchronous
+    // setState in an effect.
+    if (!scaled) return
     const measure = () => {
       const avail = scrollRef.current?.clientWidth ?? 0
       const el = canvasRef.current
