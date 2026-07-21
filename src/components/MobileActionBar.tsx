@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useApp } from '../context/AppContext'
 import { FilterBar } from './FilterBar'
 import { PinTable } from './PinTable'
@@ -6,6 +6,7 @@ import { MappingBuilder } from './MappingBuilder'
 import { ExportPanel } from './ExportPanel'
 import { CommunitySubmit } from './CommunitySubmit'
 import { IconList, IconSliders, IconDownload, IconMore } from './icons'
+import { BottomSheet } from './BottomSheet'
 
 // On a phone the studio was one long scroll: diagram, gotchas, specs,
 // flashing, filters, a 40-row pin table, then the mapping builder and export
@@ -24,30 +25,14 @@ const SHEETS: { id: SheetId; Icon: typeof IconList; label: string; title: string
   { id: 'more',   Icon: IconMore,     label: 'More',    title: 'Contribute' },
 ]
 
+// The sheet shell itself lives in BottomSheet - the pin detail panel uses
+// the same one, so every sheet in the app dismisses identically.
 function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
-  // Lock the page behind the sheet so a scroll gesture moves the sheet's own
-  // content rather than the studio underneath it.
-  useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prev
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [onClose])
-
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className="relative rounded-t-2xl border-t border-gray-700 bg-gray-950 flex flex-col"
-        style={{ maxHeight: '85vh' }}
-      >
+    <BottomSheet
+      ariaLabel={title}
+      onClose={onClose}
+      header={
         <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
           <h2 className="text-sm font-semibold text-gray-200">{title}</h2>
           <button
@@ -58,9 +43,10 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
             ✕
           </button>
         </div>
-        <div className="overflow-y-auto px-4 py-4 space-y-4">{children}</div>
-      </div>
-    </div>
+      }
+    >
+      <div className="px-4 py-4 space-y-4">{children}</div>
+    </BottomSheet>
   )
 }
 

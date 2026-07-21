@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
+import { BottomSheet } from './BottomSheet'
+import { useMediaQuery } from '../utils/useMediaQuery'
 import { ConstraintBadge } from './ConstraintBadge'
 import { reportMistakeUrl } from '../utils/github'
 import { IconWarning } from './icons'
@@ -23,6 +25,11 @@ const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
 export function PinDetailPanel() {
   const { selectedPin, setSelectedPin, chip } = useApp()
   const panelRef = useRef<HTMLDivElement>(null)
+  // A tall narrow side panel is the wrong shape for a phone: it left a dead
+  // strip of page beside it and did not match the sheets the bottom bar
+  // already opens. On phones the details come up as a sheet instead.
+  const isPhone = useMediaQuery('(max-width: 767px)')
+  const close = () => setSelectedPin(null)
 
   // Close when clicking anywhere outside the panel. Uses a document listener
   // (not a backdrop) so a click on another pin selects it directly instead of
@@ -34,7 +41,7 @@ export function PinDetailPanel() {
   // saw an empty selection and re-opened instead of closing. Re-clicking the
   // open pin now closes it, which is what the toggle always intended.
   useEffect(() => {
-    if (!selectedPin) return
+    if (!selectedPin || isPhone) return
     const onDown = (e: MouseEvent) => {
       const target = e.target as Element | null
       if (target?.closest?.('[data-pin-anchor]')) return
@@ -49,7 +56,7 @@ export function PinDetailPanel() {
       document.removeEventListener('mousedown', onDown)
       document.removeEventListener('keydown', onKey)
     }
-  }, [selectedPin, setSelectedPin])
+  }, [selectedPin, setSelectedPin, isPhone])
 
   if (!selectedPin) return null
 
@@ -66,28 +73,24 @@ export function PinDetailPanel() {
     .filter(c => c !== 'gpio')
     .map(c => ({ cap: c, detail: CAP_DETAILS[c] ?? { label: c.toUpperCase(), desc: '' } }))
 
-  return (
-    <div
-      ref={panelRef}
-      role="dialog"
-      aria-label={`GPIO${selectedPin.gpio} details`}
-      className="fixed right-0 top-0 h-full w-80 max-w-[90vw] bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col z-50 overflow-y-auto"
-    >
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
-        <div>
-          <span className="text-2xl font-bold font-mono text-green-400">GPIO{selectedPin.gpio}</span>
-          <p className="text-xs text-gray-400 mt-0.5">{chip.name}</p>
-        </div>
-        <button
-          onClick={() => setSelectedPin(null)}
-          aria-label="Close pin details"
-          className="text-gray-400 hover:text-gray-100 text-xl leading-none px-1"
-        >
-          ✕
-        </button>
+  const header = (
+    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+      <div>
+        <span className="text-2xl font-bold font-mono text-green-400">GPIO{selectedPin.gpio}</span>
+        <p className="text-xs text-gray-400 mt-0.5">{chip.name}</p>
       </div>
+      <button
+        onClick={close}
+        aria-label="Close pin details"
+        className="text-gray-400 hover:text-gray-100 text-xl leading-none px-2"
+      >
+        ✕
+      </button>
+    </div>
+  )
 
-      <div className="p-4 flex-1 space-y-5">
+  const body = (
+    <div className="p-4 space-y-5">
         {padLocation && (
           <div className="rounded-lg bg-amber-950/40 border border-amber-700 px-3 py-2">
             <p className="text-xs text-amber-300 leading-relaxed">
@@ -181,7 +184,26 @@ export function PinDetailPanel() {
         >
           <span className="inline-flex items-center gap-1.5"><IconWarning size={12} />Report a mistake with this pin</span>
         </a>
-      </div>
+</div>
+  )
+
+  if (isPhone) {
+    return (
+      <BottomSheet ariaLabel={`GPIO${selectedPin.gpio} details`} onClose={close} header={header}>
+        {body}
+      </BottomSheet>
+    )
+  }
+
+  return (
+    <div
+      ref={panelRef}
+      role="dialog"
+      aria-label={`GPIO${selectedPin.gpio} details`}
+      className="fixed right-0 top-0 h-full w-80 bg-gray-900 border-l border-gray-800 shadow-2xl flex flex-col z-50 overflow-y-auto"
+    >
+      <div className="sticky top-0 bg-gray-900 z-10">{header}</div>
+      {body}
     </div>
   )
 }

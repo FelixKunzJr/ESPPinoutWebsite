@@ -117,4 +117,28 @@ describe('pin table on a phone', () => {
     const { container } = render(<Studio />)
     expect(container.querySelector('table')).not.toBeNull()
   })
+
+  it('opens pin details as a modal bottom sheet, not the side panel', async () => {
+    mockPhone(true)
+    const user = userEvent.setup()
+    render(<Studio />)
+
+    await user.click(document.querySelector('[data-pin-anchor]') as HTMLElement)
+    const dialog = screen.getByRole('dialog')
+    // A tall narrow side panel is the wrong shape for a phone; the sheet is
+    // modal and shares the shell the bottom action bar already uses.
+    expect(dialog.getAttribute('aria-modal')).toBe('true')
+    expect(dialog.className).not.toContain('right-0')
+  })
+
+  it('keeps the docked side panel on desktop', async () => {
+    mockPhone(false)
+    const user = userEvent.setup()
+    render(<Studio />)
+
+    await user.click(document.querySelector('[data-pin-anchor]') as HTMLElement)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog.getAttribute('aria-modal')).toBeNull()
+    expect(dialog.className).toContain('right-0')
+  })
 })
