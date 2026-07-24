@@ -83,6 +83,10 @@ export function BoardBuilderPage() {
     () => (base ? [...base.pins].sort((a, b) => a.gpio - b.gpio) : []),
     [base],
   )
+  // Never-usable pins (SPI flash / PSRAM on classic ESP32 etc.) should almost
+  // never be broken out on a header. Flag them in the picker so they aren't
+  // selected by accident.
+  const pinByGpio = useMemo(() => new Map((base?.pins ?? []).map(p => [p.gpio, p])), [base])
 
   const previewValue: AppState | null = useMemo(() => {
     if (!result.chip) return null
@@ -109,7 +113,8 @@ export function BoardBuilderPage() {
         .filter(p => p.kind === 'gpio' && p.gpio !== undefined)
         .map(p => p.gpio),
     )
-    const next = (gpioOptions.find(p => !used.has(p.gpio)) ?? gpioOptions[0])?.gpio
+    const next = (gpioOptions.find(p => !used.has(p.gpio) && p.isUsable)
+      ?? gpioOptions.find(p => !used.has(p.gpio)) ?? gpioOptions[0])?.gpio
     setPads(side, [...draft[side], { kind: 'gpio', gpio: next }])
   }
   const removePad = (side: Side, i: number) => setPads(side, draft[side].filter((_, j) => j !== i))
@@ -205,11 +210,20 @@ export function BoardBuilderPage() {
                         <div className="flex gap-1.5">
                           <select className={`${fieldCls} flex-1`} value={pad.gpio ?? ''}
                             onChange={e => updatePad(side, i, { gpio: Number(e.target.value) })}>
-                            {gpioOptions.map(p => <option key={p.gpio} value={p.gpio}>GPIO{p.gpio}</option>)}
+                            {gpioOptions.map(p => (
+                              <option key={p.gpio} value={p.gpio}>
+                                GPIO{p.gpio}{p.isUsable ? '' : ' (reserved)'}
+                              </option>
+                            ))}
                           </select>
                           <input className={`${fieldCls} w-24`} value={pad.label ?? ''} placeholder="silk label"
                             onChange={e => updatePad(side, i, { label: e.target.value })} />
                         </div>
+                        {pad.gpio !== undefined && pinByGpio.get(pad.gpio)?.isUsable === false && (
+                          <p className="text-[10px] text-red-400 leading-snug">
+                            GPIO{pad.gpio} is reserved (SPI flash/PSRAM) and is almost never broken out on a header. Double-check the schematic.
+                          </p>
+                        )}
                         <input className={`${fieldCls} w-full`} value={pad.note ?? ''} placeholder="gotcha (optional)"
                           onChange={e => updatePad(side, i, { note: e.target.value })} />
                       </div>
