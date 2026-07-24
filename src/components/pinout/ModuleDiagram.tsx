@@ -597,8 +597,12 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
       <rect x={cx - usbW / 2 + 3} y={usbY + (usbTop ? 6 : 3)} width={usbW - 6} height={5} rx="2.5" fill="#3a4450" />
       <text x={cx} y={usbTop ? usbY + usbH + 14 : H - 20} textAnchor="middle" fontSize="5.4" fontFamily="monospace" fill="#5a6675" letterSpacing="1">USB</text>
 
-      {/* board name silkscreen */}
-      <text x={cx} y={nameY} textAnchor="middle" fontSize="9" fontFamily="monospace" fontWeight="800" fill="#e2e8f0" letterSpacing="0.5">{m.name.replace(/^Waveshare /, '').replace(/^ESP32-/, '')}</text>
+      {/* board name silkscreen - shrink to keep long names inside the PCB */}
+      {(() => {
+        const silkName = m.name.replace(/^Waveshare /, '').replace(/^ESP32-/, '')
+        const fontSize = Math.min(9, (W - 14) / (silkName.length * 0.66))
+        return <text x={cx} y={nameY} textAnchor="middle" fontSize={fontSize} fontFamily="monospace" fontWeight="800" fill="#e2e8f0" letterSpacing="0.5">{silkName}</text>
+      })()}
       <text x={cx} y={nameY + 12} textAnchor="middle" fontSize="6" fontFamily="monospace" fill={m.accent} letterSpacing="0.4">{m.radios}</text>
 
       {/* Front-surface solder pads: castellated half-pads tucked into the

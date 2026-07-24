@@ -35,6 +35,17 @@ describe('board spec pipeline', () => {
     expect(chip!.pins.find(p => p.gpio === 21)!.names[0]).toBe('GP21')
   })
 
+  it('resolves the Waveshare ESP32-S3-Touch-LCD-2 board with no errors', () => {
+    const spec = JSON.parse(
+      readFileSync(resolve(here, '../contrib/boards/waveshare-s3-touch-lcd-2.board.json'), 'utf8'),
+    ) as BoardSpec
+    const { chip, errors } = resolveBoard(spec, findChip(spec.baseChip))
+    expect(errors).toEqual([])
+    expect(chip).not.toBeNull()
+    expect(chip!.pins.find(p => p.gpio === 47)!.names[0]).toBe('TP_SCL')
+    expect(chip!.pins.find(p => p.gpio === 19)!.names[0]).toBe('USB_N')
+  })
+
   it('resolves the waveshare s3 nano with the Arduino Nano ESP32 mapping', () => {
     const spec = JSON.parse(
       readFileSync(resolve(here, '../contrib/boards/esp32-s3-nano.board.json'), 'utf8'),

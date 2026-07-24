@@ -56,6 +56,7 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 - [ESP32-S3-WROOM-2](https://esp32pin.com/esp32s3wroom2)
 - [ESP32-S3-MINI-1](https://esp32pin.com/esp32s3mini1)
 - [Waveshare ESP32-S3-Zero](https://esp32pin.com/esp32-s3-zero)
+- [Waveshare ESP32-S3-Touch-LCD-2](https://esp32pin.com/waveshare-s3-touch-lcd-2)
 - [Waveshare ESP32-S3-Nano](https://esp32pin.com/esp32-s3-nano) - Arduino Nano form factor; the B0/B1 pads are GPIO46/GPIO0 boot straps, not AREF/RESET
 - [ESP32-S3-DevKitC-1](https://esp32pin.com/esp32s3devkitc)
 - [Seeed XIAO ESP32-S3](https://esp32pin.com/xiao-esp32s3)

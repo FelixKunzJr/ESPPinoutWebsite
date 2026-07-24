@@ -6,6 +6,7 @@ import * as G from './generated'
 import { esp32 } from './esp32'
 import { esp32wrover } from './esp32wrover'
 import esp32S3ZeroJson from '../../../contrib/boards/esp32-s3-zero.board.json'
+import waveshareS3TouchLcd2Json from '../../../contrib/boards/waveshare-s3-touch-lcd-2.board.json'
 import esp32S3NanoJson from '../../../contrib/boards/esp32-s3-nano.board.json'
 import esp32Devkit38Json from '../../../contrib/boards/esp32-devkit-38pin.board.json'
 import esp32DevkitcJson from '../../../contrib/boards/esp32-devkitc.board.json'
@@ -224,6 +225,7 @@ const generated = MODULES.map(build)
 const byId = (id: string) => generated.find(c => c.id === id)!
 
 export const esp32S3Zero = resolveBoard(esp32S3ZeroJson as unknown as BoardSpec, byId('esp32s3')).chip!
+export const waveshareS3TouchLcd2 = resolveBoard(waveshareS3TouchLcd2Json as unknown as BoardSpec, byId('esp32s3')).chip!
 // Arduino Nano form factor. Pin nets verified against Waveshare's own schematic
 // (ESP32-S3-Nano-Schematic.pdf) and cross-checked with the arduino-esp32
 // `arduino_nano_nora` variant that the "Arduino Nano ESP32" board uses.
@@ -275,6 +277,7 @@ export const CHIPS: Chip[] = [
   byId('esp32s2devkitc'),
   byId('esp32s3devkitc'),
   esp32S3Zero,
+  waveshareS3TouchLcd2,
   esp32S3Nano,
   byId('esp32c3devkitm'),
   byId('esp32c3devkitc'),
