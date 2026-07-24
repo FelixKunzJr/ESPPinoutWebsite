@@ -10,6 +10,7 @@ import waveshareS3TouchLcd2Json from '../../../contrib/boards/waveshare-s3-touch
 import esp32S3NanoJson from '../../../contrib/boards/esp32-s3-nano.board.json'
 import esp32Devkit38Json from '../../../contrib/boards/esp32-devkit-38pin.board.json'
 import esp32DevkitcJson from '../../../contrib/boards/esp32-devkitc.board.json'
+import esp32DevkitV1Json from '../../../contrib/boards/esp32-devkitv1.board.json'
 import xiaoEsp32c3Json from '../../../contrib/boards/xiao-esp32c3.board.json'
 import xiaoEsp32s3Json from '../../../contrib/boards/xiao-esp32s3.board.json'
 import xiaoEsp32c6Json from '../../../contrib/boards/xiao-esp32c6.board.json'
@@ -235,6 +236,9 @@ export const esp32Devkit38 = resolveBoard(esp32Devkit38Json as unknown as BoardS
 // peripheral labels (VSPID/MOSI, UART, etc.) match /esp32 and the Elegoo board,
 // instead of the sparse KiCad-generated set. Same silicon, same functions.
 export const esp32Devkitc = resolveBoard(esp32DevkitcJson as unknown as BoardSpec, esp32).chip!
+// DOIT ESP32 DevKit V1 (30-pin WROOM-32). Verified against the board photo;
+// the submitter's TX0 pad was corrected from GPIO7 (flash) to GPIO1 (U0TXD).
+export const esp32DevkitV1 = resolveBoard(esp32DevkitV1Json as unknown as BoardSpec, esp32).chip!
 
 // Seeed Studio XIAO boards - same tiny footprint, different GPIO map per silicon.
 export const xiaoEsp32c3 = resolveBoard(xiaoEsp32c3Json as unknown as BoardSpec, byId('esp32c3')).chip!
@@ -272,6 +276,7 @@ export const CHIPS: Chip[] = [
   byId('esp8684wroom02c'),
   // Dev boards
   esp32Devkitc,
+  esp32DevkitV1,
   esp32Devkit38,
   byId('esp32devkitm1'),
   byId('esp32s2devkitc'),

@@ -70,6 +70,21 @@ describe('board spec pipeline', () => {
     expect(chip!.packageLayout!.right.length).toBe(15)
   })
 
+  it('resolves the DOIT ESP32 DevKit V1 with the corrected TX0=GPIO1 mapping', () => {
+    const spec = JSON.parse(
+      readFileSync(resolve(here, '../contrib/boards/esp32-devkitv1.board.json'), 'utf8'),
+    ) as BoardSpec
+    const { chip, errors } = resolveBoard(spec, findChip('esp32'))
+    expect(errors).toEqual([])
+    expect(chip).not.toBeNull()
+    // TX0/RX0 are the UART0 console on GPIO1/GPIO3 (the submission had GPIO7,
+    // a flash pin, which is not broken out on this board).
+    expect(chip!.pins.find(p => p.gpio === 1)!.names[0]).toBe('TX0')
+    expect(chip!.pins.find(p => p.gpio === 3)!.names[0]).toBe('RX0')
+    // GPIO7 (flash) must not be broken out.
+    expect(chip!.packageLayout!.left.concat(chip!.packageLayout!.right).some(p => p.gpio === 7)).toBe(false)
+  })
+
   it('flags an unknown base chip', () => {
     const spec: BoardSpec = { id: 'x', name: 'X', baseChip: 'nope', headers: { left: [], right: [] } }
     const { chip, errors } = resolveBoard(spec, findChip(spec.baseChip))
