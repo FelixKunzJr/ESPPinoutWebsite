@@ -35,6 +35,7 @@ export interface Pin {
   constraints: Constraint[]
   isUsable: boolean          // false = never use (flash-reserved etc)
   notes?: string
+  boardLabel?: string        // silkscreen name of the header pad (boards only)
 }
 
 // Physical module identity - drives the realistic on-screen module rendering.

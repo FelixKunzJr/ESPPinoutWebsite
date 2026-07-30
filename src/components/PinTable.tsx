@@ -41,7 +41,20 @@ function MappedChip({ assignment }: { assignment: PinAssignment | undefined }) {
 
 export function PinTable() {
   const { chip, selectedPin, setSelectedPin, filter, mapping } = useApp()
-  const pins = filterPins(chip.pins, filter)
+  // On a board, the table is the board's actual header pins, not every GPIO of
+  // the underlying chip. The pins not broken out (flash, unrouted GPIOs) are
+  // hidden, and the board's silkscreen label gets its own PIN column.
+  const isBoard = chip.module?.form === 'board'
+  const boardGpios = isBoard && chip.packageLayout
+    ? new Set(
+        [chip.packageLayout.left, chip.packageLayout.right, chip.packageLayout.bottom, chip.packageLayout.top ?? []]
+          .flat()
+          .filter(p => p.gpio !== undefined)
+          .map(p => p.gpio as number),
+      )
+    : null
+  const pins = filterPins(chip.pins, filter).filter(p => !boardGpios || boardGpios.has(p.gpio))
+  const otherNames = (pin: Pin) => pin.names.filter(n => n !== pin.boardLabel).join(' / ')
   // Five columns cannot fit a phone: the table only ever scrolled sideways,
   // which cut the constraint column - the one that matters most - off the
   // right edge. On phones each pin becomes a stacked card instead.
@@ -80,11 +93,16 @@ export function PinTable() {
                 ${isSelected ? 'ring-1 ring-inset ring-green-500 bg-green-950/20 is-selected' : ''}`}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <span className="font-mono font-bold text-green-400 text-base">GPIO{pin.gpio}</span>
+                <span className="font-mono font-bold text-green-400 text-base">
+                  {isBoard && pin.boardLabel ? pin.boardLabel : `GPIO${pin.gpio}`}
+                  {isBoard && pin.boardLabel && (
+                    <span className="ml-2 text-xs font-normal text-gray-500">GPIO{pin.gpio}</span>
+                  )}
+                </span>
                 <MappedChip assignment={assignment} />
               </div>
               <p className="font-mono text-xs text-gray-400 break-words">
-                {pin.names.filter(n => n !== `GPIO${pin.gpio}`).join(' / ') || 'GPIO only'}
+                {pin.names.filter(n => n !== `GPIO${pin.gpio}` && n !== pin.boardLabel).join(' / ') || 'GPIO only'}
               </p>
               <Caps pin={pin} />
               {pin.constraints.length > 0 && (
@@ -107,6 +125,7 @@ export function PinTable() {
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left text-gray-400 bg-gray-900/60 text-xs uppercase tracking-wider">
+            {isBoard && <th className="px-4 py-3">Pin</th>}
             <th className="px-4 py-3">GPIO</th>
             <th className="px-4 py-3">Names</th>
             <th className="px-4 py-3">Capabilities</th>
@@ -129,11 +148,16 @@ export function PinTable() {
                   ${isSelected ? 'ring-1 ring-inset ring-green-500 bg-green-950/20 is-selected' : ''}
                 `}
               >
-                <td className="px-4 py-2.5 font-mono font-bold text-green-400">
+                {isBoard && (
+                  <td className="px-4 py-2.5 font-mono font-bold text-green-400">
+                    {pin.boardLabel ?? '-'}
+                  </td>
+                )}
+                <td className={`px-4 py-2.5 font-mono ${isBoard ? 'text-gray-400' : 'font-bold text-green-400'}`}>
                   {pin.gpio}
                 </td>
                 <td className="px-4 py-2.5 font-mono text-gray-300 text-xs">
-                  {pin.names.join(' / ')}
+                  {otherNames(pin) || '-'}
                 </td>
                 <td className="px-4 py-2.5"><Caps pin={pin} /></td>
                 <td className="px-4 py-2.5">

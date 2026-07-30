@@ -80,6 +80,7 @@ describe('board spec pipeline', () => {
     // TX0/RX0 are the UART0 console on GPIO1/GPIO3 (the submission had GPIO7,
     // a flash pin, which is not broken out on this board).
     expect(chip!.pins.find(p => p.gpio === 1)!.names[0]).toBe('TX0')
+    expect(chip!.pins.find(p => p.gpio === 1)!.boardLabel).toBe('TX0')
     expect(chip!.pins.find(p => p.gpio === 3)!.names[0]).toBe('RX0')
     // GPIO7 (flash) must not be broken out.
     expect(chip!.packageLayout!.left.concat(chip!.packageLayout!.right).some(p => p.gpio === 7)).toBe(false)

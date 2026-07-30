@@ -51,10 +51,11 @@ export function resolveBoard(spec: BoardSpec, base: Chip | undefined): BoardResu
 
   if (errors.length) return { chip: null, errors, warnings }
 
-  // Board silk labels are prepended to the inherited pin names so they show first.
+  // Board silk labels are prepended to the inherited pin names so they show
+  // first, and kept as boardLabel so views can show them in a dedicated column.
   const pins: Pin[] = base.pins.map(p => {
     const ov = overrides[String(p.gpio)]
-    return ov?.label ? { ...p, names: [ov.label, ...p.names] } : p
+    return ov?.label ? { ...p, names: [ov.label, ...p.names], boardLabel: ov.label } : p
   })
 
   const overrideNotes = Object.entries(overrides)
