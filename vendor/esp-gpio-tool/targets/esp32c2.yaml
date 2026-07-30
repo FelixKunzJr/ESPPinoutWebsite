@@ -1,0 +1,70 @@
+features:
+  cpu:
+    cores:
+      count: 1
+      max_freq_mhz: 120
+  memory:
+    internal:
+      sram_kb: 272
+  connectivity:
+    wifi:
+      supported: true
+      standard: 802.11b/g/n
+      max_data_rate_mbps: 72.2
+    bluetooth:
+      supported: true
+      version: BLE 5.0
+    ieee_802154:
+      supported: false
+    ethernet:
+      mac: false
+    usb:
+      otg_fs_2_0: false
+      usb_serial_jtag: false
+
+peripheral:
+  ADC:
+    count: 1
+    channels: {'1': 5}
+    assigned_pins: ['ADC{count}_CH{{channel}}']
+  UART:
+    count: 2
+    assigned_pins: [U0RXD, U0TXD]
+    universal_pins: [U1TXD, U1RXD, 'U{count}CTS', 'U{count}RTS', 'U{count}DTR', 'U{count}DSR']
+  JTAG:
+    count: 1
+    assigned_pins: [MTCK, MTDO, MTMS, MTDI]
+  I2C:  # signal names from datasheet, pg. 24: I2CEXT0_SDA, I2CEXT0_SCL
+    count: 1
+    universal_pins: ['I2C{count}_SCL', 'I2C{count}_SDA']
+  SPI:  # Actually, there are 3 SPI peripherals, but SPI0 and SPI1 are SoC internal and not usable by the user
+    count: 1
+    # SPI1 is not exposed from the package
+    subname: [FSPI]
+    modes: [Single SPI, Dual SPI, Quad SPI]
+    assigned_pins: ['{subname}CLK', '{subname}Q', '{subname}D', '{subname}HD', '{subname}WP', '{subname}CS0']
+    universal_pins: [FSPICS1, FSPICS2, FSPICS3, FSPICS4, FSPICS5]
+  LEDC:
+    count: 1
+    channels: 6
+    universal_pins: ['LEDC_LS_SIG_OUT{channel}']
+
+gpio:
+  0: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH0]}
+  1: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH1]}
+  2: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH2, FSPIQ]}
+  3: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH3]}
+  4: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH4, MTMS, FSPIHD]}
+  5: {power_domain: VDD3P3_RTC, rtc: true, functions: [MTDI, FSPIWP]}
+  6: {power_domain: VDD3P3_CPU, functions: [MTCK, FSPICLK]}
+  7: {power_domain: VDD3P3_CPU, functions: [MTDO, FSPID]}
+  8: {power_domain: VDD3P3_CPU, functions: [], strapping: Has to be pulled down for Download Boot.}
+  9: {power_domain: VDD3P3_CPU, functions: [], strapping: Has to be pulled up for SPI Boot and pulled down for Download Boot., at_reset: PUP}  # PUP = wpu/weak pull-up
+  10: {power_domain: VDD3P3_CPU, functions: [FSPICS0]}
+  18: {power_domain: VDD3P3_CPU, functions: []}
+  19: {power_domain: VDD3P3_CPU, functions: [U0RXD], at_reset: PUP}
+  20: {power_domain: VDD3P3_CPU, functions: [U0TXD], at_reset: PUP}
+
+soc:
+  ESP8684H2: {reserved_pins: []}  # flash size 2 MB
+  ESP8684H4: {reserved_pins: []}  # flash size 4 MB

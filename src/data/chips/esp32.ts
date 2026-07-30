@@ -1,5 +1,6 @@
 import type { Chip, Pin } from '../../types/chip'
 import { ESP32_WROOM_32_SYMBOL } from './generated'
+import { applyEspressif } from './enrich'
 
 // Pre-built constraint objects reused across pins
 const ADC2_NO_WIFI = {
@@ -97,7 +98,7 @@ export const WROOM32_LAYOUT = {
   antennaMm: 6.69,
 }
 
-export const ESP32_BASE_PINS = [
+export const ESP32_BASE_PINS = applyEspressif('esp32', [
   {
     gpio: 0,
     names: ['GPIO0', 'ADC2_CH1', 'TOUCH1', 'CLK_OUT1'],
@@ -307,7 +308,7 @@ export const ESP32_BASE_PINS = [
     constraints: [INPUT_ONLY],
     isUsable: true,
   },
-] satisfies Pin[]
+] satisfies Pin[])
 
 export const esp32: Chip = {
   id: 'esp32',

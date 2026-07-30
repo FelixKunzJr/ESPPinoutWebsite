@@ -1,0 +1,132 @@
+features:
+  cpu:
+    cores:
+      count: 1
+      max_freq_mhz: 160
+      lp_count: 1
+      lp_max_freq_mhz: 20
+  memory:
+    internal:
+      sram_kb: 512
+      lp_sram_kb: 16
+  connectivity:
+    wifi:
+      supported: true
+      standard: 802.11b/g/n/ax (2.4 GHz Wi-Fi 6)
+      max_data_rate_mbps: 150
+    bluetooth:
+      supported: true
+      version: BLE 5.3
+    ieee_802154:
+      supported: true
+      protocols: [Thread 1.3, Zigbee 3.0]
+    ethernet:
+      mac: false
+    usb:
+      otg_fs_2_0: false
+      usb_serial_jtag: true
+    sdio:
+      slave_2_0: true
+
+peripheral:
+  ADC:
+    count: 1
+    channels: 7
+    assigned_pins: ['ADC{count}_CH{{channel}}']
+  UART:
+    count: 2
+    assigned_pins: [U0TXD, U0RXD]
+    universal_pins: [U1TXD, U1RXD, 'U{count}CTS', 'U{count}RTS', 'U{count}DTR', 'U{count}DSR']
+  JTAG:
+    count: 1
+    assigned_pins: [MTCK, MTDO, MTMS, MTDI]
+  I2C:
+    count: 1
+    universal_pins: ['I2C{count}_SCL', 'I2C{count}_SDA']
+  I2S:
+    count: 1
+    universal_pins: ['I2S{count}_WS', 'I2S{count}_SDA', 'I2S{count}_CLK']
+  SPI:
+    # SPI0 uses the same pins as SPI1 so actual count is 2
+    count: 2
+    subname: [SPI, FSPI]
+    modes: [Single SPI, Dual SPI, Quad SPI, QPI]
+    assigned_pins: ['{subname}CLK', '{subname}Q', '{subname}D', '{subname}HD', '{subname}WP', '{subname}CS0', FSPICS1, FSPICS2, FSPICS3, FSPICS4, FSPICS5]
+    universal_pins: [SPICS1]
+  SDIO:
+    count: 1
+    assigned_pins: ['SDIO{count}_CLK', 'SDIO{count}_CMD', 'SDIO{count}_DATA{{data_width}}']
+    data_width: {'0': [1, 4]}
+  RMT:
+    count: 4
+    universal_pins: ['RMT_SIG_IN{count}', 'RMT_SIG_OUT{count}']
+  MCPWM:  # Motor Control PWM
+    count: 1
+    channels: 3
+    universal_pins: ['MCPWM{count}_SYNC_IN{{channel}}', 'MCPWM{count}_FLT_IN{{channel}}', 'MCPWM{count}_CAP_IN{{channel}}', 'MCPWM{count}_OUT{{channel}}A', 'MCPWM{count}_OUT{{channel}}B']
+  LEDC:  # LED PWM
+    count: 1
+    channels: 6
+    universal_pins: ['LEDC_LS_SIG_OUT{channel}']
+  USBSERIALJTAG:  # USB Serial/JTAG
+    count: 1
+    assigned_pins: [USB_D-, USB_D+]
+  TWAI:
+    count: 2
+    universal_pins: ['TWAI{count}_RX', 'TWAI{count}_TX', 'TWAI{count}_BUS_OFF_ON', 'TWAI{count}_CLKOUT']
+  PCNT:  # Pulse Counter
+    count: 4
+    channels: 2
+    universal_pins: ['PCNT_SIG_CH{{channel}}_IN{count}', 'PCNT_CTRL_CH{{channel}}_IN{count}']
+  XTAL32K:  # external 32K crystal oscillator
+    count: 1
+    assigned_pins: [XTAL_32K_P, XTAL_32K_N]
+  PARLIO:  # Parallel IO interface
+    count: 1
+    data_width: [1, 2, 4, 8, 16]
+    universal_pins: ['PARL_RX_DATA{data_width}', 'PARL_TX_DATA{data_width}', PARL_RX_CLK_IN, PARL_TX_CLK_IN, PARL_TX_CLK_OUT]
+  LPUART:  # Low Power UART
+    count: 1
+    assigned_pins: [LP_UART_RXD, LP_UART_TXD, LP_UART_RTSN, LP_UART_CTSN, LP_UART_DTRN, LP_UART_DSRN]
+  LPI2C:  # Low Power I2C
+    count: 1
+    assigned_pins: [LP_I2C_SDA, LP_I2C_SCL]
+
+# Note: PUP (wpu in datasheet) - pull up resistor enabled; PDOWN (wpu) - pull down resistor enabled
+gpio:
+  0: {power_domain: VDDPST1, lp: true, functions: [XTAL_32K_P, ADC1_CH0, LP_UART_DTRN]}
+  1: {power_domain: VDDPST1, lp: true, functions: [XTAL_32K_N, ADC1_CH1, LP_UART_DSRN]}
+  2: {power_domain: VDDPST1, lp: true, functions: [ADC1_CH2, FSPIQ, LP_UART_RTSN]}
+  3: {power_domain: VDDPST1, lp: true, functions: [ADC1_CH3, LP_UART_CTSN]}
+  4: {power_domain: VDDPST1, lp: true, functions: [ADC1_CH4, MTMS, FSPIHD, LP_UART_RXD], strapping: Control SDIO sampling on raising (pin is high) and falling (low) edge.}
+  5: {power_domain: VDDPST1, lp: true, functions: [ADC1_CH5, MTDI, FSPIWP, LP_UART_TXD], strapping: Control SDIO output on raising (pin is high) and falling (low) edge.}
+  6: {power_domain: VDDPST1, lp: true, functions: [ADC1_CH6, MTCK, FSPICLK, LP_I2C_SDA]}
+  7: {power_domain: VDDPST1, lp: true, functions: [MTDO, FSPID, LP_I2C_SCL]}
+  8: {power_domain: VDDPST2, functions: [], strapping: Has to be pulled-up for Download Mode}
+  9: {power_domain: VDDPST2, functions: [], strapping: High for SPI Boot; Low for Download Mode, at_reset: PUP}
+  10: {power_domain: VDDPST2, functions: []}
+  11: {power_domain: VDDPST2, functions: []}
+  12: {power_domain: VDDPST2, functions: [USB_D-]}
+  13: {power_domain: VDDPST2, functions: [USB_D+]}
+  14: {power_domain: VDDPST2, functions: []}
+  15: {power_domain: VDDPST2, functions: [], strapping: JTAG signal source select}
+  16: {power_domain: VDDPST2, functions: [U0TXD, FSPICS0]}
+  17: {power_domain: VDDPST2, functions: [U0RXD, FSPICS1]}
+  18: {power_domain: VDDPST2, functions: [SDIO0_CMD, FSPICS2], at_reset: PUP}
+  19: {power_domain: VDDPST2, functions: [SDIO0_CLK, FSPICS3], at_reset: PUP}
+  20: {power_domain: VDDPST2, functions: [SDIO0_DATA0, FSPICS4], at_reset: PUP}
+  21: {power_domain: VDDPST2, functions: [SDIO0_DATA1, FSPICS5], at_reset: PUP}
+  22: {power_domain: VDDPST2, functions: [SDIO0_DATA2], at_reset: PUP}
+  23: {power_domain: VDDPST2, functions: [SDIO0_DATA3], at_reset: PUP}
+  24: {power_domain: VDD_SPI, functions: [SPICS0], at_reset: PUP}
+  25: {power_domain: VDD_SPI, functions: [SPIQ], at_reset: PUP}
+  26: {power_domain: VDD_SPI, functions: [SPIWP], at_reset: PUP}
+  27: {power_domain: VDD_SPI, functions: []}
+  28: {power_domain: VDD_SPI, functions: [SPIHD], at_reset: PUP}
+  29: {power_domain: VDD_SPI, functions: [SPICLK], at_reset: PUP}
+  30: {power_domain: VDD_SPI, functions: [SPID], at_reset: PUP}
+
+soc:
+  ESP32-C6: {not_connected: [14]}
+  ESP32-C6FH4: {not_connected: [24, 25, 26, 27, 28, 29, 30]}  # quad flash
+  ESP32-C6FH8: {not_connected: [24, 25, 26, 27, 28, 29, 30]}  # quad flash

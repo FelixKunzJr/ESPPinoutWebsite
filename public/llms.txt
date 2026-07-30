@@ -88,4 +88,4 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 
 ## Data provenance
 
-Pin data is generated from https://github.com/espressif/kicad-libraries via a build script; the schematic symbols shown are the official Espressif KiCad symbols. Family-level rules that KiCad does not encode (strapping pins, boot modes, ADC2/Wi-Fi arbitration, flash-bus rules) are maintained alongside the generator. Source: https://github.com/FelixKunzJr/ESPPinoutWebsite
+Pin data is generated from https://github.com/espressif/kicad-libraries via a build script; the schematic symbols shown are the official Espressif KiCad symbols. Per-GPIO alternate functions, RTC-domain flags, and strapping roles are merged from the dataset of Espressif's own esp-gpio-tool (https://github.com/espressif/esp-gpio-tool, Apache-2.0), and the whole catalog is cross-validated against that dataset in the test suite. Family-level rules that neither source encodes (ADC2/Wi-Fi arbitration, flash-bus rules) are maintained alongside the generator. Source: https://github.com/FelixKunzJr/ESPPinoutWebsite

@@ -1,0 +1,98 @@
+features:
+  cpu:
+    cores:
+      count: 1
+      max_freq_mhz: 160
+  memory:
+    internal:
+      sram_kb: 400
+      lp_sram_kb: 8
+  connectivity:
+    wifi:
+      supported: true
+      standard: 802.11b/g/n
+      max_data_rate_mbps: 150
+    bluetooth:
+      supported: true
+      version: BLE 5
+    ieee_802154:
+      supported: false
+    ethernet:
+      mac: false
+    usb:
+      otg_fs_2_0: false
+      usb_serial_jtag: true
+
+peripheral:
+  ADC:
+    count: 2
+    channels: {'1': 5, '2': 1}
+    assigned_pins: ['ADC{count}_CH{{channel}}']
+  UART:
+    count: 2
+    assigned_pins: [U0TXD, U0RXD]
+    universal_pins: [U1TXD, U1RXD, 'U{count}CTS', 'U{count}RTS', 'U{count}DTR', 'U{count}DSR']
+  JTAG:
+    count: 1
+    assigned_pins: [MTCK, MTDO, MTMS, MTDI]
+  I2C:
+    count: 1
+    universal_pins: ['I2C{count}_SCL', 'I2C{count}_SDA']
+  I2S:
+    count: 1
+    universal_pins: ['I2S{count}_WS', 'I2S{count}_SDA', 'I2S{count}_CLK']
+  SPI:
+    # SPI0 uses the same pins as SPI1 so actual count is 2
+    count: 2
+    subname: [SPI, FSPI]
+    modes: [Single SPI, Dual SPI, Quad SPI, QPI]
+    assigned_pins: ['{subname}CLK', '{subname}Q', '{subname}D', '{subname}HD', '{subname}WP', '{subname}CS0']
+    universal_pins: ['{subname}CS1', FSPICS2, FSPICS3, FSPICS4, FSPICS5]
+  RMT:
+    count: 2
+    universal_pins: ['RMT{count}_TX', 'RMT{count}_RX']
+  LEDC:
+    count: 1
+    channels: 6
+    universal_pins: ['LEDC_LS_SIG_OUT{channel}']
+  USBSERIALJTAG:  # USB Serial/JTAG
+    count: 1
+    assigned_pins: [USB_D-, USB_D+]
+  TWAI:
+    count: 1
+    universal_pins: [TWAI_RX, TWAI_TX, TWAI_BUS_OFF_ON, TWAI_CLKOUT]
+  XTAL32K:  # external 32K crystal oscillator
+    count: 1
+    assigned_pins: [XTAL_32K_P, XTAL_32K_N]
+
+gpio:
+  0: {power_domain: VDD3P3_RTC, rtc: true, functions: [XTAL_32K_P, ADC1_CH0]}
+  1: {power_domain: VDD3P3_RTC, rtc: true, functions: [XTAL_32K_N, ADC1_CH1]}
+  2: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH2, FSPIQ], strapping: Has to be pulled-up for SPI and Download boot}
+  3: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH3]}
+  4: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH4, MTMS, FSPIHD]}
+  5: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH0, MTDI, FSPIWP]}
+  6: {power_domain: VDD3P3_CPU, functions: [MTCK, FSPICLK]}
+  7: {power_domain: VDD3P3_CPU, functions: [MTDO, FSPID]}
+  8: {power_domain: VDD3P3_CPU, functions: [], strapping: ROM messages printing control; high for download mode}
+  9: {power_domain: VDD3P3_CPU, functions: [], strapping: High for SPI boot; low for Download mode, at_reset: PUP}
+  10: {power_domain: VDD3P3_CPU, functions: [FSPICS0]}
+  11: {power_domain: VDD3P3_CPU, functions: []}
+  12: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [SPIHD], at_reset: PUP}
+  13: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [SPIWP], at_reset: PUP}
+  14: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [SPICS0], at_reset: PUP}
+  15: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [SPICLK], at_reset: PUP}
+  16: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [SPID], at_reset: PUP}
+  17: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [SPIQ], at_reset: PUP}
+  18: {power_domain: VDD3P3_CPU, functions: [USB_D-]}
+  19: {power_domain: VDD3P3_CPU, functions: [USB_D+]}
+  20: {power_domain: VDD3P3_CPU, functions: [U0RXD]}
+  21: {power_domain: VDD3P3_CPU, functions: [U0TXD]}
+
+soc:
+  ESP32-C3: {reserved_pins: []}
+  ESP32-C3FN4: {reserved_pins: [12, 13, 14, 15, 16, 17]}  # flash 4MB
+  ESP32-C3FH4: {reserved_pins: [12, 13, 14, 15, 16, 17]}  # flash 4MB
+  ESP32-C3FH4AZ: {reserved_pins: [12, 13, 14, 15, 16, 17]}  # flash 4MB
+  ESP32-C3FH4X: {not_connected: [12, 13, 14, 15, 16, 17]}  # 16-pin package, flash 4MB
+  ESP8685: {not_connected: [11, 12, 13, 14, 15, 16, 17]}  # 15-pin package, flash 4MB

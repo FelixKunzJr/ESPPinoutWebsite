@@ -1,0 +1,152 @@
+features:
+  cpu:
+    cores:
+      count: 2
+      max_freq_mhz: 240
+  memory:
+    internal:
+      sram_kb: 520
+      rtc_sram_kb: 16
+  connectivity:
+    wifi:
+      supported: true
+      standard: 802.11b/g/n
+      max_data_rate_mbps: 150
+    bluetooth:
+      supported: true
+      version: BT Classic + BLE 4.2
+    ieee_802154:
+      supported: false
+    ethernet:
+      mac: true
+    usb:
+      otg_fs_2_0: false
+      usb_serial_jtag: false
+
+peripheral:
+  ADC:
+    count: 2
+    channels: {'1': 8, '2': 10}
+    assigned_pins: ['ADC{count}_CH{{channel}}']
+  DAC:
+    count: 2
+    assigned_pins: ['DAC_{count}']
+  UART:
+    count: 3
+    assigned_pins: ['U{count}TXD', 'U{count}RXD', 'U{count}CTS', 'U{count}RTS']
+    universal_pins: [U0DTR, U0DSR]  # DTR and DSR are only available on UART0
+  JTAG:
+    count: 1
+    assigned_pins: [MTCK, MTDO, MTMS, MTDI]
+  TOUCH:
+    count: 10
+    assigned_pins: ['TOUCH{count}']
+  EMAC:
+    count: 1
+    modes: [RMII internal CLK, RMII external CLK, MII]
+    # MII: TX_CLK, RX_CLK, TX_EN, TXD0, TXD1, TXD2, TXD3, RX_ER, RX_DV, RXD0, RXD1, RXD2, RXD3, TX_ER
+    # RMII: TX_CLK, TX_EN, TXD0, TXD1, RX_DV, RXD0, RXD1
+    # internal CLK: EMAC_CLK_OUT has to be from CLK_OUT1 (experimental), EMAC_CLK_OUT, EMAC_CLK_OUT_180 pins
+    assigned_pins: [EMAC_TX_CLK, EMAC_RX_CLK, EMAC_TX_EN, EMAC_TXD0, EMAC_TXD1, EMAC_TXD2, EMAC_TXD3, EMAC_RX_ER, EMAC_RX_DV, EMAC_RXD0, EMAC_RXD1, EMAC_RXD2, EMAC_RXD3, EMAC_CLK_OUT, EMAC_TX_ER]
+    universal_pins: [EMAC_MDC, EMAC_MDIO, EMAC_CRS, EMAC_COL]
+  I2C:
+    count: 2
+    universal_pins: ['I2C{count}_SCL', 'I2C{count}_SDA']
+  I2S:
+    count: 2
+    universal_pins: ['I2S{count}_WS', 'I2S{count}_SD']
+    assigned_pins: ['I2S{count}_CLK']  # Note: I2S_CLK has to be from CLK_OUT* pins
+  SPI:
+    # SPI0 uses the same pins as SPI1 so actual count is 3
+    count: 3  # SPI0, SPI1, SPI2 (HSPI), SPI3 (VSPI)
+    subname: [SPI, HSPI, VSPI]
+    modes: [Single SPI, Dual SPI, Quad SPI]
+    # Note: D -> MOSI, Q -> MISO, CLK -> CLK, CS0 -> CS
+    assigned_pins: ['{subname}CLK', '{subname}Q', '{subname}D', '{subname}HD', '{subname}WP', '{subname}CS0']
+    universal_pins: ['{subname}CS1', '{subname}CS2']
+  SDMMC:
+    count: 2
+    data_width: {'1': [1, 4, 8], '2': [1, 4]}
+    # Note: Pins were renamed from HS1_CLK to SDHOST_CCLK_1, etc. to keep consistency with other chips and use more descriptive names
+    assigned_pins: ['SDHOST_CCLK_{count}', 'SDHOST_CCMD_{count}', 'SDHOST_CDATA_{count}{{data_width}}']
+    universal_pins: ['SDHOST_CARD_DETECT_{count}', 'SDHOST_CARD_WRITE_PRT_{count}', 'SDHOST_CARD_INT_{count}']  # optional card detect, write protect and interrupt pins
+  SDIO:
+    count: 2
+    # Note: Pins were renamed from SD_CLK to SDIO_CLK, etc. to avoid confusion with SDMMC
+    assigned_pins: ['SDIO{count}_CLK', 'SDIO{count}_CMD', 'SDIO{count}_DATA{{data_width}}']
+    data_width: {'0': [1, 4], '1': [1, 4]}
+  CLKOUT:
+    count: 3
+    assigned_pins: ['CLK_OUT{count}']
+  RMT:
+    count: 8
+    universal_pins: ['RMT_SIG_IN{count}', 'RMT_SIG_OUT{count}']
+  MCPWM:  # Motor Control PWM
+    count: 2
+    channels: 3
+    universal_pins: ['MCPWM{count}_SYNC_IN{{channel}}', 'MCPWM{count}_FLT_IN{{channel}}', 'MCPWM{count}_CAP_IN{{channel}}', 'MCPWM{count}_OUT{{channel}}A', 'MCPWM{count}_OUT{{channel}}B']
+  LEDC:  # LED PWM
+    count: 2
+    channels: 8
+    subname: [HS, LS]
+    universal_pins: ['LEDC_{subname}_SIG_OUT{{channel}}']
+  TWAI:
+    count: 1
+    universal_pins: [TWAI_RX, TWAI_TX, TWAI_BUS_OFF_ON, TWAI_CLKOUT]
+  PCNT:  # Pulse Counter
+    count: 8
+    channels: 2
+    universal_pins: ['PCNT_SIG_CH{{channel}}_IN{count}', 'PCNT_CTRL_CH{{channel}}_IN{count}']
+  XTAL32K:  # external 32K crystal oscillator
+    count: 1
+    assigned_pins: [XTAL_32K_P, XTAL_32K_N]
+
+# Note: PUP (wpu in datasheet) - pull up resistor enabled; PDOWN (wpd) - pull down resistor enabled
+gpio:
+  0: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH1, TOUCH1, EMAC_TX_CLK, CLK_OUT1], strapping: High for SPI Boot; Low for Download Mode, at_reset: PUP}
+  1: {power_domain: VDD3P3_CPU, functions: [U0TXD, EMAC_RXD2, CLK_OUT3], at_reset: PUP}
+  2: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH2, TOUCH2, HSPIWP, SDHOST_CDATA_20, SDIO1_DATA0], strapping: Low for Download Mode, at_reset: PDOWN}
+  3: {power_domain: VDD3P3_CPU, functions: [U0RXD, CLK_OUT2], at_reset: PUP}
+  4: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH0, TOUCH0, EMAC_TX_ER, HSPIHD, SDHOST_CDATA_21, SDIO1_DATA1], at_reset: PDOWN}
+  5: {power_domain: VDD3P3_CPU, functions: [SDHOST_CDATA_16, EMAC_RX_CLK, VSPICS0], strapping: SDIO Slave timing adjustment, at_reset: PUP}
+  6: {power_domain: VDD_SDIO, functions: [SDHOST_CCLK_1, U1CTS, SDIO0_CLK, SPICLK], at_reset: PUP}
+  7: {power_domain: VDD_SDIO, functions: [SDHOST_CDATA_10, U2RTS, SDIO0_DATA0, SPIQ], at_reset: PUP}
+  8: {power_domain: VDD_SDIO, functions: [SDHOST_CDATA_11, U2CTS, SDIO0_DATA1, SPID], at_reset: PUP}
+  9: {power_domain: VDD_SDIO, functions: [SDHOST_CDATA_12, U1RXD, SDIO0_DATA2, SPIHD], at_reset: PUP}
+  10: {power_domain: VDD_SDIO, functions: [SDHOST_CDATA_13, U1TXD, SDIO0_DATA3, SPIWP], at_reset: PUP}
+  11: {power_domain: VDD_SDIO, functions: [SDHOST_CCMD_1, U1RTS, SDIO0_CMD, SPICS0], at_reset: PUP}
+  12: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH5, MTDI, TOUCH5, EMAC_TXD3, HSPIQ, SDHOST_CDATA_22, SDIO1_DATA2], strapping: Voltage of Internal LDO, at_reset: PDOWN}
+  13: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH4, MTCK, TOUCH4, EMAC_RX_ER, HSPID, SDHOST_CDATA_23, SDIO1_DATA3]}
+  14: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH6, MTMS, TOUCH6, EMAC_TXD2, HSPICLK, SDHOST_CCLK_2, SDIO1_CLK]}
+  15: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH3, MTDO, TOUCH3, EMAC_RXD3, HSPICS0, SDHOST_CCMD_2, SDIO1_CMD], strapping: Toggle for Debugging Log over UART0, at_reset: PUP}
+  16: {power_domain: VDD_SDIO, functions: [SDHOST_CDATA_14, U2RXD, EMAC_CLK_OUT]}
+  17: {power_domain: VDD_SDIO, functions: [SDHOST_CDATA_15, U2TXD, EMAC_CLK_OUT_180]}
+  18: {power_domain: VDD3P3_CPU, functions: [SDHOST_CDATA_17, VSPICLK]}
+  19: {power_domain: VDD3P3_CPU, functions: [U0CTS, EMAC_TXD0, VSPIQ]}
+  20: {power_domain: VDD3P3_CPU, functions: []}  # exposed only on PICO-V3 variants
+  21: {power_domain: VDD3P3_CPU, functions: [EMAC_TX_EN, VSPIHD]}
+  22: {power_domain: VDD3P3_CPU, functions: [U0RTS, EMAC_TXD1, VSPIWP]}
+  23: {power_domain: VDD3P3_CPU, functions: [SDHOST_STROBE_1, VSPID]}
+  25: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH8, DAC_1, EMAC_RXD0]}
+  26: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH9, DAC_2, EMAC_RXD1]}
+  27: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH7, TOUCH7, EMAC_RX_DV]}
+  32: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH4, TOUCH9, XTAL_32K_P]}
+  33: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH5, TOUCH8, XTAL_32K_N]}
+  34: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH6], is_output: false}
+  35: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH7], is_output: false}
+  36: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH0], is_output: false}
+  37: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH1], is_output: false}
+  38: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH2], is_output: false}
+  39: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC1_CH3], is_output: false}
+
+soc:
+  ESP32-PICO-D4: {reserved_pins: [6, 7, 8, 11, 16, 17], not_connected: [20]}  # quad flash
+  ESP32-PICO-V3: {reserved_pins: [6, 11], not_connected: [16, 17, 18, 23]}  # quad flash
+  ESP32-PICO-V3-02: {reserved_pins: [6, 9, 10, 11], not_connected: [16, 17, 18, 23]}  # quad PSRAM and flash
+  ESP32-U4WDH: {reserved_pins: [6, 7, 8, 11, 16, 17], not_connected: [20]}  # quad flash
+  ESP32-D0WDR2-V3: {reserved_pins: [6, 7, 8, 9, 10, 16], not_connected: [20]}  # quad PSRAM
+  ESP32-S0WD: {not_connected: [20]}
+  ESP32-D0WDQ6: {not_connected: [20]}
+  ESP32-D0WDQ6-V3: {not_connected: [20]}
+  ESP32-D0WD: {not_connected: [20]}
+  ESP32-D0WD-V3: {not_connected: [20]}

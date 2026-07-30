@@ -1,0 +1,105 @@
+features:
+  cpu:
+    cores:
+      count: 1
+      max_freq_mhz: 96
+  memory:
+    internal:
+      sram_kb: 320
+      lp_sram_kb: 4
+      cache_kb: 16
+  connectivity:
+    wifi:
+      supported: false
+    bluetooth:
+      supported: true
+      version: BLE 5.3
+    ieee_802154:
+      supported: true
+      protocols: [Thread, Zigbee, Matter over Thread]
+    ethernet:
+      mac: false
+    usb:
+      otg_fs_2_0: false
+      usb_serial_jtag: true
+
+peripheral:
+  ADC:
+    count: 1
+    channels: 5
+    assigned_pins: ['ADC{count}_CH{{channel}}']
+  UART:
+    count: 2
+    assigned_pins: [U0TXD, U0RXD]
+    universal_pins: [U1TXD, U1RXD, 'U{count}CTS', 'U{count}RTS', 'U{count}DTR', 'U{count}DSR']
+  I2C:
+    count: 2
+    universal_pins: ['I2C{count}_SCL', 'I2C{count}_SDA']
+  I2S:
+    count: 1
+    universal_pins: ['I2S{count}_WS', 'I2S{count}_SDA', 'I2S{count}_CLK']
+  JTAG:
+    count: 1
+    assigned_pins: [MTCK, MTDO, MTMS, MTDI]
+  SPI:
+    # SPI0/1 is shared and is not exposed from the package
+    count: 1
+    modes: [Single SPI, Dual SPI, Quad SPI, QPI]
+    subname: [FSPI]
+    assigned_pins: ['{subname}CLK', '{subname}Q', '{subname}D', '{subname}HD', '{subname}WP', '{subname}CS0', '{subname}CS1', '{subname}CS2', '{subname}CS3', '{subname}CS4', '{subname}CS5']
+  LEDC:  # LED PWM
+    count: 1
+    channels: 6
+    universal_pins: ['LEDC_LS_SIG_OUT{channel}']
+  MCPWM:  # Motor Control PWM
+    count: 1
+    channels: 3
+    universal_pins: ['MCPWM{count}_SYNC_IN{{channel}}', 'MCPWM{count}_FLT_IN{{channel}}', 'MCPWM{count}_CAP_IN{{channel}}', 'MCPWM{count}_OUT{{channel}}A', 'MCPWM{count}_OUT{{channel}}B']
+  RMT:
+    count: 2
+    universal_pins: ['RMT_SIG_IN{count}', 'RMT_SIG_OUT{count}']
+  PCNT:
+    count: 4
+    channels: 2
+    universal_pins: ['PCNT_SIG_CH{{channel}}_IN{count}', 'PCNT_CTRL_CH{{channel}}_IN{count}']
+  USBSERIALJTAG:  # USB Serial/JTAG
+    count: 1
+    assigned_pins: [USB_D-, USB_D+]
+  TWAI:
+    count: 1
+    universal_pins: ['TWAI{count}_RX', 'TWAI{count}_TX', 'TWAI{count}_BUS_OFF_ON', 'TWAI{count}_CLKOUT']
+  XTAL32K:  # external 32K crystal oscillator
+    count: 1
+    assigned_pins: [XTAL_32K_P, XTAL_32K_N]
+  PARLIO:  # Parallel IO interface
+    count: 1
+    data_width: [1, 2, 4, 8]
+    universal_pins: ['PARL_RX_DATA{data_width}', 'PARL_TX_DATA{data_width}', PARL_RX_CLK_IN, PARL_TX_CLK_IN, PARL_TX_CLK_OUT]
+  ANACOMP:  # Analog PAD Voltage Comparator / Zero Crossing Detector
+    count: 1
+    assigned_pins: [ANA_COMP0_PAD0, ANA_COMP0_PAD1]
+
+gpio:
+  0: {power_domain: VDDPST1, functions: [FSPIQ]}
+  1: {power_domain: VDDPST1, functions: [ADC1_CH0, FSPICS0]}
+  2: {power_domain: VDDPST1, functions: [ADC1_CH1, MTMS, FSPIWP]}  # strapping: SPI Download Boot mode - High
+  3: {power_domain: VDDPST1, functions: [ADC1_CH2, MTDO, FSPIHD]}  # strapping: SPI Download Boot mode - Low
+  4: {power_domain: VDDPST1, functions: [ADC1_CH3, MTCK, FSPICLK]}
+  5: {power_domain: VDDPST1, functions: [ADC1_CH4, MTDI, FSPID]}
+  8: {power_domain: VDDPST1, rtc: true, functions: [], strapping: Has to be pulled-up for Download Mode}
+  9: {power_domain: VDDPST1, rtc: true, functions: [], strapping: High for SPI Boot; Low for Download Mode, at_reset: PUP}
+  10: {power_domain: VDDPST1, rtc: true, functions: [ANA_COMP0_PAD0]}  # ZCD0
+  11: {power_domain: VDDPST1, rtc: true, functions: [ANA_COMP0_PAD1]}  # ZCD1
+  12: {power_domain: VDDPST1/VBAT, rtc: true, functions: []}
+  13: {power_domain: VDDPST1/VBAT, rtc: true, functions: [XTAL_32K_P]}
+  14: {power_domain: VDDPST1/VBAT, rtc: true, functions: [XTAL_32K_N]}
+  22: {power_domain: VDDPST2, functions: []}
+  23: {power_domain: VDDPST2, functions: [U0RXD, FSPICS1]}
+  24: {power_domain: VDDPST2, functions: [U0TXD, FSPICS2]}
+  25: {power_domain: VDDPST2, functions: [FSPICS3], strapping: JTAG signal source select}
+  26: {power_domain: VDDPST2, functions: [USB_D-, FSPICS4]}
+  27: {power_domain: VDDPST2, functions: [USB_D+, FSPICS5]}
+
+soc:
+  ESP32-H2FH2: {reserved_pins: []}
+  ESP32-H2FH4: {reserved_pins: []}

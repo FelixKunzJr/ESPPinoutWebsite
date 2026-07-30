@@ -17,7 +17,7 @@ import xiaoEsp32c6Json from '../../../contrib/boards/xiao-esp32c6.board.json'
 import c3SuperMiniJson from '../../../contrib/boards/esp32-c3-supermini.board.json'
 import c6SuperMiniJson from '../../../contrib/boards/esp32-c6-supermini.board.json'
 import { resolveBoard } from '../boards/resolveBoard'
-import { enrichPins } from './enrich'
+import { enrichPins, applyEspressif, FAM_TO_TARGET } from './enrich'
 import type { BoardSpec } from '../boards/types'
 
 
@@ -218,7 +218,7 @@ function build(spec: ModuleSpec): Chip {
     },
     packageLayout: GEN[`${spec.prefix}_LAYOUT`] as PackageLayout,
     symbolLayout: GEN[`${spec.prefix}_SYMBOL`] as SymbolLayout | undefined,
-    pins: enrichPins(spec.id, GEN[`${spec.prefix}_PINS`] as Pin[]),
+    pins: applyEspressif(FAM_TO_TARGET[spec.fam], enrichPins(spec.id, GEN[`${spec.prefix}_PINS`] as Pin[])),
   }
 }
 

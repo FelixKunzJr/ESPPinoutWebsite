@@ -1,0 +1,168 @@
+features:
+  cpu:
+    cores:
+      count: 2
+      max_freq_mhz: 240
+  memory:
+    internal:
+      sram_kb: 512
+      lp_sram_kb: 16
+  connectivity:
+    wifi:
+      supported: true
+      standard: 802.11b/g/n
+      max_data_rate_mbps: 150
+    bluetooth:
+      supported: true
+      version: BLE 5
+    ieee_802154:
+      supported: false
+    ethernet:
+      mac: false
+    usb:
+      otg_fs_2_0: true
+      usb_serial_jtag: true
+
+peripheral:
+  ADC:
+    count: 2
+    channels: 10
+    assigned_pins: ['ADC{count}_CH{{channel}}']
+  UART:
+    count: 3
+    assigned_pins: [U0TXD, U0RXD, U0CTS, U0RTS, U1TXD, U1RXD, U1CTS, U1RTS]
+    universal_pins: ['U{count}DTR', 'U{count}DSR', U2TXD, U2RXD, U2CTS, U2RTS]
+  JTAG:
+    count: 1
+    assigned_pins: [MTCK, MTDO, MTMS, MTDI]
+  TOUCH:
+    count: 14
+    start_cnt: 1
+    assigned_pins: ['TOUCH{count}']
+  I2C:
+    count: 2
+    universal_pins: ['I2C{count}_SCL', 'I2C{count}_SDA']
+  I2S:
+    count: 2
+    universal_pins: ['I2S{count}_WS', 'I2S{count}_SD', 'I2S{count}_CLK']
+  SPI:
+    # TODO SUBSPI
+    # SPI0/1 interface for connection to in-package or off-package flash/PSRAM via SUBSPI bus (separate
+    # bus for voltages differing from SPI bus). Note that the fast SPI2 interface will not be available
+    # reference Page 16 - datasheet
+
+    # SPI0 uses the same pins as SPI1 so actual count is 3
+    count: 3  # SPI0, SPI1, SPI2, SPI3
+    subname: [SPI, FSPI, SPI3]
+    modes:
+      SPI: [Single SPI, Dual SPI, Quad SPI, Octal SPI, QPI, OPI]
+      FSPI: [Single SPI, Dual SPI, Quad SPI, Octal SPI, QPI, OPI]
+      SPI3: [Single SPI, Dual SPI, Quad SPI, QPI]
+    # Note: D -> MOSI, Q -> MISO, CLK -> CLK, CS0 -> CS
+    # SPI has 2 CS pins, FSPI has 6 CS pins, SPI3 has 3 CS pins
+    assigned_pins: [SPICLK, SPIQ, SPID, SPIHD, SPIWP, SPIIO4, SPIIO5, SPIIO6, SPIIO7, SPIDQS, SPICS0, SPICS1, FSPICLK, FSPIQ, FSPID, FSPIHD, FSPIWP, FSPIIO4, FSPIIO5, FSPIIO6, FSPIIO7, FSPIDQS, FSPICS0]
+    universal_pins: [FSPICS1, FSPICS2, FSPICS3, FSPICS4, FSPICS5, SPI3CLK, SPI3Q, SPI3D, SPI3HD, SPI3WP, SPI3CS0, SPI3CS1, SPI3CS2]
+  SDMMC:
+    count: 2  # one controller -> two slots
+    data_width: {'1': [1, 4, 8], '2': [1, 4, 8]}
+    universal_pins: ['SDHOST_CCLK_{count}', 'SDHOST_CCMD_{count}', 'SDHOST_CDATA_{count}{{data_width}}', 'SDHOST_RST_{count}', 'SDHOST_CCMD_OD_PULLUP_EN_{count}', 'SDHOST_DATA_STROBE_{count}', 'SDHOST_CARD_DETECT_{count}',
+      'SDHOST_CARD_WRITE_PRT_{count}', 'SDHOST_CARD_INT_{count}']
+  CLKOUT:
+    count: 3
+    assigned_pins: ['CLK_OUT{count}']
+  RMT:
+    count: 4
+    universal_pins: ['RMT_SIG_IN{count}', 'RMT_SIG_OUT{count}']
+  MCPWM:  # Motor Control PWM
+    count: 2
+    channels: 3
+    universal_pins: ['MCPWM{count}_SYNC_IN{{channel}}', 'MCPWM{count}_FLT_IN{{channel}}', 'MCPWM{count}_CAP_IN{{channel}}', 'MCPWM{count}_OUT{{channel}}A', 'MCPWM{count}_OUT{{channel}}B']
+  LEDC:  # LED PWM
+    count: 1
+    channels: 8
+    universal_pins: ['LEDC_LS_SIG_OUT{channel}']
+  TWAI:
+    count: 1
+    universal_pins: [TWAI_RX, TWAI_TX, TWAI_BUS_OFF_ON, TWAI_CLKOUT]
+  PCNT:  # Pulse Counter
+    count: 4
+    channels: 2
+    universal_pins: ['PCNT_SIG_CH{{channel}}_IN{count}', 'PCNT_CTRL_CH{{channel}}_IN{count}']
+  XTAL32K:  # external 32K crystal oscillator
+    count: 1
+    assigned_pins: [XTAL_32K_P, XTAL_32K_N]
+  USBOTG:  # Full Speed USB OTG
+    count: 1
+    # Part "OTG" is not specified by the datasheet, it is only for the later resolution by the checker
+    assigned_pins: [USB_OTG_D-, USB_OTG_D+, USB_OTG_EXT_VP, USB_OTG_EXT_VM, USB_OTG_RCV, USB_OTG_EXT_OEN, USB_OTG_EXT_VPO, USB_OTG_EXT_VMO]
+  USBSERIALJTAG:  # USB Serial/JTAG
+    count: 1
+    assigned_pins: [USB_D-, USB_D+, USB_EXT_VP, USB_EXT_VM, USB_EXT_OEN, USB_EXT_VPO, USB_EXT_VMO]
+  LCDCAM:  # LCD and Camera Controller (LCD_CAM)
+    count: 1
+    subname: [LCD, CAM]
+    channels: 16
+    universal_pins: ['{subname}_PCLK', LCD_DC, CAM_CLK, '{subname}_V_SYNC', '{subname}_H_SYNC', '{subname}_H_ENABLE', '{subname}_DATA{{channel}}']
+    modes:
+      LCD: [8 bit - Master TX Mode, 16 bit - Master TX Mode]
+      CAM: [8 bit - Slave RX Mode, 16 bit - Slave RX Mode, 8 bit - Master RX Mode, 16 bit - Master RX Mode]
+
+# Note: PUP (wpu in datasheet) - pull up resistor enabled; PDOWN (wpd) - pull down resistor enabled
+# Note: USB_OTG_EXT_VMO and USB_EXT_VMO (and similar USB related functions which contains "OTG") are the same as without "OTG" part, split into two only for later resolution by the checker
+gpio:
+  0: {power_domain: VDD3P3_RTC, rtc: true, functions: [], strapping: High for SPI Boot; Low for Download Mode, at_reset: PUP}
+  1: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH1, ADC1_CH0]}
+  2: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH2, ADC1_CH1]}
+  3: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH3, ADC1_CH2], strapping: USB OTG/Device_Phy strapping select}
+  4: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH4, ADC1_CH3]}
+  5: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH5, ADC1_CH4]}
+  6: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH6, ADC1_CH5]}
+  7: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH7, ADC1_CH6]}
+  8: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH8, ADC1_CH7, SUBSPICS1]}
+  9: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH9, ADC1_CH8, SUBSPIHD, FSPIHD]}
+  10: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH10, ADC1_CH9, FSPIIO4, SUBSPICS0, FSPICS0]}
+  11: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH11, ADC2_CH0, FSPIIO5, SUBSPID, FSPID]}
+  12: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH12, ADC2_CH1, FSPIIO6, SUBSPICLK, FSPICLK]}
+  13: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH13, ADC2_CH2, FSPIIO7, SUBSPIQ, FSPIQ]}
+  14: {power_domain: VDD3P3_RTC, rtc: true, functions: [TOUCH14, ADC2_CH3, FSPIDQS, SUBSPIWP, FSPIWP]}
+  15: {power_domain: VDD3P3_RTC, rtc: true, functions: [XTAL_32K_P, ADC2_CH4, U0RTS]}
+  16: {power_domain: VDD3P3_RTC, rtc: true, functions: [XTAL_32K_N, ADC2_CH5, U0CTS]}
+  17: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH6, U1TXD]}
+  18: {power_domain: VDD3P3_RTC, rtc: true, functions: [ADC2_CH7, U1RXD, CLK_OUT3]}
+  19: {power_domain: VDD3P3_RTC, rtc: true, functions: [USB_OTG_D-, USB_D-, ADC2_CH8, U1RTS, CLK_OUT2]}
+  20: {power_domain: VDD3P3_RTC, rtc: true, functions: [USB_OTG_D+, USB_D+, ADC2_CH9, U1CTS, CLK_OUT1]}
+  21: {power_domain: VDD3P3_RTC, rtc: true, functions: [USB_RCV]}
+  26: {power_domain: VDD_SPI, functions: [SPICS1], at_reset: PUP}
+  27: {power_domain: VDD_SPI, functions: [SPIHD], at_reset: PUP}
+  28: {power_domain: VDD_SPI, functions: [SPIWP], at_reset: PUP}
+  29: {power_domain: VDD_SPI, functions: [SPICS0], at_reset: PUP}
+  30: {power_domain: VDD_SPI, functions: [SPICLK], at_reset: PUP}
+  31: {power_domain: VDD_SPI, functions: [SPIQ], at_reset: PUP}
+  32: {power_domain: VDD_SPI, functions: [SPID], at_reset: PUP}
+  33: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [FSPIHD, SUBSPIHD, SPIIO4]}
+  34: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [FSPICS0, SUBSPICS0, SPIIO5]}
+  35: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [FSPID, SUBSPID, SPIIO6]}
+  36: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [FSPICLK, SUBSPICLK, SPIIO7]}
+  37: {power_domain: VDD_SPI/VDD3P3_CPU, functions: [FSPIQ, SUBSPIQ, SPIDQS]}
+  38: {power_domain: VDD3P3_CPU, functions: [USB_OTG_EXT_VMO, USB_EXT_VMO, FSPIWP, SUBSPIWP]}
+  39: {power_domain: VDD3P3_CPU, functions: [USB_OTG_EXT_VPO, USB_EXT_VPO, MTCK, CLK_OUT3, SUBSPICS1]}
+  40: {power_domain: VDD3P3_CPU, functions: [USB_OTG_EXT_OEN, USB_EXT_OEN, MTDO, CLK_OUT2]}
+  41: {power_domain: VDD3P3_CPU, functions: [USB_OTG_EXT_VM, USB_EXT_VM, MTDI, CLK_OUT1]}
+  42: {power_domain: VDD3P3_CPU, functions: [USB_OTG_EXT_VP, USB_EXT_VP, MTMS]}
+  43: {power_domain: VDD3P3_CPU, functions: [U0TXD, CLK_OUT1], at_reset: PUP}
+  44: {power_domain: VDD3P3_CPU, functions: [U0RXD, CLK_OUT2], at_reset: PUP}
+  45: {power_domain: VDD3P3_CPU, functions: [], strapping: VDD_SPI Voltage select, at_reset: PDOWN}
+  46: {power_domain: VDD3P3_CPU, functions: [], strapping: UART print en/Low for Download Mode (ignored when GPIO0 is High), at_reset: PDOWN}
+  47: {power_domain: VDD_SPI, functions: [SPICLK_DIFF, SUBSPICLK_DIFF]}
+  48: {power_domain: VDD_SPI, functions: [SPICLK_DIFF, SUBSPICLK_DIFF]}
+
+soc:
+  ESP32-S3-PICO-1-N8R8: {reserved_pins: [26, 33, 34, 35, 36, 37], not_connected: [27, 28, 29, 30, 31, 32]}  # quad flash + octal PSRAM
+  ESP32-S3-PICO-1-N8R2: {reserved_pins: [26], not_connected: [27, 28, 29, 30, 31, 32]}  # quad flash + quad PSRAM
+  ESP32-S3FH4R2: {reserved_pins: [26, 27, 28, 29, 30, 31, 32]}  # quad flash + quad PSRAM
+  ESP32-S3FN8: {reserved_pins: [27, 28, 29, 30, 31, 32]}  # quad flash
+  ESP32-S3R8V: {reserved_pins: [26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]}  # octal PSRAM
+  ESP32-S3R16V: {reserved_pins: [26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]}  # octal PSRAM
+  ESP32-S3R8: {reserved_pins: [26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]}  # octal PSRAM
+  ESP32-S3R2: {reserved_pins: [26, 28, 29, 30, 31, 32]}  # quad PSRAM
+  ESP32-S3: {reserved_pins: []}

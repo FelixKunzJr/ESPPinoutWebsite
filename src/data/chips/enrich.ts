@@ -1,4 +1,5 @@
 import type { Capability, Pin } from '../../types/chip'
+import { ESPRESSIF_GPIO } from './espressifGpio'
 
 // Supplemental pin functions for chips whose Espressif KiCad symbol shipped with
 // sparse pin names, so the generator could not extract the analog / JTAG / crystal
@@ -60,5 +61,75 @@ export function enrichPins(chipId: string, pins: Pin[]): Pin[] {
     const capSet = new Set<Capability>([...p.capabilities, ...(e.caps ?? [])])
     const capabilities = CAP_ORDER.filter(c => capSet.has(c))
     return { ...p, names, capabilities }
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Espressif esp-gpio-tool overlay: per-GPIO ground truth from Espressif's own
+// dataset (espressifGpio.ts, generated from vendor/esp-gpio-tool). Fills in
+// alternate-function names, capabilities and strapping roles the KiCad symbols
+// don't carry. tests/espressif-crosscheck.test.ts enforces that the merged
+// catalog never contradicts the upstream data.
+
+// Which esp-gpio-tool target covers each catalog family key.
+// C5 has no upstream target yet - it is covered by the manual table above.
+export const FAM_TO_TARGET: Record<string, string> = {
+  esp32: 'esp32', s2: 'esp32s2', s3: 'esp32s3', c3: 'esp32c3',
+  c6: 'esp32c6', h2: 'esp32h2', c2: 'esp32c2',
+}
+
+// Only surface the function names users actually look for. The other
+// alternates (EMAC_*, SDHOST_*, FSPI*, LP_*) would bloat the names column.
+const FN_WHITELIST = /^(ADC\d_CH\d+|TOUCH\d+|DAC_\d|U0TXD|U0RXD|XTAL_32K_[PN]|MTCK|MTDI|MTMS|MTDO|USB_D[+-])$/
+
+// Match our historical spellings (from the KiCad symbols) against Espressif's,
+// so the merge doesn't list e.g. both DAC1 and DAC_1 on the same pin.
+const ALIASES: Record<string, string> = { '32KXP': 'XTAL32KP', '32KXN': 'XTAL32KN' }
+const canon = (n: string) => {
+  const x = n.toUpperCase().replace(/[^A-Z0-9+-]/g, '')
+  return ALIASES[x] ?? x
+}
+
+const fnCap = (f: string): Capability | null => {
+  if (f.startsWith('ADC1_')) return 'adc1'
+  if (f.startsWith('ADC2_')) return 'adc2'
+  if (/^TOUCH\d/.test(f)) return 'touch'
+  if (/^DAC_\d$/.test(f)) return 'dac'
+  if (/^(MTCK|MTDI|MTMS|MTDO)$/.test(f)) return 'jtag'
+  if (/^USB_D[+-]$/.test(f)) return 'usb'
+  if (/^U0[TR]XD$/.test(f)) return 'uart'
+  return null
+}
+
+export function applyEspressif(target: string | undefined, pins: Pin[]): Pin[] {
+  const data = target ? ESPRESSIF_GPIO[target] : undefined
+  if (!data) return pins
+  return pins.map(p => {
+    const up = data[p.gpio]
+    if (!up) return p
+    const have = new Set(p.names.map(canon))
+    const names = [...p.names]
+    const capSet = new Set<Capability>(p.capabilities)
+    for (const f of up.fns) {
+      const cap = fnCap(f)
+      if (cap) capSet.add(cap)
+      if (FN_WHITELIST.test(f) && !have.has(canon(f))) {
+        names.push(f)
+        have.add(canon(f))
+      }
+    }
+    if (up.rtc) capSet.add('rtc')
+    let constraints = p.constraints
+    if (up.strap && !constraints.some(c => c.id === 'strapping_pin')) {
+      constraints = [...constraints, {
+        id: 'strapping_pin' as const,
+        severity: 'warning' as const,
+        title: 'Strapping pin',
+        description: `Sampled at reset: ${up.strap.toLowerCase().startsWith('has') ? up.strap.charAt(0).toLowerCase() + up.strap.slice(1) : up.strap}. Avoid external loads that change its level at boot.`,
+      }]
+    }
+    const ordered = CAP_ORDER.filter(c => capSet.has(c))
+    const extra = [...capSet].filter(c => !CAP_ORDER.includes(c))
+    return { ...p, names, capabilities: [...ordered, ...extra], constraints }
   })
 }

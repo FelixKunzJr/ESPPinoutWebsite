@@ -1,0 +1,215 @@
+features:
+  cpu:
+    count: 2
+    max_freq_mhz: 360
+    lp_count: 1
+    lp_max_freq_mhz: 40
+  memory:
+    internal:
+      sram_kb: 768
+      lp_sram_kb: 32
+      spm_kb: 8
+  connectivity:
+    wifi:
+      supported: false
+    bluetooth:
+      supported: false
+    ethernet:
+      mac: true
+    usb:
+      otg_hs_2_0: true
+      otg_fs_2_0: true
+      usb_serial_jtag: true
+    sdio:
+      host_3_0: true
+      slave: false
+  hmi:
+    camera:
+      mipi_csi: true
+      parallel_camera_if: true
+      max_resolution: 1080p
+      jpeg_codec: true
+      h264_encoder: 1080p@30fps
+    display:
+      mipi_dsi: true
+      lcd_parallel_if: true
+      max_resolution: 1080p
+      ppa: true
+
+peripheral:
+  ADC:
+    count: 2
+    channels: {'1': 8, '2': 6}
+    assigned_pins: ['ADC{count}_CH{{channel}}']
+  UART:
+    count: 5
+    assigned_pins: [U0TXD, U0RXD, U0CTS, U0RTS, U1TXD, U1RXD, U1CTS, U1RTS]
+    universal_pins: ['U{count}DTR', 'U{count}DSR', U2TXD, U2RXD, U2CTS, U2RTS, U3TXD, U3RXD, U3CTS, U3RTS, U4TXD, U4RXD, U4CTS, U4RTS]
+  LPUART:
+    count: 1
+    assigned_pins: [LP_UART_RXD, LP_UART_TXD]
+    universal_pins: [LP_UART_RTS, LP_UART_CTS, LP_UART_DTR, LP_UART_DSR]
+  SPI:
+    # TODO: SPI0 and SPI1 use dedicated pins and are used for flash and PSRAM, not general purpose
+    count: 2  # The real count is 4, but SPI0 and SPI1 are using dedicated pins and are not general purpose
+    subname: [SPI2, SPI3]
+    modes:
+      SPI2: [Single SPI, Dual SPI, Quad SPI, QPI, Octal SPI, OPI]
+      SPI3: [Single SPI, Dual SPI, Quad SPI, QPI]
+    assigned_pins: [SPI2CLK, SPI2D, SPI2Q, SPI2WP, SPI2HD, SPI2IO4, SPI2IO5, SPI2IO6, SPI2IO7, SPI2DQS, SPI2CS0]
+    universal_pins: [SPI2CS1, SPI2CS2, SPI2CS3, SPI2CS4, SPI2CS5, SPI3CLK, SPI3D, SPI3Q, SPI3WP, SPI3HD, SPI3CS0, SPI3CS1, SPI3CS2]
+    # TODO: there are two sets of SPI2 assigned pins - one for QPI and one for OPI, it seems like they cannot be mixed based on the datasheet, we should check this and also probably apply to other chips
+  LPSPI:
+    count: 1
+    modes: [Single SPI]  # Only one bit SPI is supported
+    universal_pins: [LP_SPI_CLK, LP_SPI_D, LP_SPI_Q, LP_SPI_CS]  # All pins are universal for LP GPIO Matrix - it has to be LP pin
+  I2C:
+    count: 2
+    universal_pins: ['I2C{count}_SCL', 'I2C{count}_SDA']
+  LPI2C:  # Low Power I2C
+    count: 1
+    universal_pins: [LP_I2C_SCL, LP_I2C_SDA]  # All pins are universal for LP GPIO Matrix - it has to be LP pin
+  I3C:
+    count: 1
+    universal_pins: [I3C_SCL, I3C_SDA]
+  I2S:
+    count: 3
+    universal_pins: ['I2S{count}_CLK', 'I2S{count}_WS', 'I2S{count}_SD']
+  LPI2S:  # Low Power I2S
+    count: 1
+    universal_pins: [LP_I2S_CLK, LP_I2S_WS, LP_I2S_SD]
+  TOUCH:
+    count: 14
+    assigned_pins: ['TOUCH{count}']
+  XTAL32K:
+    count: 1
+    assigned_pins: [XTAL_32K_P, XTAL_32K_N]
+  PCNT:
+    count: 4
+    channels: 2
+    universal_pins: ['PCNT_SIG_CH{{channel}}_IN{count}', 'PCNT_CTRL_CH{{channel}}_IN{count}']
+  USBSERIALJTAG:
+    count: 1
+    # TODO: Can use either GPIO24-25 or GPIO26-27; Can be exchanged with USBOTGFS in eFuse or by registers.
+    # For simplicity we are using default - GPIO24-25. Also D+ and D- can be swapped the same way.
+    assigned_pins: [USB_D-, USB_D+]
+  USBOTG:
+    count: 1
+    # TODO: Can use either GPIO24-25 or GPIO26-27; Can be exchanged with USB Serial/JTAG in eFuse.
+    # For simplicity we are using default - GPIO26-27. Also D+ and D- can be swapped the same way.
+    assigned_pins: [USB_OTG_D-, USB_OTG_D+]
+  EMAC:
+    count: 1
+    modes: [RMII internal CLK, RMII external CLK, MII]
+    assigned_pins: [EMAC_RX_DV, EMAC_RXD0, EMAC_RXD1, EMAC_RX_ER, EMAC_TX_EN, EMAC_TXD0, EMAC_TXD1, EMAC_TX_ER, EMAC_REF_50M_CLK, EMAC_RMII_CLK]
+    universal_pins: [EMAC_RXD2, EMAC_RXD3, EMAC_TXD2, EMAC_TXD3, EMAC_RX_CLK, EMAC_TX_CLK, EMAC_MDC, EMAC_MDIO, EMAC_CRS, EMAC_COL]
+  TWAI:
+    count: 3
+    universal_pins: ['TWAI{count}_RX', 'TWAI{count}_TX', 'TWAI{count}_BUS_OFF_ON', 'TWAI{count}_CLKOUT', 'TWAI{count}_STANDBY']
+  SDMMC:
+    count: 2  # one controller -> two slots
+    data_width: {'1': [1, 4, 8], '2': [1, 4]}
+    assigned_pins: [SDHOST_CCLK_1, SDHOST_CCMD_1, 'SDHOST_CDATA_1{data_width}']
+    universal_pins: [SDHOST_CCLK_2, SDHOST_CCMD_2, 'SDHOST_CDATA_2{data_width}', 'SDHOST_RST_{count}', 'SDHOST_CCMD_OD_PULLUP_EN_{count}', 'SDHOST_DATA_STROBE_{count}', 'SDHOST_CARD_DETECT_{count}', 'SDHOST_CARD_WRITE_PRT_{count}',
+      'SDHOST_CARD_INT_{count}']
+  LEDC:
+    count: 1
+    channels: 8
+    universal_pins: ['LEDC_LS_SIG_OUT{channel}']
+  MCPWM:
+    count: 2
+    channels: 3
+    universal_pins: ['MCPWM{count}_SYNC_IN{{channel}}', 'MCPWM{count}_FLT_IN{{channel}}', 'MCPWM{count}_CAP_IN{{channel}}', 'MCPWM{count}_OUT{{channel}}A', 'MCPWM{count}_OUT{{channel}}B']
+  RMT:
+    count: 4
+    universal_pins: ['RMT_SIG_IN{count}', 'RMT_SIG_OUT{count}']
+  PARLIO:
+    count: 1
+    data_width: [1, 2, 4, 8, 16]
+    universal_pins: ['PARL_RX_DATA{data_width}', 'PARL_TX_DATA{data_width}', PARL_RX_CLK_IN, PARL_TX_CLK_IN, PARL_TX_CLK_OUT, PARL_RX_CLK_OUT]
+  ANACOMP:  # Analog PAD Voltage Comparator
+    count: 2
+    assigned_pins: [ANA_COMP0_PAD0, ANA_COMP0_PAD1, ANA_COMP1_PAD0, ANA_COMP1_PAD1]
+  LCDCAM:
+    count: 1
+    subname: [LCD, CAM]
+    channels: {LCD: 24, CAM: 16}
+    universal_pins: ['{subname}_PCLK', LCD_CD, LCD_CS, CAM_CLK, '{subname}_VSYNC', '{subname}_HSYNC', '{subname}_DE', '{subname}_DATA{{channel}}']
+    modes:
+      LCD: [8 bit - Master TX Mode, 16 bit - Master TX Mode, 24 bit - Master TX Mode]
+      CAM: [8 bit - Slave RX Mode, 16 bit - Slave RX Mode, 8 bit - Master RX Mode, 16 bit - Master RX Mode]
+  # TODO: Add support for dedicated pins; used for USBOTGHS, MIPICSI, MIPIDSI and partially for SPI
+  # USBOTGHS:  # High Speed USB OTG
+  # count: 1
+  #  # Pad numbers: 49, 50
+  #   dedicated_pins: [USB_DM, USB_DP]
+  # MIPICSI:
+  #   count: 1
+  #  # Pad numbers: 34, 35, 36, 37, 38, 39
+  #   dedicated_pins: [DSI_REXT, DSI_DATAP1, DSI_DATAN1, DSI_CLKN, DSI_CLKP, DSI_DATAP0]
+  # MIPIDSI:
+  #   count: 1
+  #  # Pad numbers: 40, 42, 43, 44, 45, 46, 47, 48
+  #   dedicated_pins: [DSI_DATAN0, CSI_DATAN0, CSI_DATAP0, CSI_CLKP, CSI_CLKN, CSI_DATAN1, CSI_DATAP1, CSI_REXT]
+
+# In comment after some pins are original names of functions of datasheet; they were changed for better consistency
+gpio:
+  0: {power_domain: VDD_LP, lp: true, functions: [XTAL_32K_N]}
+  1: {power_domain: VDD_LP, lp: true, functions: [XTAL_32K_P]}
+  2: {power_domain: VDD_LP, lp: true, functions: [TOUCH0, MTCK]}
+  3: {power_domain: VDD_LP, lp: true, functions: [TOUCH1, MTDI]}
+  4: {power_domain: VDD_LP, lp: true, functions: [TOUCH2, MTMS]}
+  5: {power_domain: VDD_LP, lp: true, functions: [TOUCH3, MTDO]}
+  6: {power_domain: VDD_LP, lp: true, functions: [TOUCH4, SPI2HD]}
+  7: {power_domain: VDD_LP, lp: true, functions: [TOUCH5, SPI2CS0]}
+  8: {power_domain: VDD_LP, lp: true, functions: [TOUCH6, U0RTS, SPI2D]}
+  9: {power_domain: VDD_LP, lp: true, functions: [TOUCH7, U0CTS, SPI2CLK]}
+  10: {power_domain: VDD_LP, lp: true, functions: [TOUCH8, U1TXD, SPI2Q]}
+  11: {power_domain: VDD_LP, lp: true, functions: [TOUCH9, U1RXD, SPI2WP]}
+  12: {power_domain: VDD_LP, lp: true, functions: [TOUCH10, U1RTS]}
+  13: {power_domain: VDD_LP, lp: true, functions: [TOUCH11, U1CTS]}
+  14: {power_domain: VDD_LP, lp: true, functions: [TOUCH12, LP_UART_TXD]}
+  15: {power_domain: VDD_LP, lp: true, functions: [TOUCH13, LP_UART_RXD]}
+  16: {power_domain: VDD_IO_0, functions: [ADC1_CH0]}
+  17: {power_domain: VDD_IO_0, functions: [ADC1_CH1]}
+  18: {power_domain: VDD_IO_0, functions: [ADC1_CH2]}
+  19: {power_domain: VDD_IO_0, functions: [ADC1_CH3]}
+  20: {power_domain: VDD_IO_0, functions: [ADC1_CH4]}
+  21: {power_domain: VDD_IO_0, functions: [ADC1_CH5]}
+  22: {power_domain: VDD_IO_0, functions: [ADC1_CH6]}
+  23: {power_domain: VDD_IO_0, functions: [ADC1_CH7, EMAC_REF_50M_CLK]}  # REF_50M_CLK
+  24: {power_domain: VDD_IO_4, functions: [USB_D-]}  # USB1P1_N0
+  25: {power_domain: VDD_IO_4, functions: [USB_D+]}  # USB1P1_P0
+  26: {power_domain: VDD_IO_4, functions: [USB_OTG_D-]}  # USB1P1_N1
+  27: {power_domain: VDD_IO_4, functions: [USB_OTG_D+]}  # USB1P1_P1
+  28: {power_domain: VDD_IO_4, functions: [SPI2CS0, EMAC_RX_DV]}  # GMAC_PHY_RXDV_PAD
+  29: {power_domain: VDD_IO_4, functions: [SPI2D, EMAC_RXD0]}  # GMAC_PHY_RXD0_PAD
+  30: {power_domain: VDD_IO_4, functions: [SPI2CLK, EMAC_RXD1]}  # GMAC_PHY_RXD1_PAD
+  31: {power_domain: VDD_IO_4, functions: [SPI2Q, EMAC_RX_ER]}  # GMAC_PHY_RXER_PAD
+  32: {power_domain: VDD_IO_4, functions: [SPI2HD, EMAC_RMII_CLK]}  # GMAC_RMII_CLK_PAD
+  33: {power_domain: VDD_IO_4, functions: [SPI2WP, EMAC_TX_EN]}  # GMAC_PHY_TXEN_PAD
+  34: {power_domain: VDD_IO_4, functions: [SPI2IO4, EMAC_TXD0], strapping: JTAG Signal Source Control together with eFuses}  # GMAC_PHY_TXD0_PAD
+  35: {power_domain: VDD_IO_4, functions: [SPI2IO5, EMAC_TXD1], strapping: Pull-up for SPI Boot and pull-down for Download Mode, at_reset: PUP}  # GMAC_PHY_TXD1_PAD
+  36: {power_domain: VDD_IO_4, functions: [SPI2IO6, EMAC_TXER], strapping: Pull-up for Joint Download Mode; Pull-down for SPI Download mode, at_reset: PDOWN}  # GMAC_PHY_TXER_PAD; This also controls ROM message printing
+  37: {power_domain: VDD_IO_4, functions: [U0TXD, SPI2IO7], strapping: Pull-down for SPI Download Mode}
+  38: {power_domain: VDD_IO_4, functions: [U0RXD, SPI2DQS], strapping: Pull-up for SPI Download Mode}
+  39: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_10, EMAC_REF_50M_CLK]}  # SD1_CDATA0_PAD, REF_50M_CLK_PAD
+  40: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_11, EMAC_TX_EN]}  # SD1_CDATA1_PAD, GMAC_PHY_TXEN_PAD
+  41: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_12, EMAC_TXD0]}  # SD1_CDATA2_PAD, GMAC_PHY_TXD0_PAD
+  42: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_13, EMAC_TXD1]}  # SD1_CDATA3_PAD, GMAC_PHY_TXD1_PAD
+  43: {power_domain: VDD_IO_5, functions: [SDHOST_CCLK_1, EMAC_TXER]}  # SD1_CCLK_PAD, GMAC_PHY_TXER_PAD
+  44: {power_domain: VDD_IO_5, functions: [SDHOST_CCMD_1, EMAC_RMII_CLK]}  # SD1_CCMD_PAD, GMAC_RMII_CLK_PAD
+  45: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_14, EMAC_RX_DV]}  # SD1_CDATA4_PAD, GMAC_PHY_RXDV_PAD
+  46: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_15, EMAC_RXD0]}  # SD1_CDATA5_PAD, GMAC_PHY_RXD0_PAD
+  47: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_16, EMAC_RXD1]}  # SD1_CDATA6_PAD, GMAC_PHY_RXD1_PAD
+  48: {power_domain: VDD_IO_5, functions: [SDHOST_CDATA_17, EMAC_RXER]}  # SD1_CDATA7_PAD, GMAC_PHY_RXER_PAD
+  49: {power_domain: VDD_IO_6, functions: [ADC2_CH0, EMAC_TX_EN]}  # GMAC_PHY_TXEN_PAD
+  50: {power_domain: VDD_IO_6, functions: [ADC2_CH1, EMAC_RMII_CLK]}  # GMAC_RMII_CLK_PAD
+  51: {power_domain: VDD_IO_6, functions: [ADC2_CH2, EMAC_RX_DV, ANA_COMP0_PAD0]}  # GMAC_PHY_RXDV_PAD, ANA_COMP0
+  52: {power_domain: VDD_IO_6, functions: [ADC2_CH3, EMAC_RXD0, ANA_COMP0_PAD1]}  # GMAC_PHY_RXD0_PAD, ANA_COMP0
+  53: {power_domain: VDD_IO_6, functions: [ADC2_CH4, EMAC_RXD1, ANA_COMP1_PAD0]}  # GMAC_PHY_RXD1_PAD, ANA_COMP1
+  54: {power_domain: VDD_IO_6, functions: [ADC2_CH5, EMAC_RXER, ANA_COMP1_PAD1]}  # GMAC_PHY_RXER_PAD, ANA_COMP1
+
+soc:
+  ESP32-P4NRW16X: {}
+  ESP32-P4NRW32X: {}

@@ -85,7 +85,12 @@ export function ContributePage() {
           <p className="text-sm text-green-100/70 leading-relaxed">
             Accuracy is the whole point. Every pin fact should point at a datasheet section, an errata note, or a
             KiCad library. Unsourced pin data is what every wrong pinout on the internet is made of, so we do not add
-            to the pile. A gotcha you hit in real life counts as a source, just tell us what happened.
+            to the pile. A gotcha you hit in real life counts as a source, just tell us what happened. The whole
+            catalog is also cross-validated on every build against the pin dataset of Espressif&apos;s official{' '}
+            <a href="https://github.com/espressif/esp-gpio-tool" target="_blank" rel="noopener noreferrer" className="text-green-400 underline hover:text-green-300">
+              esp-gpio-tool
+            </a>
+            , so it cannot silently drift from Espressif&apos;s own data.
           </p>
         </section>
 
