@@ -63,13 +63,16 @@ export function PinDetailBody({ pin }: { pin: Pin }) {
   const { chip } = useApp()
 
   // Is this pin a solder-only pad on the board (front surface or underside)?
+  // Boards with a surfacePadCaption (LOLIN S2/S3 Mini) use their front pads as
+  // a real through-hole inner header row - those are normal pins, not pads.
   const layoutPin = [
     ...(chip.packageLayout?.left ?? []),
     ...(chip.packageLayout?.right ?? []),
     ...(chip.packageLayout?.bottom ?? []),
     ...(chip.packageLayout?.top ?? []),
   ].find(lp => lp.gpio === pin.gpio)
-  const padLocation = layoutPin?.isBacksidePad ? 'underside' : layoutPin?.isSurfacePad ? 'front surface' : null
+  const innerRow = !!(layoutPin?.isSurfacePad && chip.packageLayout?.surfacePadCaption)
+  const padLocation = layoutPin?.isBacksidePad ? 'underside' : layoutPin?.isSurfacePad && !innerRow ? 'front surface' : null
 
   const capEntries = pin.capabilities
     .filter(c => c !== 'gpio')
@@ -83,6 +86,15 @@ export function PinDetailBody({ pin }: { pin: Pin }) {
             <span className="font-semibold">Solder pad only</span> ({padLocation} of the board) - this
             signal is not on the headers. No breadboard or header pin access; you must solder a wire
             directly to the pad.
+          </p>
+        </div>
+      )}
+
+      {innerRow && (
+        <div className="rounded-lg bg-gray-800/60 border border-gray-700 px-3 py-2">
+          <p className="text-xs text-gray-400 leading-relaxed">
+            <span className="font-semibold text-gray-300">Inner pin row</span> - a real through-hole
+            header position inboard of the outer row. Solder a header here like any other pin.
           </p>
         </div>
       )}

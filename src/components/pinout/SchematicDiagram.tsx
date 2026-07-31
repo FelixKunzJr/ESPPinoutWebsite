@@ -71,9 +71,11 @@ function fallbackBanks(chip: Chip): { left: SchemRow[]; right: SchemRow[]; top: 
     if (lp.gpio !== undefined) {
       if (seen.has(lp.gpio)) continue
       seen.add(lp.gpio)
+      // Surface pads on a board with a surfacePadCaption are a real inner
+      // header row (LOLIN S2/S3 Mini), not wire-solder-only pads.
       const row: SchemRow = {
         key: `g${lp.gpio}`, pinNums: [lp.pinNumber], pin: pinByGpio.get(lp.gpio),
-        solderPad: !!(lp.isSurfacePad || lp.isBacksidePad),
+        solderPad: !!(lp.isBacksidePad || (lp.isSurfacePad && !chip.packageLayout?.surfacePadCaption)),
       }
       if (lp.isSurfacePad) frontRows.push(row)
       else if (lp.isBacksidePad) backRows.push(row)
