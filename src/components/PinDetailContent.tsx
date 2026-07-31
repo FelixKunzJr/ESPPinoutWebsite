@@ -93,7 +93,7 @@ export function PinDetailBody({ pin }: { pin: Pin }) {
       {innerRow && (
         <div className="rounded-lg bg-gray-800/60 border border-gray-700 px-3 py-2">
           <p className="text-xs text-gray-400 leading-relaxed">
-            <span className="font-semibold text-gray-300">Inner pin row</span> - a real through-hole
+            <span className="font-semibold text-gray-300">Inner pin row</span>: a real through-hole
             header position inboard of the outer row. Solder a header here like any other pin.
           </p>
         </div>
