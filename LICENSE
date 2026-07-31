@@ -24,5 +24,9 @@ SOFTWARE.
 
 Pin data and schematic symbol layouts are derived from Espressif's official
 KiCad libraries (https://github.com/espressif/kicad-libraries), licensed
-under the Apache License 2.0. ESP32 is a trademark of Espressif Systems.
+under the Apache License 2.0. Per-GPIO alternate functions, RTC domain
+flags, and strapping roles are derived from the dataset of Espressif's
+esp-gpio-tool (https://github.com/espressif/esp-gpio-tool), licensed under
+the Apache License 2.0 (see vendor/esp-gpio-tool/LICENSE).
+ESP32 is a trademark of Espressif Systems.
 This project is not affiliated with or endorsed by Espressif Systems.
