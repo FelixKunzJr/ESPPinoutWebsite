@@ -194,7 +194,7 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, co
 
 // ─── Solder-pad strip (front-surface or underside pads, wire-solder only) ─────
 
-function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedPin, filteredSet, onToggle }: {
+function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedPin, filteredSet, onToggle, throughHole }: {
   pads: LayoutPin[]
   caption: string
   borderColor: string
@@ -203,6 +203,7 @@ function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedP
   selectedPin: Pin | null
   filteredSet: Set<number>
   onToggle: (pin: Pin | undefined) => void
+  throughHole?: boolean  // real inner header row - plated-hole marker, solid border
 }) {
   const withPins = pads.filter(lp => lp.gpio !== undefined && pinByGpio.has(lp.gpio))
   if (withPins.length === 0) return null
@@ -226,9 +227,13 @@ function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedP
               className={`pin-pad flex items-center gap-1.5 select-none rounded-md transition-colors
                 ${isActive ? '' : 'opacity-[0.07]'}
                 ${isSelected ? 'bg-violet-950/60 is-selected' : ''}`}
-              style={{ padding: '3px 7px', border: `1px dashed ${borderColor}`, background: isSelected ? undefined : 'var(--dg-chip-bg)' }}
+              style={{ padding: '3px 7px', border: `1px ${throughHole ? 'solid' : 'dashed'} ${borderColor}`, background: isSelected ? undefined : 'var(--dg-chip-bg)' }}
             >
-              <span className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: color, boxShadow: `0 0 4px ${color}60` }} />
+              <span className="rounded-full flex-shrink-0" style={
+                throughHole
+                  ? { width: 7, height: 7, background: '#0a0d12', border: `1.5px solid ${color}`, boxShadow: `0 0 4px ${color}60` }
+                  : { width: 7, height: 7, background: color, boxShadow: `0 0 4px ${color}60` }
+              } />
               <span className="font-mono" style={{ fontSize: 7.5, fontWeight: 700, color: 'var(--dg-chip-text)' }}>{lp.pinNumber}</span>
               <span className="font-mono font-bold rounded-sm" style={{ background: bg, color: text, fontSize: 9, lineHeight: '15px', padding: '0 4px' }}>
                 {pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0]}
@@ -455,6 +460,10 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
   // top, a bare chip and a ceramic antenna at the far end.
   const usbTop = m.usbEdge === 'top'
   const bare = !!m.bare
+  // Dual-row boards (LOLIN S2/S3 Mini) draw their front pads as a real inner
+  // through-hole row along the pin rows - the corner decorations (LED, ANT
+  // label) have to make room for the inner-row labels.
+  const innerRow = !!chip.packageLayout?.surfacePadCaption
 
   const usbW = 26, usbH = 13
   // On a real DevKit the module covers about two thirds of the board width and
@@ -565,7 +574,9 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
                 <g>
                   <rect x={cx - 30} y={antY} width={60} height={12} rx="1" fill="#0a1a12" stroke="#1d3a2a" strokeWidth="0.6" />
                   <path d={meanderPath(cx - 26, cx + 26, antY + 3, antY + 10)} fill="none" stroke="#c9a227" strokeWidth="1.3" opacity="0.85" />
-                  <text x={cx + 36} y={antY + 9} fontSize="5.4" fontFamily="monospace" fill="#5a6675" letterSpacing="0.5">ANT</text>
+                  {innerRow
+                    ? <text x={cx} y={antY + 20} textAnchor="middle" fontSize="5.4" fontFamily="monospace" fill="#5a6675" letterSpacing="0.5">ANT</text>
+                    : <text x={cx + 36} y={antY + 9} fontSize="5.4" fontFamily="monospace" fill="#5a6675" letterSpacing="0.5">ANT</text>}
                 </g>
               )
             }
@@ -589,8 +600,8 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
         </g>
       ))}
 
-      {/* power LED */}
-      <circle cx={cx + 30 > W - 12 ? W - 14 : modL + 6} cy={ledCy} r={2.4} fill={m.accent} opacity="0.85" />
+      {/* power LED - inner-row boards keep it clear of the inner pin labels */}
+      <circle cx={innerRow ? cx - 35 : cx + 30 > W - 12 ? W - 14 : modL + 6} cy={ledCy} r={2.4} fill={m.accent} opacity="0.85" />
 
       {/* USB connector */}
       <rect x={cx - usbW / 2} y={usbY} width={usbW} height={usbH + 4} rx="3" fill={`url(#usb-${uid})`} stroke="#5b6774" strokeWidth="0.8" />
@@ -605,31 +616,42 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
       })()}
       <text x={cx} y={nameY + 12} textAnchor="middle" fontSize="6" fontFamily="monospace" fill={m.accent} letterSpacing="0.4">{m.radios}</text>
 
-      {/* Front-surface solder pads: castellated half-pads tucked into the
-          board corner at tight pitch, exactly like the real PCB - they are
-          not header rows and do not stretch the board. Selection is a ring,
-          never a recolor. */}
+      {/* Front-surface pads. Two shapes exist in the wild:
+          - solder-only SMD pads (S3-Zero): castellated half-pads tucked into
+            the board corner at tight pitch, exactly like the real PCB
+          - a real through-hole inner header row (LOLIN S2/S3 Mini, signalled
+            by surfacePadCaption): plated holes inboard of the outer rail,
+            aligned to the same pin rows as on the real board
+          Neither stretches the board. Selection is a ring, never a recolor. */}
       {(['left', 'right'] as const).map(side => {
         const pads = (side === 'left' ? chip.packageLayout?.left : chip.packageLayout?.right)
           ?.filter(lp => lp.isSurfacePad) ?? []
         if (pads.length === 0) return null
+        const innerRow = !!chip.packageLayout?.surfacePadCaption
         // Inboard of the header rail so pads and rail holes never collide.
         const xPos = side === 'left' ? 18 : W - 18
         const labelX = side === 'left' ? 26 : W - 26
         const anchor = side === 'left' ? ('start' as const) : ('end' as const)
-        // Stack upward from just above the antenna zone (USB-top boards) or
-        // downward from below it, at half-header pitch. Either way the array
-        // order is top -> bottom, matching the header convention in the spec.
-        const stackTop = usbTop ? H - 30 - (pads.length - 1) * 17 : 30
+        // Solder-only pads stack at half-header pitch from just below the
+        // antenna zone (or above it on USB-top boards); an inner header row
+        // sits on the pin rows themselves, hole-for-hole with the outer rail.
+        // Either way the array order is top -> bottom, matching the spec.
+        const stackTop = innerRow ? ROW_H / 2 : usbTop ? H - 30 - (pads.length - 1) * 17 : 30
+        const pitch = innerRow ? ROW_H : 17
         return (
           <g key={side}>
             {pads.map((lp, k) => {
-              const isSelected = selectedPin?.gpio === lp.gpio
-              const y = stackTop + k * 17
+              const isSelected = lp.gpio !== undefined && selectedPin?.gpio === lp.gpio
+              const y = stackTop + k * pitch
               return (
                 <g key={lp.pinNumber}>
-                  <rect x={xPos - 4.5} y={y - 6.5} width={9} height={13} rx="2"
-                    fill="#caa83a" stroke={isSelected ? '#a78bfa' : '#1a2230'} strokeWidth={isSelected ? 2 : 0.8} />
+                  {innerRow ? (
+                    <circle cx={xPos} cy={y} r={2.6} fill="#0a0d12"
+                      stroke={isSelected ? '#a78bfa' : '#caa83a'} strokeWidth={isSelected ? 2 : 1.1} />
+                  ) : (
+                    <rect x={xPos - 4.5} y={y - 6.5} width={9} height={13} rx="2"
+                      fill="#caa83a" stroke={isSelected ? '#a78bfa' : '#1a2230'} strokeWidth={isSelected ? 2 : 0.8} />
+                  )}
                   <text x={labelX} y={y + 2.5} textAnchor={anchor} fontSize="6.5" fontFamily="monospace"
                     fontWeight="bold" fill="#e2e8f0" opacity="0.85">
                     {lp.gpio !== undefined ? `GP${lp.gpio}` : lp.label}
@@ -644,7 +666,7 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
       {/* Underside pads (usually bottom boundary pads) */}
       {chip.packageLayout?.bottom?.map((lp, i) => {
         if (!lp.isBacksidePad) return null
-        const isSelected = selectedPin?.gpio === lp.gpio
+        const isSelected = lp.gpio !== undefined && selectedPin?.gpio === lp.gpio
         const y = (i + 2) * ROW_H + ROW_H / 2
         return (
           <g key={lp.pinNumber}>
@@ -1012,11 +1034,12 @@ export function ModuleDiagram() {
 
         </div>
 
-        {/* ── Front-surface solder pads (tucked into the board corner, not header rows) ── */}
+        {/* ── Front-surface pads: solder-only (corner pads) or a real inner header row ── */}
         <SolderPadStrip
           pads={surfacePads}
           caption={chip.packageLayout?.surfacePadCaption ?? 'solder pads on the front - no header pins, solder wires directly'}
           borderColor="#8a6d1f"
+          throughHole={!!chip.packageLayout?.surfacePadCaption}
           maxW={Math.max(chipWidth + 260, 400)}
           pinByGpio={pinByGpio}
           selectedPin={selectedPin}
