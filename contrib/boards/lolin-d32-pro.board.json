@@ -4,62 +4,152 @@
   "baseChip": "esp32wrover",
   "pcb": "black",
   "notes": [
-    "LOLIN (WEMOS) D32 Pro v2.0.0: 65 x 25.4 mm ESP32-WROVER board (16 MB flash / 8 MB PSRAM on current units, 4 MB flash on early runs) with a CH340C USB bridge, micro-USB, LiPo support (PH-2 connector + TP4054 charger, ~500 mA), a microSD (TF) slot, and SH1.0 connectors for a TFT display (10-pin) and I2C (4-pin).",
-    "GPIO16/17 are not on the headers at all - the WROVER's PSRAM uses them, and the two pads at their usual positions are silkscreened NC.",
-    "GPIO35 is not broken out - it is hardwired to an onboard 100k/100k divider on the battery: battery voltage = ADC reading x 2.",
-    "When the microSD slot and the TFT port are in use they reserve: GPIO4 (TF_CS), GPIO14 (TFT_CS), GPIO27 (TFT_DC), GPIO33 (TFT_RST), GPIO32 (TFT backlight), GPIO12 (touch CS) - all sharing the VSPI bus on GPIO18/19/23.",
-    "Blue onboard LED on GPIO5, active LOW. No BOOT button, but the auto-flash circuit (CH340C DTR/RTS) is present, so flashing needs no button presses."
+    "LOLIN (WEMOS) D32 Pro v2.0.0: 65 x 25.4 mm ESP32-WROVER (16 MB flash / 8 MB PSRAM current, 4 MB flash early runs) with a CH340C bridge, micro-USB, LiPo charging (PH-2 + TP4054), a microSD (TF) slot, and SH1.0 ports for a TFT (10-pin) and I2C (4-pin). Auto-flash circuit onboard - no BOOT button needed.",
+    "GPIO16/17 never reach the headers (the WROVER's PSRAM uses them; the pads are silkscreened NC). GPIO35 is not broken out either - it reads the battery through a 100k/100k divider (voltage = reading x 2).",
+    "The microSD and TFT ports reserve GPIO4 (TF_CS), 14 (TFT_CS), 27 (DC), 33 (RST), 32 (backlight) and 12 (touch CS), all sharing the VSPI bus on GPIO18/19/23."
   ],
   "headers": {
     "left": [
-      { "label": "3V3" },
-      { "label": "RST" },
-      { "gpio": 36 },
-      { "gpio": 39 },
-      { "gpio": 34 },
-      { "gpio": 32 },
-      { "gpio": 33 },
-      { "gpio": 25 },
-      { "gpio": 26 },
-      { "gpio": 27 },
-      { "gpio": 14 },
-      { "gpio": 12 },
-      { "gpio": 13 },
-      { "label": "EN" },
-      { "label": "USB" },
-      { "label": "BAT" }
+      {
+        "label": "3V3"
+      },
+      {
+        "label": "RST"
+      },
+      {
+        "gpio": 36
+      },
+      {
+        "gpio": 39
+      },
+      {
+        "gpio": 34
+      },
+      {
+        "gpio": 32
+      },
+      {
+        "gpio": 33
+      },
+      {
+        "gpio": 25
+      },
+      {
+        "gpio": 26
+      },
+      {
+        "gpio": 27
+      },
+      {
+        "gpio": 14
+      },
+      {
+        "gpio": 12
+      },
+      {
+        "gpio": 13
+      },
+      {
+        "label": "EN"
+      },
+      {
+        "label": "USB"
+      },
+      {
+        "label": "BAT"
+      }
     ],
     "right": [
-      { "label": "GND" },
-      { "gpio": 23 },
-      { "gpio": 22 },
-      { "gpio": 1 },
-      { "gpio": 3 },
-      { "gpio": 21 },
-      { "gpio": 19 },
-      { "gpio": 18 },
-      { "gpio": 5 },
-      { "label": "NC" },
-      { "label": "NC" },
-      { "gpio": 4 },
-      { "gpio": 0 },
-      { "gpio": 2 },
-      { "gpio": 15 },
-      { "label": "GND" }
+      {
+        "label": "GND"
+      },
+      {
+        "gpio": 23
+      },
+      {
+        "gpio": 22
+      },
+      {
+        "gpio": 1
+      },
+      {
+        "gpio": 3
+      },
+      {
+        "gpio": 21
+      },
+      {
+        "gpio": 19
+      },
+      {
+        "gpio": 18
+      },
+      {
+        "gpio": 5
+      },
+      {
+        "label": "NC"
+      },
+      {
+        "label": "NC"
+      },
+      {
+        "gpio": 4
+      },
+      {
+        "gpio": 0
+      },
+      {
+        "gpio": 2
+      },
+      {
+        "gpio": 15
+      },
+      {
+        "label": "GND"
+      }
     ]
   },
   "overrides": {
-    "1": { "label": "TX", "note": "UART0 TX, shared with the CH340C USB-serial bridge." },
-    "3": { "label": "RX", "note": "UART0 RX, shared with the CH340C USB-serial bridge." },
-    "4": { "label": "4", "note": "TF_CS: chip select of the microSD (TF) slot - reserve it when a card is used. The arduino-esp32 d32_pro variant even remaps SS here." },
-    "5": { "label": "LED", "note": "Blue onboard LED, active LOW. Default SPI SS on the silicon, remapped to GPIO4 in the arduino-esp32 variant." },
-    "12": { "label": "12", "note": "TS_CS on the TFT port (touch controller chip select). Also the MTDI flash-voltage strap: anything pulling it HIGH at boot selects 1.8 V flash and blocks booting.", "severity": "warning" },
-    "14": { "label": "14", "note": "TFT_CS on the TFT port." },
-    "27": { "label": "27", "note": "TFT_DC on the TFT port." },
-    "32": { "label": "32", "note": "TFT_LED (display backlight) on the TFT port." },
-    "33": { "label": "33", "note": "TFT_RST on the TFT port." },
-    "36": { "label": "VP" },
-    "39": { "label": "VN" }
+    "1": {
+      "label": "TX",
+      "note": "UART0, shared with the CH340C."
+    },
+    "3": {
+      "label": "RX",
+      "note": "UART0, shared with the CH340C."
+    },
+    "4": {
+      "label": "4",
+      "note": "TF_CS - the arduino-esp32 variant remaps SS here."
+    },
+    "5": {
+      "label": "LED",
+      "note": "Blue onboard LED, active LOW."
+    },
+    "12": {
+      "label": "12",
+      "note": "TS_CS on the TFT port; also the MTDI strap - a pullup at boot selects 1.8 V flash and blocks booting.",
+      "severity": "warning"
+    },
+    "14": {
+      "label": "14"
+    },
+    "27": {
+      "label": "27"
+    },
+    "32": {
+      "label": "32"
+    },
+    "33": {
+      "label": "33"
+    },
+    "36": {
+      "label": "VP"
+    },
+    "39": {
+      "label": "VN"
+    }
   },
   "usbEdge": "bottom",
   "aspect": 0.39

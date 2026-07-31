@@ -4,40 +4,85 @@
   "baseChip": "esp32c3",
   "pcb": "black",
   "notes": [
-    "LOLIN (WEMOS) C3 Mini v2.1.0: 34.3 x 25.4 mm, bare ESP32-C3FH4 (4 MB in-package flash), USB-C, ceramic antenna, LOLIN D1 mini footprint (single 8-pad row per side).",
-    "This page models v2.1.0. On the older v1.0.0 the LEFT column runs EN, 0, 1, 2, 3, 4, 5, 3V3 (GPIO0-3 in the reverse order), the antenna is a PCB trace, and the LED is a plain blue LED. v1.0.0 also has notoriously weak Wi-Fi - capping TX power (e.g. WiFi.setTxPower(WIFI_POWER_8_5dBm)) is the standard workaround.",
-    "No USB-UART bridge: flashing and the console use the C3's native USB Serial/JTAG (GPIO18/19, wired only to the USB-C connector, not broken out). GPIO9 (BOOT button) is not broken out either.",
-    "Arduino defaults: TX=GPIO21, RX=GPIO20 (UART0), I2C SDA=GPIO8 / SCL=GPIO10, SPI SCK=2 / MISO=3 / MOSI=4 / SS=5."
+    "LOLIN (WEMOS) C3 Mini v2.1.0: 34.3 x 25.4 mm bare ESP32-C3FH4 (4 MB flash), USB-C, ceramic antenna, D1 mini footprint.",
+    "Older v1.0.0 boards differ: the left column runs EN, 0, 1, 2, 3, 4, 5, 3V3, the LED is a plain blue one, and the PCB antenna has notoriously weak Wi-Fi (cap TX power, e.g. WiFi.setTxPower(WIFI_POWER_8_5dBm)).",
+    "Native USB Serial/JTAG only (GPIO18/19, not broken out); GPIO9 (BOOT button) is not broken out either. Arduino defaults: TX=21, RX=20, SDA=8, SCL=10, SPI SCK=2 / MISO=3 / MOSI=4 / SS=5."
   ],
   "headers": {
     "left": [
-      { "label": "EN" },
-      { "gpio": 3 },
-      { "gpio": 2 },
-      { "gpio": 1 },
-      { "gpio": 0 },
-      { "gpio": 4 },
-      { "gpio": 5 },
-      { "label": "3V3" }
+      {
+        "label": "EN"
+      },
+      {
+        "gpio": 3
+      },
+      {
+        "gpio": 2
+      },
+      {
+        "gpio": 1
+      },
+      {
+        "gpio": 0
+      },
+      {
+        "gpio": 4
+      },
+      {
+        "gpio": 5
+      },
+      {
+        "label": "3V3"
+      }
     ],
     "right": [
-      { "gpio": 21 },
-      { "gpio": 20 },
-      { "gpio": 10 },
-      { "gpio": 8 },
-      { "gpio": 7 },
-      { "gpio": 6 },
-      { "label": "GND" },
-      { "label": "5V" }
+      {
+        "gpio": 21
+      },
+      {
+        "gpio": 20
+      },
+      {
+        "gpio": 10
+      },
+      {
+        "gpio": 8
+      },
+      {
+        "gpio": 7
+      },
+      {
+        "gpio": 6
+      },
+      {
+        "label": "GND"
+      },
+      {
+        "label": "5V"
+      }
     ]
   },
   "overrides": {
-    "2": { "label": "2", "note": "Strapping pin with a fixed 10 k pullup on the board - avoid external pulldowns at reset. Also the Arduino default SCK." },
-    "7": { "label": "LED", "note": "Drives the onboard LED: a WS2812B data-in on v2.1.0 (use the NeoPixel protocol / rgbLedWrite()), a plain blue active-HIGH LED on v1.0.0. Still usable as the pad is broken out." },
-    "8": { "label": "SDA", "note": "Arduino default I2C SDA. Strapping pin with a fixed 10 k pullup on the board - do not pull LOW at boot." },
-    "10": { "label": "SCL", "note": "Arduino default I2C SCL." },
-    "20": { "label": "RX", "note": "UART0 RX (U0RXD)." },
-    "21": { "label": "TX", "note": "UART0 TX (U0TXD)." }
+    "2": {
+      "label": "2"
+    },
+    "7": {
+      "label": "LED",
+      "note": "Onboard LED: WS2812B data-in on v2.1.0 (drive with the NeoPixel protocol), plain blue active-HIGH LED on v1.0.0."
+    },
+    "8": {
+      "label": "SDA",
+      "note": "Strapping pin with a 10 k onboard pullup - do not pull LOW at boot."
+    },
+    "10": {
+      "label": "SCL"
+    },
+    "20": {
+      "label": "RX"
+    },
+    "21": {
+      "label": "TX"
+    }
   },
   "usbEdge": "bottom",
   "bare": true,

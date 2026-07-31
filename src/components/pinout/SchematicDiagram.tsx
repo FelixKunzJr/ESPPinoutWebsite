@@ -91,10 +91,13 @@ function fallbackBanks(chip: Chip): { left: SchemRow[]; right: SchemRow[]; top: 
   if (gnd.length) tail.push({ key: 'gnd', pinNums: gnd.sort((a, b) => a - b), label: 'GND' })
   if (nc.length)  tail.push({ key: 'nc',  pinNums: nc.sort((a, b) => a - b),  label: 'NC' })
   // Solder-only pads are grouped apart from the header pins, behind a divider.
+  // Boards with a surfacePadCaption use their front pads as a real inner
+  // header row (LOLIN S2/S3 Mini), so the divider must not claim otherwise.
+  const frontDivider = chip.packageLayout?.surfacePadCaption ? 'inner pin row' : 'front solder pads - no header'
   const leftPadGroup: SchemRow[] = frontRows.length
-    ? [{ key: 'div-front', pinNums: [], divider: 'front solder pads' }, ...frontRows] : []
+    ? [{ key: 'div-front', pinNums: [], divider: frontDivider }, ...frontRows] : []
   const rightPadGroup: SchemRow[] = backRows.length
-    ? [{ key: 'div-back', pinNums: [], divider: 'underside solder pads' }, ...backRows] : []
+    ? [{ key: 'div-back', pinNums: [], divider: 'underside solder pads - no header' }, ...backRows] : []
   const G = gpioRows.length
   const leftG = Math.max(0, Math.min(G,
     Math.ceil((G + tail.length + rightPadGroup.length - extras.length - leftPadGroup.length) / 2)))
@@ -288,7 +291,7 @@ export function SchematicDiagram() {
         <g key={row.key}>
           <line x1={x0} y1={cy + 6} x2={x1} y2={cy + 6} stroke="#8a6d1f" strokeWidth="1" strokeDasharray="3 2" />
           <text x={x0} y={cy + 1} textAnchor={isLeft ? 'start' : 'end'} fontSize="6.5" fontFamily={FONT}
-            fontWeight={700} fill="#8a6d1f" letterSpacing="1">{row.divider.toUpperCase()} - NO HEADER</text>
+            fontWeight={700} fill="#8a6d1f" letterSpacing="1">{row.divider.toUpperCase()}</text>
         </g>
       )
     }

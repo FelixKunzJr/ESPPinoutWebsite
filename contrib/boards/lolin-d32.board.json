@@ -4,56 +4,131 @@
   "baseChip": "esp32",
   "pcb": "black",
   "notes": [
-    "LOLIN (WEMOS) D32: 57 x 25.4 mm ESP32-WROOM-32 (4 MB flash) board with a CH340C USB bridge, micro-USB, and LiPo support: PH-2 (2.0 mm) battery connector plus a TP4054 charger (~500 mA max).",
-    "GPIO35 is not broken out - it is hardwired to an onboard 100k/100k divider on the battery: battery voltage = ADC reading x 2.",
-    "Blue onboard LED on GPIO5, active LOW (write LOW to light it). GPIO5 is also the default SPI SS and must be HIGH at boot.",
-    "Mind the two enable pads: RST (left side, near the top) resets the ESP32, while the pad silkscreened EN (left side, near the bottom) enables the 3.3 V regulator - pulling THAT low cuts power to the whole board.",
-    "No BOOT button, but the full auto-flash circuit (CH340C DTR/RTS) is present, so flashing needs no button presses. There is no regulated 5 V output: the USB pad is raw VBUS and the BAT pad is the battery terminal."
+    "LOLIN (WEMOS) D32: 57 x 25.4 mm ESP32-WROOM-32 (4 MB flash) with a CH340C bridge, micro-USB, and LiPo support (PH-2 connector + TP4054 charger, ~500 mA). Auto-flash circuit onboard - no BOOT button needed.",
+    "GPIO35 is not broken out: it reads the battery through a 100k/100k divider (battery voltage = ADC reading x 2). The USB pad is raw VBUS and BAT is the battery terminal - there is no regulated 5 V output.",
+    "Two enable pads: RST resets the ESP32, but the pad silkscreened EN enables the 3.3 V regulator - pulling THAT low powers off the whole board."
   ],
   "headers": {
     "left": [
-      { "label": "3V3" },
-      { "label": "RST" },
-      { "gpio": 36 },
-      { "gpio": 39 },
-      { "gpio": 34 },
-      { "gpio": 32 },
-      { "gpio": 33 },
-      { "gpio": 25 },
-      { "gpio": 26 },
-      { "gpio": 27 },
-      { "gpio": 14 },
-      { "gpio": 12 },
-      { "gpio": 13 },
-      { "label": "EN" },
-      { "label": "USB" },
-      { "label": "BAT" }
+      {
+        "label": "3V3"
+      },
+      {
+        "label": "RST"
+      },
+      {
+        "gpio": 36
+      },
+      {
+        "gpio": 39
+      },
+      {
+        "gpio": 34
+      },
+      {
+        "gpio": 32
+      },
+      {
+        "gpio": 33
+      },
+      {
+        "gpio": 25
+      },
+      {
+        "gpio": 26
+      },
+      {
+        "gpio": 27
+      },
+      {
+        "gpio": 14
+      },
+      {
+        "gpio": 12
+      },
+      {
+        "gpio": 13
+      },
+      {
+        "label": "EN"
+      },
+      {
+        "label": "USB"
+      },
+      {
+        "label": "BAT"
+      }
     ],
     "right": [
-      { "label": "GND" },
-      { "gpio": 23 },
-      { "gpio": 22 },
-      { "gpio": 1 },
-      { "gpio": 3 },
-      { "gpio": 21 },
-      { "gpio": 19 },
-      { "gpio": 18 },
-      { "gpio": 5 },
-      { "gpio": 17 },
-      { "gpio": 16 },
-      { "gpio": 4 },
-      { "gpio": 0 },
-      { "gpio": 2 },
-      { "gpio": 15 },
-      { "label": "GND" }
+      {
+        "label": "GND"
+      },
+      {
+        "gpio": 23
+      },
+      {
+        "gpio": 22
+      },
+      {
+        "gpio": 1
+      },
+      {
+        "gpio": 3
+      },
+      {
+        "gpio": 21
+      },
+      {
+        "gpio": 19
+      },
+      {
+        "gpio": 18
+      },
+      {
+        "gpio": 5
+      },
+      {
+        "gpio": 17
+      },
+      {
+        "gpio": 16
+      },
+      {
+        "gpio": 4
+      },
+      {
+        "gpio": 0
+      },
+      {
+        "gpio": 2
+      },
+      {
+        "gpio": 15
+      },
+      {
+        "label": "GND"
+      }
     ]
   },
   "overrides": {
-    "1": { "label": "TX", "note": "UART0 TX, shared with the CH340C USB-serial bridge." },
-    "3": { "label": "RX", "note": "UART0 RX, shared with the CH340C USB-serial bridge." },
-    "5": { "label": "LED", "note": "Blue onboard LED, active LOW. Also the default SPI SS." },
-    "36": { "label": "VP" },
-    "39": { "label": "VN" }
+    "1": {
+      "label": "TX",
+      "note": "UART0, shared with the CH340C."
+    },
+    "3": {
+      "label": "RX",
+      "note": "UART0, shared with the CH340C."
+    },
+    "5": {
+      "label": "LED",
+      "note": "Blue onboard LED, active LOW. Also the default SPI SS."
+    },
+    "36": {
+      "label": "VP"
+    },
+    "39": {
+      "label": "VN"
+    }
   },
   "usbEdge": "bottom",
   "aspect": 0.45

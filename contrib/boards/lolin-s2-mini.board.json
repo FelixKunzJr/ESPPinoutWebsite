@@ -4,56 +4,150 @@
   "baseChip": "esp32s2",
   "pcb": "black",
   "notes": [
-    "LOLIN (WEMOS) S2 Mini v1.0.0: 34.3 x 25.4 mm, bare ESP32-S2FN4R2 (4 MB flash, 2 MB PSRAM), USB-C, PCB trace antenna. Two pin rows per side - the outer rows match the LOLIN D1 mini footprint, so D1 mini shields fit; the inner rows are drawn as the inboard pad strip here.",
-    "No USB-UART bridge: flashing and the serial console run over the S2's native USB (GPIO19/20, wired only to the USB-C connector). If the firmware wedges, hold BOOT (GPIO0, not broken out) and tap RST to enter the ROM downloader.",
-    "Native UART0 (GPIO43/44) is not broken out. The Arduino defaults are TX=GPIO39, RX=GPIO37 (via the GPIO matrix), I2C SDA=GPIO33 / SCL=GPIO35, SPI SCK=7 / MISO=9 / MOSI=11 / SS=12 - matching the D1 mini shield positions."
+    "LOLIN (WEMOS) S2 Mini: 34.3 x 25.4 mm bare ESP32-S2FN4R2 (4 MB flash, 2 MB PSRAM), USB-C. The outer pin rows match the D1 mini footprint (shields fit); the inner rows are a second set of through-hole pads, drawn as the inboard strip here.",
+    "Native USB only, no serial bridge: hold BOOT (GPIO0, not broken out) and tap RST for download mode. Arduino defaults: TX=39, RX=37 (native UART0 GPIO43/44 is not broken out), SDA=33, SCL=35, SPI SCK=7 / MISO=9 / MOSI=11 / SS=12."
   ],
   "headers": {
     "surfacePadCaption": "inner pin rows - real through-hole header pads inboard of the D1-mini-footprint outer rows",
     "left": [
-      { "label": "EN" },
-      { "gpio": 3 },
-      { "gpio": 5 },
-      { "gpio": 7 },
-      { "gpio": 9 },
-      { "gpio": 11 },
-      { "gpio": 12 },
-      { "label": "3V3" },
-      { "gpio": 1, "isSurfacePad": true },
-      { "gpio": 2, "isSurfacePad": true },
-      { "gpio": 4, "isSurfacePad": true },
-      { "gpio": 6, "isSurfacePad": true },
-      { "gpio": 8, "isSurfacePad": true },
-      { "gpio": 10, "isSurfacePad": true },
-      { "gpio": 13, "isSurfacePad": true },
-      { "gpio": 14, "isSurfacePad": true }
+      {
+        "label": "EN"
+      },
+      {
+        "gpio": 3
+      },
+      {
+        "gpio": 5
+      },
+      {
+        "gpio": 7
+      },
+      {
+        "gpio": 9
+      },
+      {
+        "gpio": 11
+      },
+      {
+        "gpio": 12
+      },
+      {
+        "label": "3V3"
+      },
+      {
+        "gpio": 1,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 2,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 4,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 6,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 8,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 10,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 13,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 14,
+        "isSurfacePad": true
+      }
     ],
     "right": [
-      { "gpio": 39 },
-      { "gpio": 37 },
-      { "gpio": 35 },
-      { "gpio": 33 },
-      { "gpio": 18 },
-      { "gpio": 16 },
-      { "label": "GND" },
-      { "label": "5V" },
-      { "gpio": 40, "isSurfacePad": true },
-      { "gpio": 38, "isSurfacePad": true },
-      { "gpio": 36, "isSurfacePad": true },
-      { "gpio": 34, "isSurfacePad": true },
-      { "gpio": 21, "isSurfacePad": true },
-      { "gpio": 17, "isSurfacePad": true },
-      { "label": "GND", "isSurfacePad": true },
-      { "gpio": 15, "isSurfacePad": true }
+      {
+        "gpio": 39
+      },
+      {
+        "gpio": 37
+      },
+      {
+        "gpio": 35
+      },
+      {
+        "gpio": 33
+      },
+      {
+        "gpio": 18
+      },
+      {
+        "gpio": 16
+      },
+      {
+        "label": "GND"
+      },
+      {
+        "label": "5V"
+      },
+      {
+        "gpio": 40,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 38,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 36,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 34,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 21,
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 17,
+        "isSurfacePad": true
+      },
+      {
+        "label": "GND",
+        "isSurfacePad": true
+      },
+      {
+        "gpio": 15,
+        "isSurfacePad": true
+      }
     ]
   },
   "overrides": {
-    "15": { "label": "LED", "note": "Blue onboard LED, active HIGH (unlike the D1 mini's active-low LED)." },
-    "18": { "label": "18", "note": "Has a 10 k pullup to 3.3 V on the board (idles HIGH); also DAC2. Sits at the D1 mini D3 shield position.", "severity": "warning" },
-    "33": { "label": "SDA", "note": "Arduino default I2C SDA - the D1 mini D2/SDA shield position." },
-    "35": { "label": "SCL", "note": "Arduino default I2C SCL - the D1 mini D1/SCL shield position." },
-    "37": { "label": "RX", "note": "Arduino default RX via the GPIO matrix (native U0RXD GPIO44 is not broken out)." },
-    "39": { "label": "TX", "note": "Arduino default TX via the GPIO matrix (native U0TXD GPIO43 is not broken out)." }
+    "15": {
+      "label": "LED",
+      "note": "Blue onboard LED, active HIGH."
+    },
+    "18": {
+      "label": "18",
+      "note": "10 k onboard pullup - idles HIGH.",
+      "severity": "warning"
+    },
+    "33": {
+      "label": "SDA"
+    },
+    "35": {
+      "label": "SCL"
+    },
+    "37": {
+      "label": "RX"
+    },
+    "39": {
+      "label": "TX"
+    }
   },
   "usbEdge": "bottom",
   "bare": true,
