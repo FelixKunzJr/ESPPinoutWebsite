@@ -15,10 +15,11 @@ interface PinRowProps {
   isFiltered: boolean
   mappingLabel?: string
   compact?: boolean
+  throughHolePad?: boolean  // isSurfacePad pin that is a real inner-row through-hole, not a solder pad
   onClick: () => void
 }
 
-function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, compact, onClick }: PinRowProps) {
+function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, compact, throughHolePad, onClick }: PinRowProps) {
   const color = pin ? connectorColor(pin) : '#4b5563'
 
   const hasDanger  = !!pin?.constraints.some(c => c.severity === 'danger')
@@ -39,9 +40,14 @@ function PinRow({ layoutPin, pin, side, isSelected, isFiltered, mappingLabel, co
 
   // Surface solder pads get a square gold-rimmed marker instead of the round
   // through-hole dot - you cannot put a header pin here, only solder a wire.
+  // Inner-row through-holes (LOLIN S2/S3 Mini) draw no dot at all: the rail
+  // slice next to the bank renders the plated hole in the pin's color, so the
+  // row connects straight to its hole in the PCB.
   const solderDot = layoutPin.isSurfacePad ? (
-    <div className="flex-shrink-0" title="Solder pad only - no header pin. Solder a wire directly."
-      style={{ width: 9, height: 9, background: color, border: '1.5px solid #caa83a', borderRadius: 2, boxShadow: `0 0 5px ${color}60` }} />
+    throughHolePad ? null : (
+      <div className="flex-shrink-0" title="Solder pad only - no header pin. Solder a wire directly."
+        style={{ width: 9, height: 9, background: color, border: '1.5px solid #caa83a', borderRadius: 2, boxShadow: `0 0 5px ${color}60` }} />
+    )
   ) : (
     <div className="flex-shrink-0 rounded-full"
       style={{ width: 9, height: 9, background: color, boxShadow: `0 0 5px ${color}80` }} />
@@ -194,7 +200,7 @@ function EdgePinCol({ layoutPin, pin, colWidth, edge, isSelected, isFiltered, co
 
 // ─── Solder-pad strip (front-surface or underside pads, wire-solder only) ─────
 
-function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedPin, filteredSet, onToggle, throughHole }: {
+function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedPin, filteredSet, onToggle }: {
   pads: LayoutPin[]
   caption: string
   borderColor: string
@@ -203,7 +209,6 @@ function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedP
   selectedPin: Pin | null
   filteredSet: Set<number>
   onToggle: (pin: Pin | undefined) => void
-  throughHole?: boolean  // real inner header row - plated-hole marker, solid border
 }) {
   const withPins = pads.filter(lp => lp.gpio !== undefined && pinByGpio.has(lp.gpio))
   if (withPins.length === 0) return null
@@ -227,13 +232,9 @@ function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedP
               className={`pin-pad flex items-center gap-1.5 select-none rounded-md transition-colors
                 ${isActive ? '' : 'opacity-[0.07]'}
                 ${isSelected ? 'bg-violet-950/60 is-selected' : ''}`}
-              style={{ padding: '3px 7px', border: `1px ${throughHole ? 'solid' : 'dashed'} ${borderColor}`, background: isSelected ? undefined : 'var(--dg-chip-bg)' }}
+              style={{ padding: '3px 7px', border: `1px dashed ${borderColor}`, background: isSelected ? undefined : 'var(--dg-chip-bg)' }}
             >
-              <span className="rounded-full flex-shrink-0" style={
-                throughHole
-                  ? { width: 7, height: 7, background: '#0a0d12', border: `1.5px solid ${color}`, boxShadow: `0 0 4px ${color}60` }
-                  : { width: 7, height: 7, background: color, boxShadow: `0 0 4px ${color}60` }
-              } />
+              <span className="rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: color, boxShadow: `0 0 4px ${color}60` }} />
               <span className="font-mono" style={{ fontSize: 7.5, fontWeight: 700, color: 'var(--dg-chip-text)' }}>{lp.pinNumber}</span>
               <span className="font-mono font-bold rounded-sm" style={{ background: bg, color: text, fontSize: 9, lineHeight: '15px', padding: '0 4px' }}>
                 {pin.names.find(n => /^GPIO\d/.test(n)) ?? pin.names[0]}
@@ -250,6 +251,32 @@ function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedP
         })}
       </div>
     </div>
+  )
+}
+
+// A slim slice of PCB between the two inner-row banks: one plated through-hole
+// per pin row on each edge, ringed in the pin's connector color so each bank
+// row leads straight into its hole. Echoes the board drawing above.
+function InnerRailSpacer({ leftColors, rightColors, uid }: { leftColors: string[]; rightColors: string[]; uid: string }) {
+  const W = 30
+  const H = Math.max(leftColors.length, rightColors.length) * ROW_H
+  return (
+    <svg width={W} height={H} style={{ flexShrink: 0 }} aria-hidden="true">
+      <defs>
+        <linearGradient id={`innerrail-${uid}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#141a22" />
+          <stop offset="100%" stopColor="#0a0e14" />
+        </linearGradient>
+      </defs>
+      <rect width={W} height={H} rx="7" fill={`url(#innerrail-${uid})`} />
+      <rect x="1" y="1" width={W - 2} height={H - 2} rx="7" fill="none" stroke="#2b3543" strokeWidth="1.5" />
+      {leftColors.map((c, i) => (
+        <circle key={`l${i}`} cx={8.5} cy={i * ROW_H + ROW_H / 2} r={3} fill="#0a0d12" stroke={c} strokeWidth="1.6" />
+      ))}
+      {rightColors.map((c, i) => (
+        <circle key={`r${i}`} cx={W - 8.5} cy={i * ROW_H + ROW_H / 2} r={3} fill="#0a0d12" stroke={c} strokeWidth="1.6" />
+      ))}
+    </svg>
   )
 }
 
@@ -746,10 +773,14 @@ export function ModuleDiagram() {
   // floating edge columns.
   const bottomIsBackside = bottomLayout.length > 0 && bottomLayout.every(lp => lp.isBacksidePad)
 
-  // Front-surface solder pads are not header pins either: they leave the side
-  // banks entirely (so they do not stretch the board length) and get their own
-  // strip, with the pads drawn tucked into the board corner like the real PCB.
-  const surfacePads = [...leftLayout, ...rightLayout].filter(lp => lp.isSurfacePad)
+  // Front-surface pads leave the side banks either way (so they do not stretch
+  // the board length). Dual-row boards (surfacePadCaption - LOLIN S2/S3 Mini)
+  // have real inner header rows: those get full PinRow banks below the board.
+  // Solder-only pads (S3-Zero) keep the compact strip.
+  const innerRowBoard = !!chip.packageLayout?.surfacePadCaption
+  const innerLeft  = innerRowBoard ? leftLayout.filter(lp => lp.isSurfacePad) : []
+  const innerRight = innerRowBoard ? rightLayout.filter(lp => lp.isSurfacePad) : []
+  const surfacePads = innerRowBoard ? [] : [...leftLayout, ...rightLayout].filter(lp => lp.isSurfacePad)
   leftLayout  = leftLayout.filter(lp => !lp.isSurfacePad)
   rightLayout = rightLayout.filter(lp => !lp.isSurfacePad)
 
@@ -1034,12 +1065,65 @@ export function ModuleDiagram() {
 
         </div>
 
-        {/* ── Front-surface pads: solder-only (corner pads) or a real inner header row ── */}
+        {/* ── Inner header rows (dual-row boards): full pin banks around a rail slice ── */}
+        {innerRowBoard && innerLeft.length + innerRight.length > 0 && (
+          <div className="flex flex-col items-center" style={{ marginTop: 12 }}>
+            <span className="font-mono text-center" style={{ fontSize: 8.5, color: 'var(--dg-muted)', letterSpacing: 0.3, marginBottom: 4, maxWidth: Math.max(chipWidth + 260, 400) }}>
+              {chip.packageLayout?.surfacePadCaption}
+            </span>
+            <div className="flex items-start">
+              <div className="flex flex-col">
+                {innerLeft.map(lp => {
+                  const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
+                  return (
+                    <PinRow
+                      key={lp.pinNumber}
+                      layoutPin={lp}
+                      pin={pin}
+                      side="left"
+                      isSelected={!!pin && selectedPin?.gpio === pin.gpio}
+                      isFiltered={!pin || filteredSet.has(pin.gpio)}
+                      mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
+                      compact={compact}
+                      throughHolePad
+                      onClick={() => toggle(pin)}
+                    />
+                  )
+                })}
+              </div>
+              <InnerRailSpacer
+                uid={chip.id}
+                leftColors={innerLeft.map(lp => { const p = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined; return p ? connectorColor(p) : '#4b5563' })}
+                rightColors={innerRight.map(lp => { const p = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined; return p ? connectorColor(p) : '#4b5563' })}
+              />
+              <div className="flex flex-col">
+                {innerRight.map(lp => {
+                  const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
+                  return (
+                    <PinRow
+                      key={lp.pinNumber}
+                      layoutPin={lp}
+                      pin={pin}
+                      side="right"
+                      isSelected={!!pin && selectedPin?.gpio === pin.gpio}
+                      isFiltered={!pin || filteredSet.has(pin.gpio)}
+                      mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
+                      compact={compact}
+                      throughHolePad
+                      onClick={() => toggle(pin)}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Front-surface solder pads (solder-only corner pads, e.g. S3-Zero) ── */}
         <SolderPadStrip
           pads={surfacePads}
-          caption={chip.packageLayout?.surfacePadCaption ?? 'solder pads on the front - no header pins, solder wires directly'}
+          caption={'solder pads on the front - no header pins, solder wires directly'}
           borderColor="#8a6d1f"
-          throughHole={!!chip.packageLayout?.surfacePadCaption}
           maxW={Math.max(chipWidth + 260, 400)}
           pinByGpio={pinByGpio}
           selectedPin={selectedPin}
