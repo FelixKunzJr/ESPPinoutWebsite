@@ -254,27 +254,33 @@ function SolderPadStrip({ pads, caption, borderColor, maxW, pinByGpio, selectedP
   )
 }
 
-// A slim slice of PCB between the two inner-row banks: one plated through-hole
-// per pin row on each edge, ringed in the pin's connector color so each bank
-// row leads straight into its hole. Echoes the board drawing above.
-function InnerRailSpacer({ leftColors, rightColors, uid }: { leftColors: string[]; rightColors: string[]; uid: string }) {
-  const W = 30
+// A board-width slice of PCB between the two inner-row banks: one plated
+// through-hole per pin row on each edge, ringed in the pin's connector color
+// so each bank row leads straight into its hole. Same width as the board
+// drawing above, holes on the same inner columns - the inner banks line up
+// under the board exactly like the outer banks line up beside it.
+function InnerRailSpacer({ chip, width, leftColors, rightColors }: {
+  chip: Chip; width: number; leftColors: string[]; rightColors: string[]
+}) {
+  const m = resolveModule(chip)
+  const W = width
   const H = Math.max(leftColors.length, rightColors.length) * ROW_H
   return (
-    <svg width={W} height={H} style={{ flexShrink: 0 }} aria-hidden="true">
+    <svg width={W} height={H} style={{ flexShrink: 0, display: 'block' }} aria-hidden="true">
       <defs>
-        <linearGradient id={`innerrail-${uid}`} x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`innerrail-${chip.id}`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#141a22" />
           <stop offset="100%" stopColor="#0a0e14" />
         </linearGradient>
       </defs>
-      <rect width={W} height={H} rx="7" fill={`url(#innerrail-${uid})`} />
+      <rect width={W} height={H} rx="7" fill={`url(#innerrail-${chip.id})`} />
       <rect x="1" y="1" width={W - 2} height={H - 2} rx="7" fill="none" stroke="#2b3543" strokeWidth="1.5" />
+      <rect x="4.5" y="4.5" width={W - 9} height={H - 9} rx="5" fill="none" stroke={m.accent} strokeWidth="0.75" opacity="0.35" />
       {leftColors.map((c, i) => (
-        <circle key={`l${i}`} cx={8.5} cy={i * ROW_H + ROW_H / 2} r={3} fill="#0a0d12" stroke={c} strokeWidth="1.6" />
+        <circle key={`l${i}`} cx={18} cy={i * ROW_H + ROW_H / 2} r={3} fill="#0a0d12" stroke={c} strokeWidth="1.6" />
       ))}
       {rightColors.map((c, i) => (
-        <circle key={`r${i}`} cx={W - 8.5} cy={i * ROW_H + ROW_H / 2} r={3} fill="#0a0d12" stroke={c} strokeWidth="1.6" />
+        <circle key={`r${i}`} cx={W - 18} cy={i * ROW_H + ROW_H / 2} r={3} fill="#0a0d12" stroke={c} strokeWidth="1.6" />
       ))}
     </svg>
   )
@@ -1063,61 +1069,64 @@ export function ModuleDiagram() {
           </div>
         )}
 
-        </div>
-
-        {/* ── Inner header rows (dual-row boards): full pin banks around a rail slice ── */}
+        {/* ── Inner header rows (dual-row boards): full pin banks in the same
+            grid tracks as the outer banks, flanking a board-width rail slice
+            so the inner holes sit directly under the board's inner columns ── */}
         {innerRowBoard && innerLeft.length + innerRight.length > 0 && (
-          <div className="flex flex-col items-center" style={{ marginTop: 12 }}>
-            <span className="font-mono text-center" style={{ fontSize: 8.5, color: 'var(--dg-muted)', letterSpacing: 0.3, marginBottom: 4, maxWidth: Math.max(chipWidth + 260, 400) }}>
+          <>
+            <div className="font-mono text-center" style={{ gridColumn: '1 / -1', gridRow: 5, fontSize: 8.5, color: 'var(--dg-muted)', letterSpacing: 0.3, marginTop: 12, marginBottom: 4 }}>
               {chip.packageLayout?.surfacePadCaption}
-            </span>
-            <div className="flex items-start">
-              <div className="flex flex-col">
-                {innerLeft.map(lp => {
-                  const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
-                  return (
-                    <PinRow
-                      key={lp.pinNumber}
-                      layoutPin={lp}
-                      pin={pin}
-                      side="left"
-                      isSelected={!!pin && selectedPin?.gpio === pin.gpio}
-                      isFiltered={!pin || filteredSet.has(pin.gpio)}
-                      mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
-                      compact={compact}
-                      throughHolePad
-                      onClick={() => toggle(pin)}
-                    />
-                  )
-                })}
-              </div>
+            </div>
+            <div className="flex flex-col" style={{ gridColumn: 1, gridRow: 6 }}>
+              {innerLeft.map(lp => {
+                const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
+                return (
+                  <PinRow
+                    key={lp.pinNumber}
+                    layoutPin={lp}
+                    pin={pin}
+                    side="left"
+                    isSelected={!!pin && selectedPin?.gpio === pin.gpio}
+                    isFiltered={!pin || filteredSet.has(pin.gpio)}
+                    mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
+                    compact={compact}
+                    throughHolePad
+                    onClick={() => toggle(pin)}
+                  />
+                )
+              })}
+            </div>
+            <div style={{ gridColumn: 2, gridRow: 6, justifySelf: 'center' }}>
               <InnerRailSpacer
-                uid={chip.id}
+                chip={chip}
+                width={chipWidth}
                 leftColors={innerLeft.map(lp => { const p = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined; return p ? connectorColor(p) : '#4b5563' })}
                 rightColors={innerRight.map(lp => { const p = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined; return p ? connectorColor(p) : '#4b5563' })}
               />
-              <div className="flex flex-col">
-                {innerRight.map(lp => {
-                  const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
-                  return (
-                    <PinRow
-                      key={lp.pinNumber}
-                      layoutPin={lp}
-                      pin={pin}
-                      side="right"
-                      isSelected={!!pin && selectedPin?.gpio === pin.gpio}
-                      isFiltered={!pin || filteredSet.has(pin.gpio)}
-                      mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
-                      compact={compact}
-                      throughHolePad
-                      onClick={() => toggle(pin)}
-                    />
-                  )
-                })}
-              </div>
             </div>
-          </div>
+            <div className="flex flex-col" style={{ gridColumn: 3, gridRow: 6 }}>
+              {innerRight.map(lp => {
+                const pin = lp.gpio !== undefined ? pinByGpio.get(lp.gpio) : undefined
+                return (
+                  <PinRow
+                    key={lp.pinNumber}
+                    layoutPin={lp}
+                    pin={pin}
+                    side="right"
+                    isSelected={!!pin && selectedPin?.gpio === pin.gpio}
+                    isFiltered={!pin || filteredSet.has(pin.gpio)}
+                    mappingLabel={pin ? mapping.find(a => a.gpio === pin.gpio)?.label : undefined}
+                    compact={compact}
+                    throughHolePad
+                    onClick={() => toggle(pin)}
+                  />
+                )
+              })}
+            </div>
+          </>
         )}
+
+        </div>
 
         {/* ── Front-surface solder pads (solder-only corner pads, e.g. S3-Zero) ── */}
         <SolderPadStrip
