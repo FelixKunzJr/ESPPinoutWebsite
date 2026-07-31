@@ -86,6 +86,91 @@ describe('board spec pipeline', () => {
     expect(chip!.packageLayout!.left.concat(chip!.packageLayout!.right).some(p => p.gpio === 7)).toBe(false)
   })
 
+  it('resolves the LOLIN D32 with battery sense on GPIO35 kept off the headers', () => {
+    const spec = JSON.parse(
+      readFileSync(resolve(here, '../contrib/boards/lolin-d32.board.json'), 'utf8'),
+    ) as BoardSpec
+    const { chip, errors } = resolveBoard(spec, findChip('esp32'))
+    expect(errors).toEqual([])
+    expect(chip).not.toBeNull()
+    const pads = chip!.packageLayout!.left.concat(chip!.packageLayout!.right)
+    // GPIO35 is hardwired to the VBAT divider, not a header pad.
+    expect(pads.some(p => p.gpio === 35)).toBe(false)
+    expect(chip!.pins.find(p => p.gpio === 1)!.names[0]).toBe('TX')
+    expect(chip!.pins.find(p => p.gpio === 5)!.boardLabel).toBe('LED')
+    expect(chip!.packageLayout!.left.length).toBe(16)
+    expect(chip!.packageLayout!.right.length).toBe(16)
+  })
+
+  it('resolves the LOLIN D32 Pro on the WROVER base (GPIO16/17 are NC)', () => {
+    const spec = JSON.parse(
+      readFileSync(resolve(here, '../contrib/boards/lolin-d32-pro.board.json'), 'utf8'),
+    ) as BoardSpec
+    const { chip, errors } = resolveBoard(spec, findChip('esp32wrover'))
+    expect(errors).toEqual([])
+    expect(chip).not.toBeNull()
+    const pads = chip!.packageLayout!.left.concat(chip!.packageLayout!.right)
+    // The WROVER's PSRAM consumes GPIO16/17; the D32 Pro silkscreens those pads NC.
+    expect(pads.some(p => p.gpio === 16 || p.gpio === 17 || p.gpio === 35)).toBe(false)
+    expect(chip!.pins.find(p => p.gpio === 16)!.isUsable).toBe(false)
+    expect(chip!.pins.find(p => p.gpio === 1)!.names[0]).toBe('TX')
+  })
+
+  it('resolves the LOLIN S2 Mini with the D1-mini-position Arduino defaults', () => {
+    const spec = JSON.parse(
+      readFileSync(resolve(here, '../contrib/boards/lolin-s2-mini.board.json'), 'utf8'),
+    ) as BoardSpec
+    const { chip, errors } = resolveBoard(spec, findChip('esp32s2'))
+    expect(errors).toEqual([])
+    expect(chip).not.toBeNull()
+    // TX/RX are matrix-routed GPIO39/37 (native UART0 43/44 is not broken out).
+    expect(chip!.pins.find(p => p.gpio === 39)!.names[0]).toBe('TX')
+    expect(chip!.pins.find(p => p.gpio === 37)!.names[0]).toBe('RX')
+    expect(chip!.pins.find(p => p.gpio === 33)!.names[0]).toBe('SDA')
+    expect(chip!.pins.find(p => p.gpio === 15)!.boardLabel).toBe('LED')
+    const pads = chip!.packageLayout!.left.concat(chip!.packageLayout!.right)
+    // GPIO0 is on the BOOT button only.
+    expect(pads.some(p => p.gpio === 0)).toBe(false)
+    // Two 8-pad rows per side: 8 header pads + 8 inner (surface) pads.
+    expect(chip!.packageLayout!.left.filter(p => p.isSurfacePad).length).toBe(8)
+    expect(chip!.packageLayout!.right.filter(p => p.isSurfacePad).length).toBe(8)
+  })
+
+  it('resolves the LOLIN S3 Mini on the bare S3FH4R2 base (GPIO33/34, no OSPI trap)', () => {
+    // The catalog resolves this spec against a bare-chip base that adds
+    // GPIO33/34 (not on WROOM-1 modules) and drops the octal-PSRAM
+    // constraint (the S3FH4R2's PSRAM is quad), so read it from CHIPS.
+    const chip = findChip('lolin-s3-mini')
+    expect(chip).toBeDefined()
+    expect(chip!.pins.find(p => p.gpio === 35)!.names[0]).toBe('SDA')
+    expect(chip!.pins.find(p => p.gpio === 36)!.names[0]).toBe('SCL')
+    expect(chip!.pins.find(p => p.gpio === 43)!.names[0]).toBe('TX')
+    // The bare chip exposes GPIO33/34, and 35-37 carry no octal-PSRAM constraint.
+    for (const g of [33, 34]) expect(chip!.pins.find(p => p.gpio === g), `GPIO${g}`).toBeDefined()
+    for (const g of [35, 36, 37]) {
+      expect(chip!.pins.find(p => p.gpio === g)!.constraints.some(c => c.id === 'ospi_reserved')).toBe(false)
+    }
+    const pads = chip!.packageLayout!.left.concat(chip!.packageLayout!.right)
+    expect(pads.some(p => p.gpio === 33)).toBe(true)
+    // GPIO0 (BOOT) and GPIO47 (WS2812) are not broken out.
+    expect(pads.some(p => p.gpio === 0 || p.gpio === 47)).toBe(false)
+  })
+
+  it('resolves the LOLIN C3 Mini (v2.1.0 header order)', () => {
+    const spec = JSON.parse(
+      readFileSync(resolve(here, '../contrib/boards/lolin-c3-mini.board.json'), 'utf8'),
+    ) as BoardSpec
+    const { chip, errors } = resolveBoard(spec, findChip('esp32c3'))
+    expect(errors).toEqual([])
+    expect(chip).not.toBeNull()
+    expect(chip!.pins.find(p => p.gpio === 21)!.names[0]).toBe('TX')
+    expect(chip!.pins.find(p => p.gpio === 20)!.names[0]).toBe('RX')
+    expect(chip!.pins.find(p => p.gpio === 8)!.names[0]).toBe('SDA')
+    const pads = chip!.packageLayout!.left.concat(chip!.packageLayout!.right)
+    // GPIO9 is on the BOOT button only.
+    expect(pads.some(p => p.gpio === 9)).toBe(false)
+  })
+
   it('flags an unknown base chip', () => {
     const spec: BoardSpec = { id: 'x', name: 'X', baseChip: 'nope', headers: { left: [], right: [] } }
     const { chip, errors } = resolveBoard(spec, findChip(spec.baseChip))

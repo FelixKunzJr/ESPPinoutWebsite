@@ -1,0 +1,63 @@
+{
+  "id": "lolin-s3-mini",
+  "name": "LOLIN S3 Mini",
+  "baseChip": "esp32s3",
+  "pcb": "black",
+  "notes": [
+    "LOLIN (WEMOS) S3 Mini v1.0.0: 34.3 x 25.4 mm, bare ESP32-S3FH4R2 (4 MB flash, 2 MB quad PSRAM), USB-C, PCB trace antenna. Two pin rows per side - the outer rows match the LOLIN D1 mini footprint, so D1 mini shields fit; the inner rows are drawn as the inboard pad strip here.",
+    "GPIO35/36/37 ARE usable on this board: the S3FH4R2's in-package PSRAM is quad, not octal, so the generic S3 note about octal-PSRAM (R8/R16V) modules does not apply here. 35/36 are even the Arduino default I2C pins. The bare chip also exposes GPIO33/34, which WROOM-1 modules keep for themselves.",
+    "RGB LED: a WS2812B on GPIO47 (not broken out) - drive it with the NeoPixel protocol / rgbLedWrite(), not digitalWrite().",
+    "No USB-UART bridge: the console is the S3's native USB-CDC (GPIO19/20, wired only to the USB-C connector). If the firmware wedges, hold BOOT (GPIO0, not broken out) and tap RST to enter the ROM downloader.",
+    "Arduino defaults: TX=GPIO43, RX=GPIO44 (real UART0), I2C SDA=GPIO35 / SCL=GPIO36, SPI SCK=12 / MISO=13 / MOSI=11 / SS=10 - matching the D1 mini shield positions."
+  ],
+  "headers": {
+    "surfacePadCaption": "inner pin rows - real through-hole header pads inboard of the D1-mini-footprint outer rows",
+    "left": [
+      { "label": "EN" },
+      { "gpio": 2 },
+      { "gpio": 4 },
+      { "gpio": 12 },
+      { "gpio": 13 },
+      { "gpio": 11 },
+      { "gpio": 10 },
+      { "label": "3V3" },
+      { "gpio": 1, "isSurfacePad": true },
+      { "gpio": 3, "isSurfacePad": true },
+      { "gpio": 5, "isSurfacePad": true },
+      { "gpio": 6, "isSurfacePad": true },
+      { "gpio": 7, "isSurfacePad": true },
+      { "gpio": 8, "isSurfacePad": true },
+      { "gpio": 9, "isSurfacePad": true },
+      { "gpio": 14, "isSurfacePad": true }
+    ],
+    "right": [
+      { "gpio": 43 },
+      { "gpio": 44 },
+      { "gpio": 36 },
+      { "gpio": 35 },
+      { "gpio": 18 },
+      { "gpio": 16 },
+      { "label": "GND" },
+      { "label": "5V" },
+      { "gpio": 33, "isSurfacePad": true },
+      { "gpio": 37, "isSurfacePad": true },
+      { "gpio": 38, "isSurfacePad": true },
+      { "gpio": 34, "isSurfacePad": true },
+      { "gpio": 21, "isSurfacePad": true },
+      { "gpio": 17, "isSurfacePad": true },
+      { "label": "GND", "isSurfacePad": true },
+      { "gpio": 15, "isSurfacePad": true }
+    ]
+  },
+  "overrides": {
+    "35": { "label": "SDA", "note": "Arduino default I2C SDA (the D1 mini D2/SDA shield position). Usable here: the S3FH4R2 has quad PSRAM, so GPIO35-37 are free." },
+    "36": { "label": "SCL", "note": "Arduino default I2C SCL (the D1 mini D1/SCL shield position). Usable here: the S3FH4R2 has quad PSRAM, so GPIO35-37 are free." },
+    "37": { "label": "37", "note": "Usable here: the S3FH4R2 has quad PSRAM - the octal-PSRAM reservation does not apply." },
+    "43": { "label": "TX", "note": "UART0 TX (U0TXD) - the D1 mini TX shield position." },
+    "44": { "label": "RX", "note": "UART0 RX (U0RXD) - the D1 mini RX shield position." }
+  },
+  "usbEdge": "bottom",
+  "bare": true,
+  "antenna": "pcb",
+  "aspect": 0.74
+}

@@ -618,14 +618,14 @@ function BoardBody({ chip, sideHeight, width, selectedPin }: { chip: Chip; sideH
         const labelX = side === 'left' ? 26 : W - 26
         const anchor = side === 'left' ? ('start' as const) : ('end' as const)
         // Stack upward from just above the antenna zone (USB-top boards) or
-        // downward from below it, at half-header pitch.
-        const baseY = usbTop ? H - 30 : 30
-        const dir = usbTop ? -1 : 1
+        // downward from below it, at half-header pitch. Either way the array
+        // order is top -> bottom, matching the header convention in the spec.
+        const stackTop = usbTop ? H - 30 - (pads.length - 1) * 17 : 30
         return (
           <g key={side}>
             {pads.map((lp, k) => {
               const isSelected = selectedPin?.gpio === lp.gpio
-              const y = baseY + dir * (pads.length - 1 - k) * 17
+              const y = stackTop + k * 17
               return (
                 <g key={lp.pinNumber}>
                   <rect x={xPos - 4.5} y={y - 6.5} width={9} height={13} rx="2"
@@ -1015,7 +1015,7 @@ export function ModuleDiagram() {
         {/* ── Front-surface solder pads (tucked into the board corner, not header rows) ── */}
         <SolderPadStrip
           pads={surfacePads}
-          caption="solder pads on the front - no header pins, solder wires directly"
+          caption={chip.packageLayout?.surfacePadCaption ?? 'solder pads on the front - no header pins, solder wires directly'}
           borderColor="#8a6d1f"
           maxW={Math.max(chipWidth + 260, 400)}
           pinByGpio={pinByGpio}

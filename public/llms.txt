@@ -45,12 +45,15 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 - [ESP32-PICO-MINI-02](https://esp32pin.com/esp32pico)
 - [ESP32-DevKitC](https://esp32pin.com/esp32devkitc)
 - [DOIT ESP32 DevKit V1](https://esp32pin.com/esp32-devkitv1) - popular 30-pin WROOM-32 board
+- [LOLIN D32](https://esp32pin.com/lolin-d32) - WROOM-32 board with LiPo charger; battery sense on GPIO35 (not broken out)
+- [LOLIN D32 Pro](https://esp32pin.com/lolin-d32-pro) - WROVER board with PSRAM (GPIO16/17 NC), microSD slot and TFT connector
 
 ### ESP32-S2 (Xtensa LX7, Wi-Fi only)
 - [ESP32-S2-WROOM](https://esp32pin.com/esp32s2)
 - [ESP32-S2-MINI-1](https://esp32pin.com/esp32s2mini1)
 - [ESP32-S2-SOLO](https://esp32pin.com/esp32s2solo)
 - [ESP32-S2-WROVER](https://esp32pin.com/esp32s2wrover)
+- [LOLIN S2 Mini](https://esp32pin.com/lolin-s2-mini) - D1 mini footprint, two pin rows per side, native USB only
 
 ### ESP32-S3 (Xtensa LX7, Wi-Fi + BLE)
 - [ESP32-S3-WROOM-1](https://esp32pin.com/esp32s3)
@@ -61,12 +64,14 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 - [Waveshare ESP32-S3-Nano](https://esp32pin.com/esp32-s3-nano) - Arduino Nano form factor; the B0/B1 pads are GPIO46/GPIO0 boot straps, not AREF/RESET
 - [ESP32-S3-DevKitC-1](https://esp32pin.com/esp32s3devkitc)
 - [Seeed XIAO ESP32-S3](https://esp32pin.com/xiao-esp32s3)
+- [LOLIN S3 Mini](https://esp32pin.com/lolin-s3-mini) - D1 mini footprint; GPIO35/36/37 usable (quad PSRAM, default I2C on 35/36)
 
 ### ESP32-C3 (RISC-V, Wi-Fi + BLE)
 - [ESP32-C3-MINI-1](https://esp32pin.com/esp32c3)
 - [ESP32-C3-WROOM-02](https://esp32pin.com/esp32c3wroom02)
 - [ESP32-C3-DevKitM-1](https://esp32pin.com/esp32c3devkitm)
 - [Seeed XIAO ESP32-C3](https://esp32pin.com/xiao-esp32c3)
+- [LOLIN C3 Mini](https://esp32pin.com/lolin-c3-mini) - D1 mini footprint, v2.1.0; UART0 on GPIO21/20, WS2812 LED on GPIO7
 
 ### ESP32-C6 (RISC-V, Wi-Fi 6 + BLE + 802.15.4)
 - [ESP32-C6-MINI-1](https://esp32pin.com/esp32c6)

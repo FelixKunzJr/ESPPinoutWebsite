@@ -16,6 +16,11 @@ import xiaoEsp32s3Json from '../../../contrib/boards/xiao-esp32s3.board.json'
 import xiaoEsp32c6Json from '../../../contrib/boards/xiao-esp32c6.board.json'
 import c3SuperMiniJson from '../../../contrib/boards/esp32-c3-supermini.board.json'
 import c6SuperMiniJson from '../../../contrib/boards/esp32-c6-supermini.board.json'
+import lolinD32Json from '../../../contrib/boards/lolin-d32.board.json'
+import lolinD32ProJson from '../../../contrib/boards/lolin-d32-pro.board.json'
+import lolinS2MiniJson from '../../../contrib/boards/lolin-s2-mini.board.json'
+import lolinS3MiniJson from '../../../contrib/boards/lolin-s3-mini.board.json'
+import lolinC3MiniJson from '../../../contrib/boards/lolin-c3-mini.board.json'
 import { resolveBoard } from '../boards/resolveBoard'
 import { enrichPins, applyEspressif, FAM_TO_TARGET } from './enrich'
 import type { BoardSpec } from '../boards/types'
@@ -225,6 +230,25 @@ function build(spec: ModuleSpec): Chip {
 const generated = MODULES.map(build)
 const byId = (id: string) => generated.find(c => c.id === id)!
 
+// Bare-chip ESP32-S3FH4R2 base for boards that solder the chip directly on the
+// PCB (LOLIN S3 Mini). Two deltas vs the WROOM-1 module: the bare chip exposes
+// GPIO33/34 (the module keeps those pads for itself), and its in-package PSRAM
+// is quad, so the octal-PSRAM reservation on GPIO35-37 can never apply. Names
+// and capabilities for 33/34 follow the S3 datasheet IO MUX (FSPI bus pins),
+// mirroring how the generated 35-37 entries are spelled.
+const s3FH4R2: Chip = (() => {
+  const base = byId('esp32s3')
+  const extra: Pin[] = [
+    { gpio: 33, names: ['GPIO33', 'SPIIO4', 'FSPIHD', 'SUBSPIHD'], capabilities: ['gpio', 'pwm', 'spi'], constraints: [], isUsable: true },
+    { gpio: 34, names: ['GPIO34', 'SPIIO5', 'FSPICS0', 'SUBSPICS0'], capabilities: ['gpio', 'pwm', 'spi'], constraints: [], isUsable: true },
+  ]
+  const pins = base.pins
+    .map(p => ({ ...p, constraints: p.constraints.filter(c => c.id !== 'ospi_reserved') }))
+    .concat(applyEspressif('esp32s3', extra))
+    .sort((a, b) => a.gpio - b.gpio)
+  return { ...base, pins }
+})()
+
 export const esp32S3Zero = resolveBoard(esp32S3ZeroJson as unknown as BoardSpec, byId('esp32s3')).chip!
 export const waveshareS3TouchLcd2 = resolveBoard(waveshareS3TouchLcd2Json as unknown as BoardSpec, byId('esp32s3')).chip!
 // Arduino Nano form factor. Pin nets verified against Waveshare's own schematic
@@ -249,6 +273,16 @@ export const xiaoEsp32c6 = resolveBoard(xiaoEsp32c6Json as unknown as BoardSpec,
 // the header order below is read off them plus the vendor pinout art.
 export const c3SuperMini = resolveBoard(c3SuperMiniJson as unknown as BoardSpec, byId('esp32c3')).chip!
 export const c6SuperMini = resolveBoard(c6SuperMiniJson as unknown as BoardSpec, byId('esp32c6')).chip!
+
+// LOLIN (WEMOS) boards. Every pin map was verified against Wemos's official
+// schematic PDF, the official pinout image, and the arduino-esp32 variant
+// (d32, d32_pro, lolin_s2_mini, lolin_s3_mini, lolin_c3_mini) - all agreed.
+// The C3 Mini spec models v2.1.0 (v1.0.0 reverses the left-column GPIO order).
+export const lolinD32    = resolveBoard(lolinD32Json as unknown as BoardSpec, esp32).chip!
+export const lolinD32Pro = resolveBoard(lolinD32ProJson as unknown as BoardSpec, esp32wrover).chip!
+export const lolinS2Mini = resolveBoard(lolinS2MiniJson as unknown as BoardSpec, byId('esp32s2')).chip!
+export const lolinS3Mini = resolveBoard(lolinS3MiniJson as unknown as BoardSpec, s3FH4R2).chip!
+export const lolinC3Mini = resolveBoard(lolinC3MiniJson as unknown as BoardSpec, byId('esp32c3')).chip!
 
 
 // Ordered, grouped by family for the selector.
@@ -279,13 +313,18 @@ export const CHIPS: Chip[] = [
   esp32DevkitV1,
   esp32Devkit38,
   byId('esp32devkitm1'),
+  lolinD32,
+  lolinD32Pro,
   byId('esp32s2devkitc'),
+  lolinS2Mini,
   byId('esp32s3devkitc'),
   esp32S3Zero,
   waveshareS3TouchLcd2,
   esp32S3Nano,
+  lolinS3Mini,
   byId('esp32c3devkitm'),
   byId('esp32c3devkitc'),
+  lolinC3Mini,
   byId('esp32c6devkitc'),
   byId('esp32c6devkitm'),
   byId('esp32c5devkitc'),

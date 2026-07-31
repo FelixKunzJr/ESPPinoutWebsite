@@ -81,6 +81,7 @@ export function resolveBoard(spec: BoardSpec, base: Chip | undefined): BoardResu
     top: spec.headers.top ? toLayout(spec.headers.top) : undefined,
     leftRailHoles: spec.headers.leftRailHoles,
     rightRailHoles: spec.headers.rightRailHoles,
+    surfacePadCaption: spec.headers.surfacePadCaption,
   }
 
   const module: ModuleInfo = {

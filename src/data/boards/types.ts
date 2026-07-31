@@ -32,6 +32,7 @@ export interface BoardSpec {
     bottom?: HeaderPad[]        // left -> right
     leftRailHoles?: number  // limit count of edge through-holes to render on left rail
     rightRailHoles?: number // limit count of edge through-holes to render on right rail
+    surfacePadCaption?: string // caption for the isSurfacePad strip, e.g. when the pads are a real inner header row rather than solder-only pads
   }
   overrides?: Record<string, BoardOverride>  // keyed by GPIO number (as a string)
   // Physical appearance hints for the board rendering:

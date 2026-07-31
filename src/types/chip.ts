@@ -122,6 +122,7 @@ export interface PackageLayout {
   top?:   LayoutPin[]   // left → right (MINI modules have a GND ring on the top edge too)
   leftRailHoles?: number  // limit count of edge through-holes to render on left rail
   rightRailHoles?: number // limit count of edge through-holes to render on right rail
+  surfacePadCaption?: string // strip caption for isSurfacePad pins (default assumes solder-only pads; dual-row boards override)
   bodyMm?: { w: number; h: number } // physical outline in mm (from the KiCad footprint courtyard) - drives true rendered proportions
   antennaMm?: number   // pad-free strip at the top of the outline (the antenna keep-out), in mm
 }
