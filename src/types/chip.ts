@@ -20,6 +20,8 @@ export type ConstraintId =
   | 'serial_console'
   | 'limited_current'
   | 'no_pullup'
+  | 'no_interrupt'
+  | 'adc_input_range'
 
 export interface Constraint {
   id: ConstraintId

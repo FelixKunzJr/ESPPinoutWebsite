@@ -154,6 +154,8 @@ export const AFFECTED_WORD: Record<ConstraintId, string> = {
   serial_console:  'Serial',
   limited_current: 'Current',
   no_pullup:       'Pull-up',
+  no_interrupt:    'Interrupt',
+  adc_input_range: 'ADC range',
 }
 
 // Constraints whose ⚠ is pinned onto the specific function badge it concerns
