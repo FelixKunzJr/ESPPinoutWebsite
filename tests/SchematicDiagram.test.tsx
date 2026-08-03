@@ -51,3 +51,24 @@ describe('SchematicDiagram flash-bus danger badges on the bare ESP-12F module', 
     expect(text).toMatch(/Flash/)
   })
 })
+
+describe('SchematicDiagram bare-pin annotation (round 2 residual 2b)', () => {
+  // A bare pin with no other annotation (GPIO4/GPIO5 on the ESP-12F) used to
+  // say "routes any peripheral" regardless of family - false for the ESP8266,
+  // which has no signal router and can only host software I2C/PWM there.
+  it('does not claim a bare ESP8266 pin routes any peripheral, and names only the software-driven ones', () => {
+    const { container } = renderSchematic('esp8266')
+    const text = container.textContent ?? ''
+    expect(text).not.toMatch(/routes any peripheral/)
+    expect(text).toMatch(/free \(I2C\/PWM\)/)
+  })
+
+  it('still claims a bare ESP32 pin routes any peripheral (regression guard)', () => {
+    // WROOM-32 has no bare pins (every pin carries an alternate-function
+    // name); WROOM-DA does, so it is the one that actually exercises this
+    // fallback branch.
+    const { container } = renderSchematic('esp32wroomda')
+    const text = container.textContent ?? ''
+    expect(text).toMatch(/routes any peripheral/)
+  })
+})

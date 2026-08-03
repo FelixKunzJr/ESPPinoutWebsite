@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext'
 import { filterPins } from '../../utils/filterPins'
 import type { Pin, Chip, LayoutPin, SymbolPin } from '../../types/chip'
 import { AFFECTED_WORD, resolveModule, fnColor, fnCategory, pinAriaLabel } from './shared'
+import { hasGpioMatrix, matrixPeripherals } from '../../data/routing'
 
 // Attribution for the schematic symbol caption. Espressif publishes official
 // KiCad data for every family except the ESP8266 - the generator falls back
@@ -132,7 +133,7 @@ interface Seg {
   chipFill?: string    // filled warning-chip background (drawn as a rect)
 }
 
-function rowSegments(row: SchemRow, mappingLabel?: string): Seg[] {
+function rowSegments(row: SchemRow, family: string, mappingLabel?: string): Seg[] {
   const segs: Seg[] = []
   if (mappingLabel) segs.push({ text: mappingLabel, color: '#fff', bold: true, chipFill: '#15803d' })
   const { pin } = row
@@ -157,9 +158,16 @@ function rowSegments(row: SchemRow, mappingLabel?: string): Seg[] {
     segs.push({ text: n, color: fnColor(n) })
   }
   // A bare pin is not a useless pin - it is a fully free one. Say so instead
-  // of leaving it blank (the GPIO matrix routes I2C/UART/PWM/SPI/... anywhere).
+  // of leaving it blank. Families with a GPIO matrix route I2C/UART/PWM/
+  // SPI/... anywhere; the ESP8266 has no matrix, so a bare pin there is only
+  // free for the software-driven peripherals matrixPeripherals() lists for
+  // it - reusing that instead of a second hardcoded peripheral list keeps
+  // this annotation honest if that list ever changes.
   if (segs.length === 0 && pin.isUsable) {
-    segs.push({ text: '✓ routes any peripheral', color: '#4f7d53' })
+    const text = hasGpioMatrix(family)
+      ? '✓ routes any peripheral'
+      : `✓ free (${matrixPeripherals(family).map(p => p.split(' ')[0]).join('/')})`
+    segs.push({ text, color: '#4f7d53' })
   }
   return segs
 }
@@ -219,8 +227,8 @@ export function SchematicDiagram() {
 
   const mapLabel = (row: SchemRow) => (row.pin ? mapping.find(a => a.gpio === row.pin!.gpio)?.label : undefined)
 
-  const leftAW  = Math.min(330, Math.max(140, ...banks.left.map(r => segsW(rowSegments(r, mapLabel(r))))))
-  const rightAW = Math.min(330, Math.max(140, ...banks.right.map(r => segsW(rowSegments(r, mapLabel(r))))))
+  const leftAW  = Math.min(330, Math.max(140, ...banks.left.map(r => segsW(rowSegments(r, chip.family, mapLabel(r))))))
+  const rightAW = Math.min(330, Math.max(140, ...banks.right.map(r => segsW(rowSegments(r, chip.family, mapLabel(r))))))
 
   const FRAME_I = 22
   const CX0 = FRAME_I + 24
@@ -310,7 +318,7 @@ export function SchematicDiagram() {
         </g>
       )
     }
-    const segs = rowSegments(row, mapLabel(row))
+    const segs = rowSegments(row, chip.family, mapLabel(row))
     const name = rowName(row)
     const isSelected = !!row.pin && selectedPin?.gpio === row.pin.gpio
     const isActive = !row.pin || filteredSet.has(row.pin.gpio)
