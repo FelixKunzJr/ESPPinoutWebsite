@@ -9,6 +9,11 @@ const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, t
 const USB = { id: 'usb_jtag' as const, severity: 'warning' as const, title: 'USB / Serial-JTAG', description: 'Part of the native USB (Serial/JTAG) interface. Avoid repurposing while USB is in use.' }
 const FLASH = { id: 'flash_reserved' as const, severity: 'danger' as const, title: 'Reserved for flash', description: 'Wired to the SPI flash of the module. Using it for anything else will crash the chip.' }
 const OSPI = { id: 'ospi_reserved' as const, severity: 'warning' as const, title: 'OSPI PSRAM', description: 'On modules with Octal SPI PSRAM (ESP32-S3R8 / R16V based, e.g. N8R8/N16R8 variants), IO35, IO36 and IO37 are connected to the PSRAM and are not available for other uses. Free on quad-PSRAM and no-PSRAM variants.' }
+const SERIAL = { id: 'serial_console' as const, severity: 'warning' as const, title: 'Serial console', description: 'UART0. The bootloader prints its log here at boot and this is the flashing port. Usable as GPIO, but you lose the console and anything attached sees boot noise.' }
+const FLASH_DIO = { id: 'flash_reserved' as const, severity: 'warning' as const, title: 'Flash bus (DIO only)', description: 'Wired to the SPI flash. It is broken out and does work as a GPIO when the flash runs in DIO mode, but not in QIO mode. Check how your module is configured before using it.' }
+const NO_INT = { id: 'no_interrupt' as const, severity: 'warning' as const, title: 'No interrupt or PWM', description: 'This pin lives in the RTC domain. It cannot raise an interrupt, cannot do PWM, and has an internal pull-down instead of a pull-up. Its purpose is deep-sleep wake: tie it to RST and it pulls the chip out of deep sleep.' }
+const NO_PULLUP = { id: 'no_pullup' as const, severity: 'warning' as const, title: 'No internal pull-up', description: 'This pin has an internal pull-down, not a pull-up. Add an external pull-up if you need one.' }
+const ADC_RANGE = { id: 'adc_input_range' as const, severity: 'warning' as const, title: 'ADC is 0 to 1.0 V', description: 'The ESP8266 analog input reads 0 to 1.0 V on the bare module, not 0 to 3.3 V. Feeding it 3.3 V directly damages it. Dev boards fit an onboard divider, so check your board before wiring anything to it.' }
 
 export const ESP32_WROOM_32_SYMBOL: SymbolLayout = {
   left: [{ pins: [3], label: 'EN', name: "EN/CHIP_PU" }, { pins: [8], gpio: 32, name: "32K_XP/GPIO32/ADC1_CH4" }, { pins: [9], gpio: 33, name: "32K_XN/GPIO33/ADC1_CH5" }, { pins: [14], gpio: 12, name: "MTDI/GPIO12/ADC2_CH5" }, { pins: [16], gpio: 13, name: "MTCK/GPIO13/ADC2_CH4" }, { pins: [13], gpio: 14, name: "MTMS/GPIO14/ADC2_CH6" }, { pins: [23], gpio: 15, name: "MTDO/GPIO15/ADC2_CH3" }, { pins: [6], gpio: 34, name: "GPIO34/ADC1_CH6" }, { pins: [7], gpio: 35, name: "GPIO35/ADC1_CH7" }, { pins: [4], gpio: 36, name: "SENSOR_VP/GPIO36/ADC1_CH0" }, { pins: [5], gpio: 39, name: "SENSOR_VN/GPIO39/ADC1_CH3" }],
@@ -892,6 +897,43 @@ export const ESP8684_WROOM_02C_SYMBOL: SymbolLayout = {
   right: [{ pins: [11], gpio: 19, name: "GPIO19" }, { pins: [12], gpio: 20, name: "GPIO20" }, { pins: [13], label: 'NC', name: "NC" }, { pins: [14], gpio: 18, name: "GPIO18" }, { pins: [16], gpio: 2, name: "GPIO2" }, { pins: [15], gpio: 3, name: "GPIO3" }, { pins: [3], gpio: 4, name: "GPIO4" }, { pins: [4], gpio: 5, name: "GPIO5" }, { pins: [5], gpio: 6, name: "GPIO6" }, { pins: [6], gpio: 7, name: "GPIO7" }, { pins: [7], gpio: 8, name: "GPIO8" }, { pins: [8], gpio: 9, name: "GPIO9" }, { pins: [10], gpio: 10, name: "GPIO10" }],
   bottom: [{ pins: [9,19], label: 'GND', name: "GND" }],
   top: [{ pins: [1], label: '3V3', name: "3V3" }],
+}
+
+export const ESP12F_PINS: Pin[] = [
+  { gpio: 0, names: ["GPIO0"], capabilities: ["gpio","pwm"] as Capability[], constraints: [STRAP], isUsable: true },
+  { gpio: 1, names: ["GPIO1","TXD"], capabilities: ["gpio","pwm","uart"] as Capability[], constraints: [SERIAL], isUsable: true },
+  { gpio: 2, names: ["GPIO2"], capabilities: ["gpio","pwm"] as Capability[], constraints: [STRAP], isUsable: true },
+  { gpio: 3, names: ["GPIO3","RXD"], capabilities: ["gpio","pwm","uart"] as Capability[], constraints: [SERIAL], isUsable: true },
+  { gpio: 4, names: ["GPIO4"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
+  { gpio: 5, names: ["GPIO5"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
+  { gpio: 6, names: ["GPIO6","SCLK"], capabilities: [] as Capability[], constraints: [FLASH], isUsable: false },
+  { gpio: 7, names: ["GPIO7","MISO"], capabilities: [] as Capability[], constraints: [FLASH], isUsable: false },
+  { gpio: 8, names: ["GPIO8","MOSI"], capabilities: [] as Capability[], constraints: [FLASH], isUsable: false },
+  { gpio: 9, names: ["GPIO9"], capabilities: ["gpio","pwm"] as Capability[], constraints: [FLASH_DIO], isUsable: true },
+  { gpio: 10, names: ["GPIO10"], capabilities: ["gpio","pwm"] as Capability[], constraints: [FLASH_DIO], isUsable: true },
+  { gpio: 11, names: ["GPIO11","CS0"], capabilities: [] as Capability[], constraints: [FLASH], isUsable: false },
+  { gpio: 12, names: ["GPIO12"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
+  { gpio: 13, names: ["GPIO13"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
+  { gpio: 14, names: ["GPIO14"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
+  { gpio: 15, names: ["GPIO15"], capabilities: ["gpio","pwm"] as Capability[], constraints: [STRAP], isUsable: true },
+  { gpio: 16, names: ["GPIO16"], capabilities: ["gpio"] as Capability[], constraints: [NO_INT, NO_PULLUP], isUsable: true },
+  { gpio: 17, names: ["A0","TOUT"], capabilities: ["adc1"] as Capability[], constraints: [ADC_RANGE], isUsable: true },
+]
+
+export const ESP12F_LAYOUT: PackageLayout = {
+  name: 'ESP-12F',
+  left: [{ pinNumber: 1, label: '~{RST}' }, { pinNumber: 2, gpio: 17 }, { pinNumber: 3, label: 'EN' }, { pinNumber: 4, gpio: 16 }, { pinNumber: 5, gpio: 14 }, { pinNumber: 6, gpio: 12 }, { pinNumber: 7, gpio: 13 }, { pinNumber: 8, label: 'VCC' }],
+  bottom: [{ pinNumber: 9, gpio: 11 }, { pinNumber: 10, gpio: 7 }, { pinNumber: 11, gpio: 9 }, { pinNumber: 12, gpio: 10 }, { pinNumber: 13, gpio: 8 }, { pinNumber: 14, gpio: 6 }],
+  right: [{ pinNumber: 22, gpio: 1 }, { pinNumber: 21, gpio: 3 }, { pinNumber: 20, gpio: 5 }, { pinNumber: 19, gpio: 4 }, { pinNumber: 18, gpio: 0 }, { pinNumber: 17, gpio: 2 }, { pinNumber: 16, gpio: 15 }, { pinNumber: 15, label: 'GND' }],
+  bodyMm: { w: 18.1, h: 25.3 },
+  antennaMm: 8.7,
+}
+
+export const ESP12F_SYMBOL: SymbolLayout = {
+  left: [{ pins: [1], label: '~{RST}', name: "~{RST}" }, { pins: [3], label: 'EN', name: "EN" }, { pins: [2], label: 'ADC', name: "ADC" }, { pins: [9], label: 'CS0', name: "CS0" }, { pins: [10], label: 'MISO', name: "MISO" }, { pins: [11], gpio: 9, name: "GPIO9" }, { pins: [12], gpio: 10, name: "GPIO10" }, { pins: [13], label: 'MOSI', name: "MOSI" }, { pins: [14], label: 'SCLK', name: "SCLK" }],
+  right: [{ pins: [18], gpio: 0, name: "GPIO0" }, { pins: [22], gpio: 1, name: "GPIO1/TXD" }, { pins: [17], gpio: 2, name: "GPIO2" }, { pins: [21], gpio: 3, name: "GPIO3/RXD" }, { pins: [19], gpio: 4, name: "GPIO4" }, { pins: [20], gpio: 5, name: "GPIO5" }, { pins: [6], gpio: 12, name: "GPIO12" }, { pins: [7], gpio: 13, name: "GPIO13" }, { pins: [5], gpio: 14, name: "GPIO14" }, { pins: [16], gpio: 15, name: "GPIO15" }, { pins: [4], gpio: 16, name: "GPIO16" }],
+  bottom: [{ pins: [15], label: 'GND', name: "GND" }],
+  top: [{ pins: [8], label: 'VCC', name: "VCC" }],
 }
 
 export const ESP32_DEVKITC_PINS: Pin[] = [

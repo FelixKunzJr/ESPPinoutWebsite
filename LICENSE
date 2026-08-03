@@ -30,3 +30,8 @@ esp-gpio-tool (https://github.com/espressif/esp-gpio-tool), licensed under
 the Apache License 2.0 (see vendor/esp-gpio-tool/LICENSE).
 ESP32 is a trademark of Espressif Systems.
 This project is not affiliated with or endorsed by Espressif Systems.
+
+ESP8266 pin names, schematic symbol geometry and pad layout are derived from
+the KiCad Library project's stock symbol and footprint libraries
+(https://gitlab.com/kicad/libraries), licensed CC-BY-SA 4.0 with the KiCad
+library exception. Espressif does not publish KiCad data for the ESP8266.

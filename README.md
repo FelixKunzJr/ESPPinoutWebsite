@@ -31,6 +31,8 @@ KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs
 
 On top of that, per-GPIO alternate functions, RTC/low-power domain flags, and strapping roles are merged from the dataset of Espressif's official [esp-gpio-tool](https://github.com/espressif/esp-gpio-tool) (Apache-2.0, vendored in `vendor/esp-gpio-tool/`, regenerated with `node scripts/import-esp-gpio-tool.mjs`). The test suite (`tests/espressif-crosscheck.test.ts`) cross-validates the entire catalog against that dataset on every run, so the site can never silently drift from Espressif's own pin data.
 
+Espressif does not publish KiCad data for the ESP8266, so the ESP-12F's pin names, schematic symbol geometry and pad layout are derived instead from [KiCad's own stock symbol and footprint libraries](https://gitlab.com/kicad/libraries), licensed CC-BY-SA 4.0 with the KiCad library exception.
+
 ## Found a mistake?
 
 Use the **Report mistake** button on the site (it prefills an issue with the chip and pin context), or [open an issue](https://github.com/FelixKunzJr/ESPPinoutWebsite/issues/new) directly. Corrections with a datasheet reference are merged fast.
@@ -48,6 +50,6 @@ Pushes to `main` auto-deploy via Vercel.
 
 ## License
 
-MIT (see [LICENSE](LICENSE)). Pin data and symbols derive from Espressif's KiCad libraries (Apache 2.0). ESP32 is a trademark of Espressif Systems; this project is not affiliated with or endorsed by Espressif.
+MIT (see [LICENSE](LICENSE)). Pin data and symbols derive from Espressif's KiCad libraries (Apache 2.0) and, for the ESP8266, from KiCad's own stock libraries (CC-BY-SA 4.0 with the KiCad library exception). ESP32 is a trademark of Espressif Systems; this project is not affiliated with or endorsed by Espressif.
 
 Always verify pinouts against the official datasheet before committing hardware.

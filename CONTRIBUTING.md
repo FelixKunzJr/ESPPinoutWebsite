@@ -36,6 +36,7 @@ KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs
 - `src/data/chips/generated.ts` is the **output — never hand-edit it.** A hand edit is overwritten on the next regenerate, and hand-copied datasheet data is exactly the drift we're avoiding.
 - Family-level lore KiCad doesn't encode (strapping pins, boot modes, ADC2/Wi-Fi arbitration, flash-bus rules) lives in the generator's `FAM` table in `scripts/generate-chip-data.mjs` and in `src/data/chips/catalog.ts`.
 - The two original hand-authored chips, `src/data/chips/esp32.ts` and `esp32wrover.ts`, are the exception; everything else flows through the generator.
+- Espressif does not publish KiCad data for the ESP8266, so the ESP-12F is generated from [KiCad's own stock symbol and footprint libraries](https://gitlab.com/kicad/libraries) instead, licensed CC-BY-SA 4.0 with the KiCad library exception.
 
 ## Adding a board
 
@@ -73,4 +74,4 @@ npm run build    # production build
 
 ## License
 
-By contributing you agree your work is released under the project's [MIT license](LICENSE). Pin data and symbols derive from Espressif's KiCad libraries (Apache 2.0). Always verify against the official datasheet before committing hardware.
+By contributing you agree your work is released under the project's [MIT license](LICENSE). Pin data and symbols derive from Espressif's KiCad libraries (Apache 2.0) and, for the ESP8266, from KiCad's own stock libraries (CC-BY-SA 4.0 with the KiCad library exception). Always verify against the official datasheet before committing hardware.

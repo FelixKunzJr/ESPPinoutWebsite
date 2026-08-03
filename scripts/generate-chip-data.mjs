@@ -1,25 +1,52 @@
 // Regenerates src/data/chips/generated.ts (authoritative pin names + physical
-// pad layouts) from Espressif's official KiCad libraries.
+// pad layouts) from Espressif's official KiCad libraries, plus KiCad's own
+// stock libraries for parts Espressif does not publish (the ESP8266).
 //
 //   git clone --depth 1 https://github.com/espressif/kicad-libraries
-//   KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs
-//
-// Set KICAD_LIB to the cloned repo (defaults to /tmp/esp-kicad).
+//   git clone --depth 1 https://gitlab.com/kicad/libraries/kicad-symbols.git
+//   git clone --depth 1 https://gitlab.com/kicad/libraries/kicad-footprints.git
+//   KICAD_LIB=./kicad-libraries KICAD_STOCK=./kicad-symbols \
+//     KICAD_STOCK_FP=./kicad-footprints node scripts/generate-chip-data.mjs
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 const KICAD = process.env.KICAD_LIB || '/tmp/esp-kicad'
+// KiCad's own stock libraries, for parts Espressif does not publish (ESP8266).
+const STOCK = process.env.KICAD_STOCK || '/tmp/kicad-symbols'
+const STOCK_FP = process.env.KICAD_STOCK_FP || '/tmp/kicad-footprints'
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'data', 'chips', 'generated.ts')
 const SYM = fs.readFileSync(`${KICAD}/symbols/Espressif.kicad_sym`, 'utf8')
 const FP_DIR = `${KICAD}/footprints/Espressif.pretty`
+const STOCK_SYM_DIR = `${STOCK}/RF_Module.kicad_symdir`
+const STOCK_FP_DIR = `${STOCK_FP}/RF_Module.pretty`
 
-function symbolPins(n) {
+// Espressif ships one flat .kicad_sym holding every symbol, so a symbol is a
+// slice of that file. Find the slice for one symbol name.
+function espBody(n) {
   const s = SYM.indexOf(`(symbol "${n}"`)
   if (s < 0) throw new Error('no sym ' + n)
   const re = /\n\t\(symbol "/g; re.lastIndex = s + 1
   let m, e = SYM.length; if (m = re.exec(SYM)) e = m.index
-  const r = SYM.slice(s, e)
-  const p = /\(pin\b[\s\S]*?\(at ([-0-9.]+) ([-0-9.]+) ([0-9]+)\)[\s\S]*?\(name "([^"]*)"[\s\S]*?\(number "([^"]*)"/g
+  return SYM.slice(s, e)
+}
+
+// KiCad's stock library is one file per symbol. An alias symbol carries no pins
+// of its own and points at its parent with (extends "..."), so follow that to
+// whichever ancestor actually draws the pins (ESP-12F extends ESP-12E).
+function stockBody(n, depth = 0) {
+  if (depth > 8) throw new Error('extends loop at ' + n)
+  const t = fs.readFileSync(`${STOCK_SYM_DIR}/${n}.kicad_sym`, 'utf8')
+  const ext = t.match(/\(extends "([^"]+)"\)/)
+  return ext ? stockBody(ext[1], depth + 1) : t
+}
+
+const symBody = mod => (mod.lib === 'kicad' ? stockBody(mod.sym) : espBody(mod.sym))
+
+const PIN_RE = /\(pin\b[\s\S]*?\(at ([-0-9.]+) ([-0-9.]+) ([0-9]+)\)[\s\S]*?\(name "([^"]*)"[\s\S]*?\(number "([^"]*)"/g
+
+// pad number -> pin name, for one symbol body.
+function symbolPins(r) {
+  const p = new RegExp(PIN_RE.source, 'g')
   const o = {}; let x
   while (x = p.exec(r)) o[x[5]] = x[4]
   return o
@@ -28,13 +55,8 @@ function symbolPins(n) {
 // The symbol's own pin geometry: which body side each pin sits on, in drawn
 // order. angle 0 = points right (LEFT side), 180 = RIGHT, 90 = BOTTOM, 270 = TOP.
 // Pins stacked at the same coordinate (hidden duplicate power pins) are merged.
-function symbolGeometry(n) {
-  const s = SYM.indexOf(`(symbol "${n}"`)
-  if (s < 0) throw new Error('no sym ' + n)
-  const re = /\n\t\(symbol "/g; re.lastIndex = s + 1
-  let m, e = SYM.length; if (m = re.exec(SYM)) e = m.index
-  const r = SYM.slice(s, e)
-  const p = /\(pin\b[\s\S]*?\(at ([-0-9.]+) ([-0-9.]+) ([0-9]+)\)[\s\S]*?\(name "([^"]*)"[\s\S]*?\(number "([^"]*)"/g
+function symbolGeometry(r) {
+  const p = new RegExp(PIN_RE.source, 'g')
   const byPos = new Map()
   let x
   while (x = p.exec(r)) {
@@ -64,8 +86,8 @@ function symbolGeometry(n) {
     bottom: sides.bottom.map(sp), top: sides.top.map(sp),
   }
 }
-function fpPads(f) {
-  const t = fs.readFileSync(`${FP_DIR}/${f}.kicad_mod`, 'utf8')
+function fpPads(dir, f) {
+  const t = fs.readFileSync(`${dir}/${f}.kicad_mod`, 'utf8')
   const re = /\(pad "([^"]*)"\s+\S+\s+\S+\s+\(at ([-0-9.]+) ([-0-9.]+)/g
   const o = {}; let m
   while (m = re.exec(t)) { const n = m[1]; if (!n) continue; (o[n] ??= []).push({ x: +m[2], y: +m[3] }) }
@@ -73,8 +95,8 @@ function fpPads(f) {
 }
 // Physical module outline in mm, from the footprint's courtyard bounding box
 // (falls back to silkscreen / fab outline). Drives true on-screen proportions.
-function fpOutline(f) {
-  const t = fs.readFileSync(`${FP_DIR}/${f}.kicad_mod`, 'utf8')
+function fpOutline(dir, f) {
+  const t = fs.readFileSync(`${dir}/${f}.kicad_mod`, 'utf8')
   for (const layer of ['F.CrtYd', 'F.SilkS', 'F.Fab']) {
     const xs = [], ys = []
     const re = /\((?:start|end|xy|center)\s+(-?[\d.]+)\s+(-?[\d.]+)\)/g
@@ -88,8 +110,8 @@ function fpOutline(f) {
   }
   return undefined
 }
-function fpBodyMm(f) {
-  const o = fpOutline(f)
+function fpBodyMm(dir, f) {
+  const o = fpOutline(dir, f)
   return o && { w: o.w, h: o.h }
 }
 // The antenna keep-out: the strip at the top of the module outline that carries
@@ -100,8 +122,8 @@ function fpBodyMm(f) {
 // bodyMm may be overridden where the courtyard is larger than the module (again
 // WROOM-DA, whose courtyard includes the keep-out region); the gap is rebased
 // onto that outline so it stays a fraction of the body actually drawn.
-function fpAntennaMm(f, pads, bodyMm) {
-  const o = fpOutline(f)
+function fpAntennaMm(dir, f, pads, bodyMm) {
+  const o = fpOutline(dir, f)
   if (!o || !bodyMm) return undefined
   const ys = Object.values(pads).flat().map(p => p.y)
   if (!ys.length) return undefined
@@ -181,7 +203,19 @@ function buildLayout(pins, pads) {
   return { left: L.map(lp), bottom: B.map(lp), right: R.map(lp), top: T.map(lp) }
 }
 function buildModule(mod, fam) {
-  const pins = symbolPins(mod.sym), pads = fpPads(mod.fp)
+  const dir = mod.lib === 'kicad' ? STOCK_FP_DIR : FP_DIR
+  const raw = symbolPins(symBody(mod)), pads = fpPads(dir, mod.fp)
+  // Pads whose symbol name carries no GPIO number get one prepended, so both
+  // the pin list and the pad layout below can find it. The original role name
+  // is kept as a following token.
+  const pins = { ...raw }
+  for (const [pad, gpio] of Object.entries(fam.padGpio ?? {})) {
+    // Pads 11 and 12 are already named GPIO9 / GPIO10 by KiCad. Skip those so
+    // the override cannot produce a duplicate token like 'GPIO9/GPIO9'.
+    if (new RegExp(`GPIO${gpio}\\b`).test(raw[pad] ?? '')) continue
+    pins[pad] = `GPIO${gpio}` + (raw[pad] ? `/${raw[pad]}` : '')
+  }
+  if (fam.analog) pins[fam.analog.pad] = `GPIO${fam.analog.gpio}/${fam.analog.names.join('/')}`
   const seen = new Map()
   for (const raw of Object.values(pins)) {
     const g = (raw || '').toUpperCase().match(/GPIO(\d+)/)
@@ -196,20 +230,35 @@ function buildModule(mod, fam) {
   const pinObjs = [...seen.entries()].sort((a, b) => a[0] - b[0]).map(([gpio, raw]) => {
     const toks = nameTokens(raw)
     const inputOnly = fam.inputOnly?.includes(gpio)
-    const flashReserved = fam.flashBus && ([6, 7, 8, 11].includes(gpio) || (fullFlashBus && [9, 10].includes(gpio)))
+    const flashDanger = fam.flashDanger
+      ? fam.flashDanger.includes(gpio)
+      : fam.flashBus && ([6, 7, 8, 11].includes(gpio) || (fullFlashBus && [9, 10].includes(gpio)))
+    const flashWarn = fam.flashWarn?.includes(gpio) ?? false
+    const flashReserved = flashDanger || flashWarn
     const cs = []
-    if (flashReserved) cs.push('FLASH')
+    if (flashDanger) cs.push('FLASH')
+    if (flashWarn) cs.push('FLASH_DIO')
     if (mod.ospi && [35, 36, 37].includes(gpio)) cs.push('OSPI')
     if (inputOnly) cs.push('INPUT_ONLY')
     if (fam.strapping?.includes(gpio)) cs.push('STRAP')
+    if (fam.serialConsole?.includes(gpio)) cs.push('SERIAL')
+    if (fam.noInterrupt?.includes(gpio)) cs.push('NO_INT', 'NO_PULLUP')
+    if (fam.analog?.gpio === gpio) cs.push('ADC_RANGE')
     if (fam.adc2Wifi && toks.some(t => /^ADC2/i.test(t))) cs.push('ADC2_WIFI')
     if (toks.some(t => /USB_D/i.test(t))) cs.push('USB')
-    return { gpio, names: toks, capabilities: flashReserved ? [] : caps(toks, inputOnly), constraints: cs, usable: !flashReserved }
+    const isAnalog = fam.analog?.gpio === gpio
+    return {
+      gpio,
+      names: isAnalog ? fam.analog.names : toks,
+      capabilities: flashDanger ? [] : isAnalog ? ['adc1'] : caps(toks, inputOnly).filter(c => !(fam.softI2c && c === 'i2c') && !(fam.noInterrupt?.includes(gpio) && c === 'pwm')),
+      constraints: cs,
+      usable: !flashDanger,
+    }
   })
   // mm override for footprints whose courtyard is not the module outline
   // (WROOM-DA's courtyard includes the dual-antenna keep-out region).
-  const bodyMm = mod.mm ? { w: mod.mm[0], h: mod.mm[1] } : fpBodyMm(mod.fp)
-  const antennaMm = fpAntennaMm(mod.fp, pads, bodyMm)
+  const bodyMm = mod.mm ? { w: mod.mm[0], h: mod.mm[1] } : fpBodyMm(dir, mod.fp)
+  const antennaMm = fpAntennaMm(dir, mod.fp, pads, bodyMm)
   return { pins: pinObjs, layout: { name: mod.name, ...buildLayout(pins, pads), bodyMm, antennaMm } }
 }
 
@@ -223,6 +272,22 @@ const FAM = {
   h2:    { strapping: [2, 3, 8, 9], inputOnly: [], adc2Wifi: false },
   c5:    { strapping: [7, 25, 26, 27, 28], inputOnly: [], adc2Wifi: false },
   c2:    { strapping: [8, 9], inputOnly: [], adc2Wifi: false },
+  // ESP8266: GPIO6-11 are the SPI flash bus. Unlike the ESP32 modules, an
+  // ESP-12F breaks out 9 and 10, and they do work when the flash runs in DIO
+  // mode, so those two are a warning rather than a hard danger.
+  esp8266: {
+    strapping: [0, 2, 15], inputOnly: [], adc2Wifi: false,
+    flashBus: true, flashDanger: [6, 7, 8, 11], flashWarn: [9, 10],
+    serialConsole: [1, 3], noInterrupt: [16], softI2c: true,
+    // KiCad's ESP-12E symbol names these pads by SPI role with no GPIO number,
+    // so the GPIO regex cannot see them. Values from the ESP8266EX datasheet,
+    // confirmed against the NodeMCU DevKit v1.0 schematic net labels.
+    padGpio: { 9: 11, 10: 7, 11: 9, 12: 10, 13: 8, 14: 6 },
+    // TOUT/ADC is not a GPIO. It ships as a synthetic pin so the pin table,
+    // filters and export all handle it; GPIO17 does not exist on the ESP8266,
+    // so the number cannot collide.
+    analog: { pad: 2, gpio: 17, names: ['A0', 'TOUT'] },
+  },
 }
 
 // One entry per distinct module pinout. prefix → exported const names.
@@ -250,6 +315,10 @@ const MODULES = [
   // ESP8685 is ESP32-C3 silicon; ESP8684 is the ESP32-C2 group.
   { prefix: 'ESP8685_WROOM_06', name: 'ESP8685-WROOM-06', sym: 'ESP8685-WROOM-06', fp: 'ESP8685-WROOM-06', fam: 'c3' },
   { prefix: 'ESP8684_WROOM_02C', name: 'ESP8684-WROOM-02C', sym: 'ESP8684-WROOM-02C/U', fp: 'ESP8684-WROOM-02C', fam: 'c2' },
+  // ESP8266. Espressif's KiCad library has no ESP8266 parts, so this one comes
+  // from KiCad's own stock RF_Module library. ESP-12F extends ESP-12E there and
+  // shares its footprint.
+  { prefix: 'ESP12F', name: 'ESP-12F', sym: 'ESP-12F', fp: 'ESP-12E', fam: 'esp8266', lib: 'kicad' },
   // Common development boards (two breakout header rows)
   { prefix: 'ESP32_DEVKITC', name: 'ESP32-DevKitC', sym: 'ESP32-DevKitC', fp: 'ESP32-DevKitC', fam: 'esp32' },
   { prefix: 'ESP32_DEVKITM_1', name: 'ESP32-DevKitM-1', sym: 'ESP32-DevKitM-1', fp: 'ESP32-DevKitM-1', fam: 'esp32' },
@@ -288,11 +357,16 @@ out += `const STRAP = { id: 'strapping_pin' as const, severity: 'warning' as con
 out += `const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, title: 'ADC2 unusable with Wi-Fi', description: 'ADC2 is claimed by the Wi-Fi driver; analogRead() on this pin fails while Wi-Fi is active. Prefer ADC1 pins.' }\n`
 out += `const USB = { id: 'usb_jtag' as const, severity: 'warning' as const, title: 'USB / Serial-JTAG', description: 'Part of the native USB (Serial/JTAG) interface. Avoid repurposing while USB is in use.' }\n`
 out += `const FLASH = { id: 'flash_reserved' as const, severity: 'danger' as const, title: 'Reserved for flash', description: 'Wired to the SPI flash of the module. Using it for anything else will crash the chip.' }\n`
-out += `const OSPI = { id: 'ospi_reserved' as const, severity: 'warning' as const, title: 'OSPI PSRAM', description: 'On modules with Octal SPI PSRAM (ESP32-S3R8 / R16V based, e.g. N8R8/N16R8 variants), IO35, IO36 and IO37 are connected to the PSRAM and are not available for other uses. Free on quad-PSRAM and no-PSRAM variants.' }\n\n`
+out += `const OSPI = { id: 'ospi_reserved' as const, severity: 'warning' as const, title: 'OSPI PSRAM', description: 'On modules with Octal SPI PSRAM (ESP32-S3R8 / R16V based, e.g. N8R8/N16R8 variants), IO35, IO36 and IO37 are connected to the PSRAM and are not available for other uses. Free on quad-PSRAM and no-PSRAM variants.' }\n`
+out += `const SERIAL = { id: 'serial_console' as const, severity: 'warning' as const, title: 'Serial console', description: 'UART0. The bootloader prints its log here at boot and this is the flashing port. Usable as GPIO, but you lose the console and anything attached sees boot noise.' }\n`
+out += `const FLASH_DIO = { id: 'flash_reserved' as const, severity: 'warning' as const, title: 'Flash bus (DIO only)', description: 'Wired to the SPI flash. It is broken out and does work as a GPIO when the flash runs in DIO mode, but not in QIO mode. Check how your module is configured before using it.' }\n`
+out += `const NO_INT = { id: 'no_interrupt' as const, severity: 'warning' as const, title: 'No interrupt or PWM', description: 'This pin lives in the RTC domain. It cannot raise an interrupt, cannot do PWM, and has an internal pull-down instead of a pull-up. Its purpose is deep-sleep wake: tie it to RST and it pulls the chip out of deep sleep.' }\n`
+out += `const NO_PULLUP = { id: 'no_pullup' as const, severity: 'warning' as const, title: 'No internal pull-up', description: 'This pin has an internal pull-down, not a pull-up. Add an external pull-up if you need one.' }\n`
+out += `const ADC_RANGE = { id: 'adc_input_range' as const, severity: 'warning' as const, title: 'ADC is 0 to 1.0 V', description: 'The ESP8266 analog input reads 0 to 1.0 V on the bare module, not 0 to 3.3 V. Feeding it 3.3 V directly damages it. Dev boards fit an onboard divider, so check your board before wiring anything to it.' }\n\n`
 
 const keys = []
 for (const mod of MODULES) {
-  const sym = symbolGeometry(mod.sym)
+  const sym = symbolGeometry(symBody(mod))
   if (!mod.symOnly) {
     const { pins, layout } = buildModule(mod, FAM[mod.fam])
     out += `export const ${mod.prefix}_PINS: Pin[] = [\n${pins.map(fmtPin).join(',\n')},\n]\n\n`
