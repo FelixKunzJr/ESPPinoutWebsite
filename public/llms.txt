@@ -1,6 +1,6 @@
 # ESP32 Pinout Studio
 
-> Free interactive pinout reference for the whole ESP32 family. Every pin carries its real-world constraints (strapping pins, ADC2/Wi-Fi conflicts, flash-reserved GPIOs, input-only pins, USB/JTAG lines) so you don't pick a pin that stops your project from booting. Pin names, physical pad layouts, and schematic symbols are generated from Espressif's official KiCad libraries, not hand-copied from datasheets.
+> Free interactive pinout reference for the whole ESP32 family. Every pin carries its real-world constraints (strapping pins, ADC2/Wi-Fi conflicts, flash-reserved GPIOs, input-only pins, USB/JTAG lines) so you don't pick a pin that stops your project from booting. Pin names, physical pad layouts, and schematic symbols are generated from Espressif's official KiCad libraries (and, for the ESP8266, from KiCad's own stock libraries), not hand-copied from datasheets.
 
 Site: https://esp32pin.com
 License: MIT (open source). Data derives from Espressif's KiCad libraries (Apache 2.0). Not affiliated with or endorsed by Espressif.
@@ -36,7 +36,7 @@ Always verify against the official datasheet before committing hardware.
 - ESP8266: GPIO6-11 are the SPI flash bus. GPIO6, 7, 8 and 11 are never usable; GPIO9 and GPIO10 work only in DIO flash mode.
 - ESP8266: GPIO15 must be LOW at boot, GPIO2 must be HIGH at boot, GPIO0 LOW at boot enters the flasher.
 - ESP8266: GPIO16 has no interrupt, no PWM and an internal pull-down. Tie it to RST to wake from deep sleep.
-- ESP8266: the analog input is 0 to 1.0 V on a bare module. NodeMCU v1.0 and the D1 Mini fit a divider (3.3 V and 3.2 V respectively).
+- ESP8266: the analog input is 0 to 1.0 V on a bare module. NodeMCU v1.0 and the D1 Mini both fit a divider giving 0 to 3.2 V full scale.
 - ESP8266: there is no I2C peripheral. Wire bit-bangs it, defaulting to SDA=GPIO4, SCL=GPIO5.
 
 ## Per-module pinout pages
@@ -104,4 +104,4 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 
 ## Data provenance
 
-Pin data is generated from https://github.com/espressif/kicad-libraries via a build script; the schematic symbols shown are the official Espressif KiCad symbols. Per-GPIO alternate functions, RTC-domain flags, and strapping roles are merged from the dataset of Espressif's own esp-gpio-tool (https://github.com/espressif/esp-gpio-tool, Apache-2.0), and the whole catalog is cross-validated against that dataset in the test suite. Family-level rules that neither source encodes (ADC2/Wi-Fi arbitration, flash-bus rules) are maintained alongside the generator. Source: https://github.com/FelixKunzJr/ESPPinoutWebsite
+Pin data is generated from https://github.com/espressif/kicad-libraries via a build script; the schematic symbols shown are the official Espressif KiCad symbols. Espressif does not publish KiCad data for the ESP8266, so the ESP-12F (and the NodeMCU v1.0 / D1 Mini boards built on it) instead derive from KiCad's own stock symbol and footprint libraries (https://gitlab.com/kicad/libraries, CC-BY-SA 4.0 with the KiCad library exception). Per-GPIO alternate functions, RTC-domain flags, and strapping roles are merged from the dataset of Espressif's own esp-gpio-tool (https://github.com/espressif/esp-gpio-tool, Apache-2.0), and the whole catalog is cross-validated against that dataset in the test suite. Family-level rules that neither source encodes (ADC2/Wi-Fi arbitration, flash-bus rules) are maintained alongside the generator. Source: https://github.com/FelixKunzJr/ESPPinoutWebsite

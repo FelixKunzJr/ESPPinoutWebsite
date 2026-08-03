@@ -36,7 +36,20 @@ describe('NodeMCU v1.0', () => {
   it('puts A0 on the first left pad and notes the divider', () => {
     expect(chip.packageLayout!.left[0].gpio).toBe(17)
     expect(labelOf(chip, 17)).toBe('A0')
-    expect(chip.notes.join(' ')).toMatch(/0 to 3\.3 V/)
+    expect(chip.notes.join(' ')).toMatch(/divider/)
+  })
+
+  // R13 = 220k (1%), R14 = 100k (1%) per the official NODEMCU_DEVKIT_V1.0
+  // schematic sheet 07_ADC and its BOM: 1.0 V x (220 + 100) / 100 = 3.2 V,
+  // the same full-scale voltage as the D1 Mini - not 3.3 V as the board note
+  // previously (and wrongly) claimed.
+  it('states the A0 divider full-scale voltage as 3.2 V, with the resistor values, not 3.3 V', () => {
+    const a0Note = chip.notes.find(n => n.startsWith('A0:'))!
+    expect(a0Note).toBeDefined()
+    expect(a0Note).toMatch(/0 to 3\.2 V/)
+    expect(a0Note).not.toMatch(/3\.3 V/)
+    expect(a0Note).toMatch(/220k/)
+    expect(a0Note).toMatch(/100k/)
   })
 
   it('keeps the flash pins unusable even though they are broken out', () => {

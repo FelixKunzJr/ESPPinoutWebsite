@@ -46,7 +46,7 @@
     ]
   },
   "overrides": {
-    "17": { "label": "A0", "note": "Reads 0 to 3.3 V here: the board fits a divider ahead of the chip's 1.0 V input." },
+    "17": { "label": "A0", "note": "Reads 0 to 3.2 V here: the board fits a divider (R13 220k / R14 100k, both 1%) ahead of the chip's 1.0 V input. Source: the official NODEMCU_DEVKIT_V1.0 schematic sheet 07_ADC and its BOM." },
     "16": { "label": "D0", "note": "Wired to the blue LED on the module. Tie to RST for deep-sleep wake." },
     "5": { "label": "D1", "note": "Wire's default SCL." },
     "4": { "label": "D2", "note": "Wire's default SDA." },
