@@ -90,7 +90,7 @@ function prerenderHtml(base: string, chip: Chip): string {
 // ---------- per-pin pages (programmatic SEO) ----------
 // Only one representative chip per family: the same GPIO exists on every
 // module of a family, and near-duplicate pages would hurt more than help.
-const FAMILY_REPS = ['esp32', 'esp32s2', 'esp32s3', 'esp32c3', 'esp32c5wroom1', 'esp32c6', 'esp32h2']
+const FAMILY_REPS = ['esp32', 'esp32s2', 'esp32s3', 'esp32c3', 'esp32c5wroom1', 'esp32c6', 'esp32h2', 'esp8266']
 
 const CAP_LABELS: Record<string, string> = {
   gpio: 'Digital input/output',

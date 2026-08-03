@@ -20,8 +20,8 @@
         }
       } catch (e) {}
     </script>
-    <title>ESP32 Pinout Studio | Interactive pinout reference for every ESP32 module</title>
-    <meta name="description" content="Free interactive pinout diagrams for ESP32, S2, S3, C3, C5, C6 and H2 modules and dev boards. Official Espressif schematic symbols, strapping-pin and ADC2/Wi-Fi warnings, pin mapping builder, and Arduino code export." />
+    <title>ESP32 Pinout Studio | Interactive pinout reference for every ESP32 and ESP8266 module</title>
+    <meta name="description" content="Free interactive pinout diagrams for ESP32, S2, S3, C3, C5, C6, H2 and ESP8266 modules and dev boards. Official schematic symbols, strapping-pin and ADC2/Wi-Fi warnings, pin mapping builder, and Arduino code export." />
     <link rel="canonical" href="https://esp32pin.com/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="ESP32 Pinout Studio" />
@@ -59,7 +59,7 @@
           "applicationCategory": "DeveloperApplication",
           "operatingSystem": "Web browser",
           "url": "https://esp32pin.com/",
-          "description": "Free interactive pinout diagrams for ESP32, S2, S3, C3, C5, C6 and H2 modules and dev boards, with strapping-pin and ADC2/Wi-Fi warnings, a pin mapping builder, and Arduino code export. Pin data is generated from Espressif's official KiCad libraries.",
+          "description": "Free interactive pinout diagrams for ESP32, S2, S3, C3, C5, C6, H2 and ESP8266 modules and dev boards, with strapping-pin and ADC2/Wi-Fi warnings, a pin mapping builder, and Arduino code export. Pin data is generated from Espressif's official KiCad libraries.",
           "isAccessibleForFree": true,
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
           "license": "https://opensource.org/licenses/MIT"
@@ -107,6 +107,14 @@
                 "@type": "Answer",
                 "text": "GPIO6-11 are connected to the ESP32's internal SPI flash chip. Using them for anything else interferes with code execution and crashes the ESP32. On modules with embedded flash they are usually not broken out; never repurpose them."
               }
+            },
+            {
+              "@type": "Question",
+              "name": "Is D1 the same as GPIO1 on a NodeMCU or D1 Mini?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. The D numbers silkscreened on ESP8266 dev boards are not GPIO numbers. D0 is GPIO16, D1 is GPIO5, D2 is GPIO4, D3 is GPIO0, D4 is GPIO2, D5 is GPIO14, D6 is GPIO12, D7 is GPIO13 and D8 is GPIO15. Arduino code addresses the GPIO number, so digitalWrite(5, HIGH) drives the pad silkscreened D1. This applies to the NodeMCU v1.0 and the LOLIN (Wemos) D1 Mini alike."
+              }
             }
           ]
         }
@@ -135,6 +143,9 @@
           <li><a href="/esp32h2">ESP32-H2 pinout</a></li>
           <li><a href="/esp32devkitc">ESP32-DevKitC pinout</a></li>
           <li><a href="/esp32s3devkitc">ESP32-S3-DevKitC-1 pinout</a></li>
+          <li><a href="/esp8266">ESP8266 (ESP-12F) pinout</a></li>
+          <li><a href="/nodemcu-v1">NodeMCU v1.0 pinout</a></li>
+          <li><a href="/d1-mini">LOLIN D1 Mini pinout</a></li>
         </ul>
 
         <h2>Common ESP32 pin questions</h2>

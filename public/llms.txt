@@ -32,6 +32,12 @@ Always verify against the official datasheet before committing hardware.
 - ESP32-C6: single-core RISC-V, Wi-Fi 6 + BLE 5 + 802.15.4 (Zigbee/Thread/Matter).
 - ESP32-C5: RISC-V, dual-band Wi-Fi 6.
 - ESP32-H2: RISC-V, BLE 5 + 802.15.4, no Wi-Fi.
+- ESP8266: D-labels on dev boards are not GPIO numbers. D0=GPIO16, D1=GPIO5, D2=GPIO4, D3=GPIO0, D4=GPIO2, D5=GPIO14, D6=GPIO12, D7=GPIO13, D8=GPIO15.
+- ESP8266: GPIO6-11 are the SPI flash bus. GPIO6, 7, 8 and 11 are never usable; GPIO9 and GPIO10 work only in DIO flash mode.
+- ESP8266: GPIO15 must be LOW at boot, GPIO2 must be HIGH at boot, GPIO0 LOW at boot enters the flasher.
+- ESP8266: GPIO16 has no interrupt, no PWM and an internal pull-down. Tie it to RST to wake from deep sleep.
+- ESP8266: the analog input is 0 to 1.0 V on a bare module. NodeMCU v1.0 and the D1 Mini fit a divider (3.3 V and 3.2 V respectively).
+- ESP8266: there is no I2C peripheral. Wire bit-bangs it, defaulting to SDA=GPIO4, SCL=GPIO5.
 
 ## Per-module pinout pages
 
@@ -85,6 +91,11 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 
 ### ESP32-H2 (RISC-V, BLE + 802.15.4, no Wi-Fi)
 - [ESP32-H2-MINI-1](https://esp32pin.com/esp32h2)
+
+### ESP8266 (Xtensa LX106, Wi-Fi only)
+- [ESP8266 (ESP-12F)](https://esp32pin.com/esp8266) - bare module, 0 to 1.0 V analog input, no I2C peripheral (Wire bit-bangs it)
+- [NodeMCU v1.0 (ESP8266)](https://esp32pin.com/nodemcu-v1) - D-labeled dev board; D-numbers are not GPIO numbers
+- [LOLIN D1 Mini (ESP8266)](https://esp32pin.com/d1-mini) - D-labeled dev board; D-numbers are not GPIO numbers
 
 ## Contributing
 
