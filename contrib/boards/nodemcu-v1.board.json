@@ -1,0 +1,70 @@
+{
+  "id": "nodemcu-v1",
+  "name": "NodeMCU v1.0 (ESP8266)",
+  "baseChip": "esp8266",
+  "pcb": "black",
+  "notes": [
+    "NodeMCU DevKit v1.0: an ESP-12E module on a 48 x 26 mm carrier with a CP2102 USB-serial bridge, an auto-flash circuit on DTR/RTS, and an AMS1117 3.3 V regulator. Header order verified against the official NODEMCU_DEVKIT_V1.0 schematic.",
+    "The D-numbers on the silk are not GPIO numbers. D0 is GPIO16, D1 is GPIO5, D2 is GPIO4, D3 is GPIO0, D4 is GPIO2, D5 is GPIO14, D6 is GPIO12, D7 is GPIO13, D8 is GPIO15. Writing digitalWrite(5, HIGH) drives GPIO5, which the silk calls D1.",
+    "The SD0/SD1/SD2/SD3/CMD/CLK pads on the left header are the flash bus. They are broken out but only SD2 and SD3 (GPIO9 and GPIO10) are ever usable, and only when the flash runs in DIO mode.",
+    "VIN is the raw 5 V input ahead of the regulator, not a 5 V output derived from anything else. The two RSV pads are reserved and not connected to a usable pin."
+  ],
+  "headers": {
+    "left": [
+      { "label": "A0", "gpio": 17 },
+      { "label": "RSV" },
+      { "label": "RSV" },
+      { "gpio": 10 },
+      { "gpio": 9 },
+      { "gpio": 8 },
+      { "gpio": 11 },
+      { "gpio": 7 },
+      { "gpio": 6 },
+      { "label": "GND" },
+      { "label": "3V3" },
+      { "label": "EN" },
+      { "label": "RST" },
+      { "label": "GND" },
+      { "label": "VIN" }
+    ],
+    "right": [
+      { "gpio": 16 },
+      { "gpio": 5 },
+      { "gpio": 4 },
+      { "gpio": 0 },
+      { "gpio": 2 },
+      { "label": "3V3" },
+      { "label": "GND" },
+      { "gpio": 14 },
+      { "gpio": 12 },
+      { "gpio": 13 },
+      { "gpio": 15 },
+      { "gpio": 3 },
+      { "gpio": 1 },
+      { "label": "GND" },
+      { "label": "3V3" }
+    ]
+  },
+  "overrides": {
+    "17": { "label": "A0", "note": "Reads 0 to 3.3 V here: the board fits a divider ahead of the chip's 1.0 V input." },
+    "16": { "label": "D0", "note": "Wired to the blue LED on the module. Tie to RST for deep-sleep wake." },
+    "5": { "label": "D1", "note": "Wire's default SCL." },
+    "4": { "label": "D2", "note": "Wire's default SDA." },
+    "0": { "label": "D3", "note": "FLASH button. Held LOW at boot it enters the flasher, so avoid an external pull-down." },
+    "2": { "label": "D4", "note": "Onboard LED, active LOW. Must be HIGH at boot." },
+    "14": { "label": "D5", "note": "HSPI clock." },
+    "12": { "label": "D6", "note": "HSPI MISO." },
+    "13": { "label": "D7", "note": "HSPI MOSI." },
+    "15": { "label": "D8", "note": "Must be LOW at boot. The onboard pull-down holds it there, so do not add a pull-up." },
+    "3": { "label": "RX", "note": "UART0 RX, shared with the CP2102." },
+    "1": { "label": "TX", "note": "UART0 TX, shared with the CP2102." },
+    "10": { "label": "SD3" },
+    "9": { "label": "SD2" },
+    "8": { "label": "SD1" },
+    "11": { "label": "CMD" },
+    "7": { "label": "SD0" },
+    "6": { "label": "CLK" }
+  },
+  "usbEdge": "bottom",
+  "aspect": 0.54
+}

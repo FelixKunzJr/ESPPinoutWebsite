@@ -21,6 +21,7 @@ import lolinD32ProJson from '../../../contrib/boards/lolin-d32-pro.board.json'
 import lolinS2MiniJson from '../../../contrib/boards/lolin-s2-mini.board.json'
 import lolinS3MiniJson from '../../../contrib/boards/lolin-s3-mini.board.json'
 import lolinC3MiniJson from '../../../contrib/boards/lolin-c3-mini.board.json'
+import nodemcuV1Json from '../../../contrib/boards/nodemcu-v1.board.json'
 import { resolveBoard } from '../boards/resolveBoard'
 import { enrichPins, applyEspressif, FAM_TO_TARGET } from './enrich'
 import type { BoardSpec } from '../boards/types'
@@ -303,6 +304,11 @@ export const lolinS2Mini = resolveBoard(lolinS2MiniJson as unknown as BoardSpec,
 export const lolinS3Mini = resolveBoard(lolinS3MiniJson as unknown as BoardSpec, s3FH4R2).chip!
 export const lolinC3Mini = resolveBoard(lolinC3MiniJson as unknown as BoardSpec, byId('esp32c3')).chip!
 
+// ESP8266 boards. Header order read off the vendors' own schematics: the
+// official NODEMCU_DEVKIT_V1.0 PDF and LOLIN's sch_d1_mini_v4.0.0.pdf. The
+// D0-D8 silk map was cross-checked against arduino-esp8266's variant headers.
+export const nodemcuV1 = resolveBoard(nodemcuV1Json as unknown as BoardSpec, byId('esp8266')).chip!
+
 
 // Ordered, grouped by family for the selector.
 export const CHIPS: Chip[] = [
@@ -353,6 +359,7 @@ export const CHIPS: Chip[] = [
   xiaoEsp32c6,
   c3SuperMini,
   c6SuperMini,
+  nodemcuV1,
 ]
 
 export function getChip(id: string): Chip | undefined {
