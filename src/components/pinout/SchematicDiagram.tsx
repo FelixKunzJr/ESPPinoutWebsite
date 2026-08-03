@@ -4,6 +4,19 @@ import { filterPins } from '../../utils/filterPins'
 import type { Pin, Chip, LayoutPin, SymbolPin } from '../../types/chip'
 import { AFFECTED_WORD, resolveModule, fnColor, fnCategory, pinAriaLabel } from './shared'
 
+// Attribution for the schematic symbol caption. Espressif publishes official
+// KiCad data for every family except the ESP8266 - the generator falls back
+// to KiCad's own stock RF_Module library for that one (see
+// scripts/generate-chip-data.mjs) - so the caption must credit that source
+// instead. Keyed by family so it stays correct as more non-Espressif parts
+// are added, without hardcoding a single chip id.
+const NON_ESPRESSIF_SYMBOL_FAMILIES = new Set(['ESP8266'])
+function symbolCaption(family: string): string {
+  return NON_ESPRESSIF_SYMBOL_FAMILIES.has(family)
+    ? "KiCad's own stock library schematic symbol - stacked GND pins merged; numbers are the physical pads."
+    : 'Official Espressif schematic symbol (KiCad library) - stacked GND pins merged; numbers are the physical pads.'
+}
+
 // ─── EDA sheet palette (KiCad Eeschema classic) ───────────────────────────────
 
 const SHEET_BG    = '#fdfcf6'
@@ -511,7 +524,7 @@ export function SchematicDiagram() {
       </div>
       <p className="text-center font-mono px-4 pb-1" style={{ fontSize: 9, color: '#3d5068' }}>
         {sym
-          ? 'Official Espressif schematic symbol (KiCad library) - stacked GND pins merged; numbers are the physical pads.'
+          ? symbolCaption(chip.family)
           : 'Logical symbol - GPIOs in ascending order. Pin numbers are the physical pads on the module.'}
       </p>
     </div>
