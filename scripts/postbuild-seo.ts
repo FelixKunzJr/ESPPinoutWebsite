@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import sharp from 'sharp'
 import { CHIPS } from '../src/data/chips'
+import { hasGpioMatrix } from '../src/data/routing'
 import type { Chip } from '../src/types/chip'
 
 const DIST = join(import.meta.dirname, '..', 'dist')
@@ -59,7 +60,8 @@ function chipTitle(chip: Chip): string {
 function chipDescription(chip: Chip): string {
   const name = chip.module?.name ?? chip.name
   const traps = trapPinCount(chip)
-  return `Interactive ${name} pinout: all ${chip.totalGpio} GPIOs with ADC, touch, PWM and bus functions, ${traps} trap pins flagged (strapping, flash, input-only), live conflict checking and Arduino export. Data from Espressif's official KiCad symbols.`
+  const source = chip.family === 'ESP8266' ? "KiCad's own stock symbols" : "Espressif's official KiCad symbols"
+  return `Interactive ${name} pinout: all ${chip.totalGpio} GPIOs with ADC, touch, PWM and bus functions, ${traps} trap pins flagged (strapping, flash, input-only), live conflict checking and Arduino export. Data from ${source}.`
 }
 
 function prerenderHtml(base: string, chip: Chip): string {
@@ -92,18 +94,47 @@ function prerenderHtml(base: string, chip: Chip): string {
 // module of a family, and near-duplicate pages would hurt more than help.
 const FAMILY_REPS = ['esp32', 'esp32s2', 'esp32s3', 'esp32c3', 'esp32c5wroom1', 'esp32c6', 'esp32h2', 'esp8266']
 
-const CAP_LABELS: Record<string, string> = {
-  gpio: 'Digital input/output',
-  adc1: 'ADC1 analog input (works while Wi-Fi is active)',
-  adc2: 'ADC2 analog input (unusable while Wi-Fi is active)',
-  dac: 'DAC analog output',
-  touch: 'Capacitive touch sensing',
-  pwm: 'PWM output (LEDC)',
-  i2c: 'I2C (via GPIO matrix)',
-  spi: 'SPI (via GPIO matrix)',
-  uart: 'UART (via GPIO matrix)',
-  rtc: 'RTC GPIO (usable in deep sleep, wake source)',
-  usb: 'Native USB',
+// Capability badge copy, family-aware: families with no GPIO matrix (the
+// ESP8266) have neither LEDC PWM nor matrix-routed SPI/UART/I2C, so the label
+// must not claim either. hasGpioMatrix() is the same signal RoutingCard and
+// SchematicDiagram use for this distinction.
+function capLabel(cap: string, family: string): string {
+  const matrix = hasGpioMatrix(family)
+  switch (cap) {
+    case 'gpio':  return 'Digital input/output'
+    case 'adc1':  return 'ADC1 analog input (works while Wi-Fi is active)'
+    case 'adc2':  return 'ADC2 analog input (unusable while Wi-Fi is active)'
+    case 'dac':   return 'DAC analog output'
+    case 'touch': return 'Capacitive touch sensing'
+    case 'pwm':   return matrix ? 'PWM output (LEDC)' : 'PWM output (software)'
+    case 'i2c':   return matrix ? 'I2C (via GPIO matrix)' : 'I2C (software, bit-banged)'
+    case 'spi':   return matrix ? 'SPI (via GPIO matrix)' : 'SPI (fixed IO MUX pins)'
+    case 'uart':  return matrix ? 'UART (via GPIO matrix)' : 'UART (fixed IO MUX pins)'
+    case 'rtc':   return 'RTC GPIO (usable in deep sleep, wake source)'
+    case 'usb':   return 'Native USB'
+    default:      return cap
+  }
+}
+
+// Espressif is the source for every family except the ESP8266, which has no
+// published Espressif KiCad data (see LICENSE / README).
+function dataSourceNote(chip: Chip): string {
+  return chip.family === 'ESP8266'
+    ? "Pin data generated from KiCad's own stock symbol and footprint libraries (Espressif publishes no ESP8266 KiCad data)."
+    : "Pin data generated from Espressif's official KiCad libraries."
+}
+
+// The URL slug and display name for one pin. Real GPIOs carry the 'gpio'
+// capability (the same "is this a real GPIO" signal MappingBuilder and
+// resolveBoard use); the ESP8266's synthetic analog input does not, so it
+// must render under its real name (A0) rather than the internal GPIO17 id -
+// that id does not exist on the chip and must never reach a URL, title, h1 or
+// sibling link.
+function pinSlug(pin: Chip['pins'][number]): string {
+  return pin.capabilities.includes('gpio') ? `gpio${pin.gpio}` : pin.names[0].toLowerCase()
+}
+function pinDisplayName(pin: Chip['pins'][number]): string {
+  return pin.capabilities.includes('gpio') ? `GPIO${pin.gpio}` : pin.names[0]
 }
 
 function pinVerdict(pin: { isUsable: boolean; constraints: { severity: string }[] }) {
@@ -117,21 +148,23 @@ function pinVerdict(pin: { isUsable: boolean; constraints: { severity: string }[
 function pinPageHtml(chip: Chip, pin: Chip['pins'][number]): string {
   const fam = chip.family
   const n = pin.gpio
-  const url = `${SITE}/${chip.id}/gpio${n}`
+  const slug = pinSlug(pin)
+  const display = pinDisplayName(pin)
+  const url = `${SITE}/${chip.id}/${slug}`
   const verdict = pinVerdict(pin)
-  const title = `${fam} GPIO${n}: functions, boot behavior, is it safe? | ESP32 Pinout Studio`
-  const desc = `${fam} GPIO${n} (${pin.names.join(', ')}): ${verdict.text.toLowerCase()}. ${
+  const title = `${fam} ${display}: functions, boot behavior, is it safe? | ESP32 Pinout Studio`
+  const desc = `${fam} ${display} (${pin.names.join(', ')}): ${verdict.text.toLowerCase()}. ${
     pin.constraints.length
       ? pin.constraints.map(c => c.title).join(', ') + '.'
       : 'No known conflicts.'
   } Full interactive ${fam} pinout with live conflict checking.`
-  const caps = pin.capabilities.map(c => `<li>${esc(CAP_LABELS[c] ?? c)}</li>`).join('')
+  const caps = pin.capabilities.map(c => `<li>${esc(capLabel(c, fam))}</li>`).join('')
   const constraints = pin.constraints.map(c =>
     `<h3 style="margin:14px 0 4px;color:${c.severity === 'danger' ? '#f87171' : '#fbbf24'}">${esc(c.title)}</h3><p style="margin:0;color:#9ca3af">${esc(c.description)}</p>`).join('')
   const siblings = chip.pins.map(p =>
     p.gpio === n
-      ? `<span style="color:#f9fafb">GPIO${p.gpio}</span>`
-      : `<a href="/${chip.id}/gpio${p.gpio}" style="color:#60a5fa;text-decoration:none">GPIO${p.gpio}</a>`).join(' · ')
+      ? `<span style="color:#f9fafb">${esc(pinDisplayName(p))}</span>`
+      : `<a href="/${chip.id}/${pinSlug(p)}" style="color:#60a5fa;text-decoration:none">${esc(pinDisplayName(p))}</a>`).join(' · ')
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -143,7 +176,7 @@ function pinPageHtml(chip: Chip, pin: Chip['pins'][number]): string {
   <link rel="icon" href="/favicon.svg">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="ESP32 Pinout Studio">
-  <meta property="og:title" content="${esc(`${fam} GPIO${n}: ${verdict.text}`)}">
+  <meta property="og:title" content="${esc(`${fam} ${display}: ${verdict.text}`)}">
   <meta property="og:description" content="${esc(desc)}">
   <meta property="og:url" content="${url}">
   <meta property="og:image" content="${SITE}/og/${chip.id}.png">
@@ -152,19 +185,19 @@ function pinPageHtml(chip: Chip, pin: Chip['pins'][number]): string {
 <body style="margin:0;background:#030712;color:#e5e7eb;font-family:-apple-system,'Segoe UI',sans-serif;line-height:1.55">
   <main style="max-width:720px;margin:0 auto;padding:40px 20px">
     <p style="margin:0 0 4px"><a href="/${chip.id}" style="color:#60a5fa;text-decoration:none">&larr; ${esc(chip.module?.name ?? chip.name)} pinout</a></p>
-    <h1 style="margin:0 0 6px;font-size:32px;color:#f9fafb">${esc(fam)} GPIO${n}</h1>
+    <h1 style="margin:0 0 6px;font-size:32px;color:#f9fafb">${esc(fam)} ${esc(display)}</h1>
     <p style="margin:0 0 18px;color:#6b7280;font-family:monospace">${esc(pin.names.join(' / '))}</p>
     <div style="border:1px solid ${verdict.color};border-radius:8px;padding:12px 16px;margin-bottom:22px">
       <strong style="color:${verdict.color}">${verdict.text}</strong>
       <span style="color:#9ca3af"> - ${esc(verdict.detail)}</span>
     </div>
-    ${caps ? `<h2 style="font-size:18px;margin:0 0 6px;color:#f9fafb">What GPIO${n} can do</h2><ul style="margin:0 0 18px;padding-left:20px;color:#d1d5db">${caps}</ul>` : ''}
-    ${constraints ? `<h2 style="font-size:18px;margin:18px 0 0;color:#f9fafb">Warnings for GPIO${n}</h2>${constraints}` : ''}
+    ${caps ? `<h2 style="font-size:18px;margin:0 0 6px;color:#f9fafb">What ${esc(display)} can do</h2><ul style="margin:0 0 18px;padding-left:20px;color:#d1d5db">${caps}</ul>` : ''}
+    ${constraints ? `<h2 style="font-size:18px;margin:18px 0 0;color:#f9fafb">Warnings for ${esc(display)}</h2>${constraints}` : ''}
     ${pin.notes ? `<p style="margin:16px 0 0;color:#9ca3af">${esc(pin.notes)}</p>` : ''}
     <a href="/${chip.id}" style="display:inline-block;margin:26px 0 0;background:#1d4ed8;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Open the interactive ${esc(fam)} pinout &rarr;</a>
     <h2 style="font-size:14px;margin:34px 0 6px;color:#6b7280">All ${esc(fam)} pins</h2>
     <p style="font-size:13px;margin:0">${siblings}</p>
-    <p style="margin:34px 0 0;font-size:12px;color:#4b5563">ESP32 Pinout Studio - free interactive pinout reference. Pin data generated from Espressif's official KiCad libraries. <a href="/" style="color:#60a5fa">esp32pin.com</a></p>
+    <p style="margin:34px 0 0;font-size:12px;color:#4b5563">ESP32 Pinout Studio - free interactive pinout reference. ${dataSourceNote(chip)} <a href="/" style="color:#60a5fa">esp32pin.com</a></p>
   </main>
 </body>
 </html>`
@@ -197,10 +230,11 @@ async function main() {
     const chip = CHIPS.find(c => c.id === id)
     if (!chip) throw new Error(`postbuild-seo: family rep chip not found: ${id}`)
     for (const pin of chip.pins) {
-      const dir = join(DIST, chip.id, `gpio${pin.gpio}`)
+      const slug = pinSlug(pin)
+      const dir = join(DIST, chip.id, slug)
       mkdirSync(dir, { recursive: true })
       writeFileSync(join(dir, 'index.html'), pinPageHtml(chip, pin))
-      pinUrls.push(`${SITE}/${chip.id}/gpio${pin.gpio}`)
+      pinUrls.push(`${SITE}/${chip.id}/${slug}`)
     }
   }
   writeFileSync(join(DIST, 'sitemap.xml'), sitemapXml(pinUrls))
