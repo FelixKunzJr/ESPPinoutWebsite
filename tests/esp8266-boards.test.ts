@@ -45,3 +45,33 @@ describe('NodeMCU v1.0', () => {
     }
   })
 })
+
+describe('LOLIN D1 Mini', () => {
+  const chip = getChip('d1-mini')!
+
+  it('exists and inherits the ESP8266 family', () => {
+    expect(chip).toBeDefined()
+    expect(chip.family).toBe('ESP8266')
+    expect(chip.module?.form).toBe('board')
+    expect(chip.module?.usbEdge).toBe('top')
+  })
+
+  it('maps every D label to the right GPIO', () => {
+    for (const [label, gpio] of Object.entries(D_MAP)) {
+      expect(labelOf(chip, gpio), `${label} should be GPIO${gpio}`).toBe(label)
+    }
+  })
+
+  it('breaks out 8 pads per side, RST first on the left', () => {
+    expect(chip.packageLayout!.left).toHaveLength(8)
+    expect(chip.packageLayout!.right).toHaveLength(8)
+    expect(chip.packageLayout!.left[0].label).toBe('RST')
+    expect(chip.packageLayout!.left[1].gpio).toBe(17)
+  })
+
+  it('does not break out the flash bus', () => {
+    const pads = [...chip.packageLayout!.left, ...chip.packageLayout!.right]
+    const broken = pads.map(p => p.gpio).filter((g): g is number => g !== undefined)
+    for (const n of [6, 7, 8, 9, 10, 11]) expect(broken, `GPIO${n}`).not.toContain(n)
+  })
+})

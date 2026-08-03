@@ -22,6 +22,7 @@ import lolinS2MiniJson from '../../../contrib/boards/lolin-s2-mini.board.json'
 import lolinS3MiniJson from '../../../contrib/boards/lolin-s3-mini.board.json'
 import lolinC3MiniJson from '../../../contrib/boards/lolin-c3-mini.board.json'
 import nodemcuV1Json from '../../../contrib/boards/nodemcu-v1.board.json'
+import d1MiniJson from '../../../contrib/boards/d1-mini.board.json'
 import { resolveBoard } from '../boards/resolveBoard'
 import { enrichPins, applyEspressif, FAM_TO_TARGET } from './enrich'
 import type { BoardSpec } from '../boards/types'
@@ -308,6 +309,7 @@ export const lolinC3Mini = resolveBoard(lolinC3MiniJson as unknown as BoardSpec,
 // official NODEMCU_DEVKIT_V1.0 PDF and LOLIN's sch_d1_mini_v4.0.0.pdf. The
 // D0-D8 silk map was cross-checked against arduino-esp8266's variant headers.
 export const nodemcuV1 = resolveBoard(nodemcuV1Json as unknown as BoardSpec, byId('esp8266')).chip!
+export const d1Mini = resolveBoard(d1MiniJson as unknown as BoardSpec, byId('esp8266')).chip!
 
 
 // Ordered, grouped by family for the selector.
@@ -360,6 +362,7 @@ export const CHIPS: Chip[] = [
   c3SuperMini,
   c6SuperMini,
   nodemcuV1,
+  d1Mini,
 ]
 
 export function getChip(id: string): Chip | undefined {

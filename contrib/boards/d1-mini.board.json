@@ -1,0 +1,51 @@
+{
+  "id": "d1-mini",
+  "name": "LOLIN D1 Mini (ESP8266)",
+  "baseChip": "esp8266",
+  "pcb": "black",
+  "notes": [
+    "LOLIN (Wemos) D1 mini: 34.2 x 25.6 mm, 8 pads per side, USB-C on v4. Header order verified against LOLIN's own sch_d1_mini_v4.0.0.pdf.",
+    "v4.0.0 solders a bare ESP8266EX with a PCB antenna and separate flash rather than an ESP-12 module, so its GPIO set matches the ESP-12F exactly but the physical part differs.",
+    "The D-numbers on the silk are not GPIO numbers. D0 is GPIO16, D1 is GPIO5, D2 is GPIO4, D3 is GPIO0, D4 is GPIO2, D5 is GPIO14, D6 is GPIO12, D7 is GPIO13, D8 is GPIO15.",
+    "The flash bus (GPIO6-11) is not broken out at all here, so the pads you can reach are all pads you can consider using.",
+    "The 5V pad is raw VBUS from the USB connector. Powering the board through it bypasses nothing, but feeding it while USB is also connected back-feeds the host."
+  ],
+  "headers": {
+    "left": [
+      { "label": "RST" },
+      { "label": "A0", "gpio": 17 },
+      { "gpio": 16 },
+      { "gpio": 14 },
+      { "gpio": 12 },
+      { "gpio": 13 },
+      { "gpio": 15 },
+      { "label": "3V3" }
+    ],
+    "right": [
+      { "gpio": 1 },
+      { "gpio": 3 },
+      { "gpio": 5 },
+      { "gpio": 4 },
+      { "gpio": 0 },
+      { "gpio": 2 },
+      { "label": "GND" },
+      { "label": "5V" }
+    ]
+  },
+  "overrides": {
+    "17": { "label": "A0", "note": "Reads 0 to 3.2 V here: the board fits a divider ahead of the chip's 1.0 V input." },
+    "16": { "label": "D0", "note": "No interrupt and no PWM. Tie to RST for deep-sleep wake." },
+    "14": { "label": "D5", "note": "HSPI clock, silkscreened SCK." },
+    "12": { "label": "D6", "note": "HSPI MISO." },
+    "13": { "label": "D7", "note": "HSPI MOSI." },
+    "15": { "label": "D8", "note": "Must be LOW at boot. The onboard pull-down holds it there, so do not add a pull-up." },
+    "1": { "label": "TX", "note": "UART0 TX, shared with the CH340C." },
+    "3": { "label": "RX", "note": "UART0 RX, shared with the CH340C." },
+    "5": { "label": "D1", "note": "Wire's default SCL, and the SCL pin of the onboard I2C shield connector." },
+    "4": { "label": "D2", "note": "Wire's default SDA, and the SDA pin of the onboard I2C shield connector." },
+    "0": { "label": "D3", "note": "Pulled up on board. Held LOW at boot it enters the flasher." },
+    "2": { "label": "D4", "note": "Onboard LED, active LOW. Must be HIGH at boot." }
+  },
+  "usbEdge": "top",
+  "aspect": 0.75
+}
