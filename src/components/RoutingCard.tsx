@@ -1,5 +1,5 @@
 import { useApp } from '../context/AppContext'
-import { matrixPeripherals, FAMILY_ROUTING_NOTE, TRM_URLS, resolveGroups } from '../data/routing'
+import { matrixPeripherals, hasGpioMatrix, FAMILY_ROUTING_NOTE, TRM_URLS, resolveGroups } from '../data/routing'
 
 // "Can I put I2C on pin X?" - the GPIO matrix / IO MUX explainer the diagram
 // alone cannot answer. Fixed-interface pin chips are clickable and open the
@@ -19,7 +19,7 @@ export function RoutingCard() {
       <div>
         <div className="flex items-baseline justify-between gap-2 mb-1">
           <p className="text-xs font-semibold text-gray-300">
-            Peripheral routing - GPIO matrix &amp; IO MUX
+            Peripheral routing - {hasGpioMatrix(chip.family) ? 'GPIO matrix & IO MUX' : 'IO MUX'}
           </p>
           {TRM_URLS[chip.family] && (
             <a
@@ -34,8 +34,18 @@ export function RoutingCard() {
           )}
         </div>
         <p className="text-xs text-gray-400 leading-relaxed">
-          The {chip.family} routes most peripherals through its GPIO matrix, so these can use{' '}
-          <span className="text-gray-200 font-medium">almost any free GPIO</span>:{' '}
+          {hasGpioMatrix(chip.family) ? (
+            <>
+              The {chip.family} routes most peripherals through its GPIO matrix, so these can use{' '}
+              <span className="text-gray-200 font-medium">almost any free GPIO</span>:{' '}
+            </>
+          ) : (
+            <>
+              The {chip.family} has no on-chip signal router - peripheral functions are fixed to
+              specific pins by the IO MUX. Only these are software-driven and can use{' '}
+              <span className="text-gray-200 font-medium">almost any usable GPIO</span>:{' '}
+            </>
+          )}
           {matrixPeripherals(chip.family).map((p, i) => (
             <span key={p}>
               {i > 0 && <span className="text-gray-600"> · </span>}
@@ -80,12 +90,14 @@ export function RoutingCard() {
         </div>
       )}
 
-      <p className="text-[10px] text-gray-600 leading-relaxed">
-        Advanced (TRM): the matrix can invert any routed signal, feed a peripheral input a constant
-        0/1 without using a pin, and loop a peripheral output back into another peripheral on-chip.
-        Every pad has configurable drive strength and a hold latch that freezes its state through
-        resets and deep sleep.
-      </p>
+      {hasGpioMatrix(chip.family) && (
+        <p className="text-[10px] text-gray-600 leading-relaxed">
+          Advanced (TRM): the matrix can invert any routed signal, feed a peripheral input a constant
+          0/1 without using a pin, and loop a peripheral output back into another peripheral on-chip.
+          Every pad has configurable drive strength and a hold latch that freezes its state through
+          resets and deep sleep.
+        </p>
+      )}
     </div>
   )
 }

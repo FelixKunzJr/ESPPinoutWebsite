@@ -2,7 +2,7 @@ import { useApp } from '../context/AppContext'
 import { ConstraintBadge } from './ConstraintBadge'
 import { reportMistakeUrl } from '../utils/github'
 import { IconWarning } from './icons'
-import { specialInterfaces, matrixPeripherals } from '../data/routing'
+import { specialInterfaces, matrixPeripherals, hasGpioMatrix } from '../data/routing'
 import type { Pin } from '../types/chip'
 
 // The pin detail content, independent of how it is presented. Three shells
@@ -153,8 +153,12 @@ export function PinDetailBody({ pin }: { pin: Pin }) {
         <div className="rounded-lg bg-gray-800/40 border border-gray-700/60 px-3 py-2">
           <p className="text-[11px] text-gray-400 leading-relaxed">
             {pin.constraints.some(c => c.id === 'input_only')
-              ? 'Input-only, but the GPIO matrix can still route peripheral inputs here (UART RX, I2S data in, pulse counter and similar).'
-              : `Via the GPIO matrix this pin can also host ${matrixPeripherals(chip.family).join(' · ')} - most peripherals are not tied to specific pins.`}
+              ? hasGpioMatrix(chip.family)
+                ? 'Input-only, but the GPIO matrix can still route peripheral inputs here (UART RX, I2S data in, pulse counter and similar).'
+                : `Input-only, but it can still host ${matrixPeripherals(chip.family).join(' · ')} - these are software-driven and not tied to specific pins.`
+              : hasGpioMatrix(chip.family)
+                ? `Via the GPIO matrix this pin can also host ${matrixPeripherals(chip.family).join(' · ')} - most peripherals are not tied to specific pins.`
+                : `This pin can also host ${matrixPeripherals(chip.family).join(' · ')} - these are software-driven and not tied to specific pins; other peripherals are fixed to specific pins by the IO MUX.`}
           </p>
         </div>
       )}

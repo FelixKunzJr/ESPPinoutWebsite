@@ -137,10 +137,23 @@ const NAME_GROUPS: NameGroupDef[] = [
   },
 ]
 
+// Families with no GPIO matrix at all (the ESP8266 - that is an ESP32-era
+// feature). Peripheral functions are fixed to specific pins by the IO MUX
+// there, so only interfaces that are software-driven (bit-banged I2C,
+// software PWM) are free to land on any usable pin.
+const NO_GPIO_MATRIX = new Set(['ESP8266'])
+
+export function hasGpioMatrix(family: string): boolean {
+  return !NO_GPIO_MATRIX.has(family)
+}
+
 // Peripherals the GPIO matrix can place on (almost) any free GPIO.
 // Sigma-delta modulated output (a pseudo-analog voltage after an RC filter,
-// like a faster PWM) exists on every family except the classic ESP32.
+// like a faster PWM) exists on every family except the classic ESP32; the
+// ESP8266 has neither a GPIO matrix nor LEDC/RMT/pulse-counter/sigma-delta
+// peripherals, so it gets its own short, honest list.
 export function matrixPeripherals(family: string): string[] {
+  if (!hasGpioMatrix(family)) return ['I2C (software)', 'PWM (software)']
   const base = ['I2C', 'UART', 'PWM (LEDC)', 'SPI (up to ~26 MHz)', 'I2S', 'RMT', 'Pulse counter']
   if (family !== 'ESP32') base.push('Sigma-delta (pseudo-analog out)')
   return base
@@ -181,17 +194,27 @@ export interface ResolvedGroup extends FixedGroup {
 // point about "internal connections on modules / PICO chips". Derived from
 // the existing constraint data.
 function internalConnectionsGroup(chip: Chip): ResolvedGroup | null {
-  const present: FixedGroupPin[] = chip.pins
+  const wired = chip.pins
     .filter(p => p.constraints.some(c => c.id === 'flash_reserved' || c.id === 'psram_reserved'))
-    .map(p => ({
-      gpio: p.gpio,
-      role: p.constraints.some(c => c.id === 'psram_reserved') ? 'PSRAM' : 'flash',
-    }))
-  if (present.length === 0) return null
+  if (wired.length === 0) return null
+  const present: FixedGroupPin[] = wired.map(p => ({
+    gpio: p.gpio,
+    role: p.constraints.some(c => c.id === 'psram_reserved') ? 'PSRAM' : 'flash',
+  }))
+  // Most modules wire the flash/PSRAM bus so it is never usable (danger
+  // severity throughout). Some (the ESP8266's GPIO9/10) are only a warning:
+  // broken out and usable, just conditionally (DIO flash mode). The blanket
+  // "never repurpose them" line would over-claim there, so it only applies
+  // when every wired pin here is actually always off-limits.
+  const alwaysReserved = wired.every(p =>
+    p.constraints.some(c => (c.id === 'flash_reserved' || c.id === 'psram_reserved') && c.severity === 'danger'))
+  const desc = alwaysReserved
+    ? 'These GPIOs connect to the flash or PSRAM die inside the module/SiP. They are electrically in use even where the pad or header pin is broken out - never repurpose them.'
+    : 'These GPIOs connect to the flash or PSRAM die inside the module/SiP. They are electrically in use even where the pad or header pin is broken out. Pins flagged danger above are never usable; pins flagged warning are usable only in the flash mode noted for them.'
   return {
     id: 'internal',
     name: 'Wired inside the module',
-    desc: 'These GPIOs connect to the flash or PSRAM die inside the module/SiP. They are electrically in use even where the pad or header pin is broken out - never repurpose them.',
+    desc,
     families: [chip.family],
     pins: present,
     present,
