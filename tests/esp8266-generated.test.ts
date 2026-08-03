@@ -83,4 +83,19 @@ describe('ESP8266 enrichment overlay', () => {
   it('never adds an i2c capability', () => {
     expect(enriched.some(p => p.capabilities.includes('i2c'))).toBe(false)
   })
+
+  // Regression coverage for four functions the brief's draft table claimed that the
+  // ESP8266EX datasheet does not support: CLK_XTAL/CLK_RTC do not exist anywhere in
+  // the datasheet (GPIO4/GPIO5 only ever appear as plain GPIO4/GPIO5 in Table 2-1 -
+  // the crystal pins are the dedicated XTAL_IN/XTAL_OUT pins, not GPIO4/GPIO5), and
+  // U1TXD/U1RTS are not on GPIO7/GPIO11 (Table 4-6 places UART1's only two signals,
+  // U1TXD and U1RXD, on GPIO2 and GPIO8 respectively - UART1 has no RTS/CTS at all).
+  it('does not claim functions the ESP8266EX datasheet does not support', () => {
+    expect(byGpio(4).names).not.toContain('CLK_XTAL')
+    expect(byGpio(5).names).not.toContain('CLK_RTC')
+    expect(byGpio(7).names).not.toContain('U1TXD')
+    expect(byGpio(7).capabilities).not.toContain('uart')
+    expect(byGpio(11).names).not.toContain('U1RTS')
+    expect(byGpio(11).capabilities).not.toContain('uart')
+  })
 })
