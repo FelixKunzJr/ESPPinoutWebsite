@@ -83,7 +83,11 @@ export const FIXED_GROUPS: FixedGroup[] = [
 interface NameGroupDef {
   id: string
   name: string
-  desc: string
+  // A plain string for families whose wording never varies; a function for
+  // groups whose accurate description depends on the chip (e.g. UART0 is
+  // matrix-routable on families with a GPIO matrix but fixed-swap-only on
+  // the ESP8266, which has none).
+  desc: string | ((chip: Chip) => string)
   match: RegExp
   role: (name: string) => string
   families?: string[]     // restrict to specific chip.family values
@@ -124,7 +128,9 @@ const NAME_GROUPS: NameGroupDef[] = [
   {
     id: 'uart0',
     name: 'UART0 (console)',
-    desc: 'Default console UART used for flashing and the boot log. UART is matrix-routable to any pin, but the ROM bootloader always logs here.',
+    desc: chip => hasGpioMatrix(chip.family)
+      ? 'Default console UART used for flashing and the boot log. UART is matrix-routable to any pin, but the ROM bootloader always logs here.'
+      : 'Default console UART used for flashing and the boot log. This family has no on-chip signal router, so UART0 is not freely routable - the only alternative is the fixed swap function (TX to GPIO15, RX to GPIO13), not an arbitrary pin.',
     match: /^U0(TXD|RXD)$/,
     role: n => n.replace('U0', ''),
   },
@@ -239,7 +245,7 @@ function deriveNameGroups(chip: Chip): ResolvedGroup[] {
         present.push({ gpio: pin.gpio, role })
       }
       return {
-        id: g.id, name: g.name, desc: g.desc,
+        id: g.id, name: g.name, desc: typeof g.desc === 'function' ? g.desc(chip) : g.desc,
         families: g.families ?? [chip.family],
         pins: present, present, missing: [],
       }

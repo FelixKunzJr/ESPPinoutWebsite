@@ -80,4 +80,21 @@ describe('peripheral routing data', () => {
       'JTAG debug:MTMS',
     ]))
   })
+
+  // Round 2 fix: the UART0 group desc claimed UART is "matrix-routable to
+  // any pin" for every family, including the ESP8266, which has no matrix at
+  // all - UART0 only moves via the fixed swap function (TX->GPIO15,
+  // RX->GPIO13), not to an arbitrary pin.
+  it('UART0 desc is family-aware: no matrix claim for the ESP8266, unchanged wording for ESP32', () => {
+    const esp8266Desc = group('esp8266', 'uart0')!.desc
+    expect(esp8266Desc).not.toMatch(/matrix-routable/)
+    expect(esp8266Desc).not.toMatch(/GPIO matrix/)
+    expect(esp8266Desc).toMatch(/GPIO15/)
+    expect(esp8266Desc).toMatch(/GPIO13/)
+
+    const esp32Desc = group('esp32', 'uart0')!.desc
+    expect(esp32Desc).toBe(
+      'Default console UART used for flashing and the boot log. UART is matrix-routable to any pin, but the ROM bootloader always logs here.',
+    )
+  })
 })

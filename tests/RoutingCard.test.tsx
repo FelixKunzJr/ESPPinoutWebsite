@@ -66,4 +66,20 @@ describe('RoutingCard rendered text', () => {
     const text = container.textContent ?? ''
     expect(text).toMatch(/never repurpose them/)
   })
+
+  // Round 2 residual 2a: the UART0 card also claimed matrix-routing for
+  // every family.
+  it('does not claim UART0 is matrix-routable for the ESP8266, but describes the fixed swap pins instead', () => {
+    const { container } = renderCard('esp8266')
+    const text = container.textContent ?? ''
+    expect(text).toMatch(/UART0 \(console\)/)
+    expect(text).not.toMatch(/matrix-routable/)
+    expect(text).toMatch(/fixed swap function/)
+  })
+
+  it('still claims UART0 is matrix-routable for the ESP32 (regression guard)', () => {
+    const { container } = renderCard('esp32')
+    const text = container.textContent ?? ''
+    expect(text).toMatch(/UART is matrix-routable to any pin/)
+  })
 })
