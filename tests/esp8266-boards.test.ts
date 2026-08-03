@@ -44,6 +44,14 @@ describe('NodeMCU v1.0', () => {
       expect(chip.pins.find(p => p.gpio === n)!.isUsable, `GPIO${n}`).toBe(false)
     }
   })
+
+  // GPIO17 is the internal synthetic id for the A0/TOUT analog pin - it is
+  // not a real GPIO and must never leak into user-facing text.
+  it('prefixes the analog-pin override note with A0, never GPIO17', () => {
+    const notes = chip.notes.join(' ')
+    expect(notes).toMatch(/A0:/)
+    expect(notes).not.toMatch(/GPIO17/)
+  })
 })
 
 describe('LOLIN D1 Mini', () => {
@@ -73,5 +81,25 @@ describe('LOLIN D1 Mini', () => {
     const pads = [...chip.packageLayout!.left, ...chip.packageLayout!.right]
     const broken = pads.map(p => p.gpio).filter((g): g is number => g !== undefined)
     for (const n of [6, 7, 8, 9, 10, 11]) expect(broken, `GPIO${n}`).not.toContain(n)
+  })
+
+  // GPIO17 is the internal synthetic id for the A0/TOUT analog pin - it is
+  // not a real GPIO and must never leak into user-facing text.
+  it('prefixes the analog-pin override note with A0, never GPIO17', () => {
+    const notes = chip.notes.join(' ')
+    expect(notes).toMatch(/A0:/)
+    expect(notes).not.toMatch(/GPIO17/)
+  })
+})
+
+describe('resolveBoard override-note prefixing (regression: every ESP32 board keeps GPIOn prefixes)', () => {
+  it('an ESP32 board with a real-GPIO override note keeps the "GPIOn:" prefix unchanged', () => {
+    // lolin-d32 overrides GPIO5 (LED, "Blue onboard LED...") with a note - a
+    // real GPIO, so it must keep the numeric "GPIO5:" prefix, not fall back
+    // to a pin-name prefix like the ESP8266 analog pin does.
+    const chip = getChip('lolin-d32')!
+    expect(chip).toBeDefined()
+    const notes = chip.notes.join(' ')
+    expect(notes).toMatch(/GPIO5: Blue onboard LED/)
   })
 })

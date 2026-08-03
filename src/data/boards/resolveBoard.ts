@@ -58,9 +58,16 @@ export function resolveBoard(spec: BoardSpec, base: Chip | undefined): BoardResu
     return ov?.label ? { ...p, names: [ov.label, ...p.names], boardLabel: ov.label } : p
   })
 
+  // A base pin that lacks the 'gpio' capability is not a real GPIO (e.g. the
+  // ESP8266's synthetic A0/TOUT analog pin) - prefix its note with the pin's
+  // own name instead of a "GPIOn" number that does not exist on the chip.
   const overrideNotes = Object.entries(overrides)
     .filter(([, ov]) => ov.note)
-    .map(([gpio, ov]) => `GPIO${gpio}: ${ov.note}`)
+    .map(([gpio, ov]) => {
+      const p = pinByGpio.get(Number(gpio))
+      const prefix = p && !p.capabilities.includes('gpio') ? p.names[0] : `GPIO${gpio}`
+      return `${prefix}: ${ov.note}`
+    })
   const notes = [...base.notes, ...(spec.notes ?? []), ...overrideNotes]
 
   let n = 0
