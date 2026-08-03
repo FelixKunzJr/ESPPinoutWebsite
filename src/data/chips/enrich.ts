@@ -43,12 +43,38 @@ const C3: Record<number, Enrich> = {
   7: { names: ['MTDO'], caps: ['jtag'] },
 }
 
+// ESP8266EX (ESP8266EX Datasheet, "Pin Definitions" and the IO MUX table).
+// KiCad's ESP-12E symbol names only a few functions, so the alternates are
+// transcribed here. Deliberately absent: any 'i2c' capability. The ESP8266 has
+// no I2C peripheral at all - Wire bit-bangs it on any two usable pins - so
+// tagging specific pins would claim hardware that does not exist. (The
+// datasheet's I2C table even bit-bangs its example on GPIO14/GPIO2, further
+// evidence it is not a fixed peripheral pinout.)
+const ESP8266: Record<number, Enrich> = {
+  0:  { names: ['SPICS2'] },
+  1:  { names: ['U0TXD', 'SPICS1'], caps: ['uart'] },
+  2:  { names: ['U1TXD', 'I2SO_WS'], caps: ['uart', 'i2s'] },
+  3:  { names: ['U0RXD', 'I2SO_DATA'], caps: ['uart', 'i2s'] },
+  6:  { names: ['SPICLK'], caps: ['spi'] },
+  7:  { names: ['SPIQ'], caps: ['spi'] },
+  8:  { names: ['SPID', 'U1RXD'], caps: ['spi', 'uart'] },
+  9:  { names: ['SPIHD', 'HSPIHD'], caps: ['spi'] },
+  10: { names: ['SPIWP', 'HSPIWP'], caps: ['spi'] },
+  11: { names: ['SPICS0'], caps: ['spi'] },
+  12: { names: ['HSPIQ', 'MISO', 'I2SI_DATA'], caps: ['spi', 'i2s'] },
+  13: { names: ['HSPID', 'MOSI', 'I2SI_BCK', 'U0CTS'], caps: ['spi', 'i2s', 'uart'] },
+  14: { names: ['HSPICLK', 'SCK', 'I2SI_WS'], caps: ['spi', 'i2s'] },
+  15: { names: ['HSPICS', 'SS', 'I2SO_BCK', 'U0RTS'], caps: ['spi', 'i2s', 'uart'] },
+  16: { names: ['WAKE', 'XPD_DCDC'], caps: ['rtc'] },
+}
+
 const TABLE: Record<string, Record<number, Enrich>> = {
   esp32c5wroom1: C5,
   esp32c5mini1: C5,
   esp32c3: C3,
   esp32c3wroom02: C3,
   esp32c3devkitm: C3,
+  esp8266: ESP8266,
 }
 
 export function enrichPins(chipId: string, pins: Pin[]): Pin[] {

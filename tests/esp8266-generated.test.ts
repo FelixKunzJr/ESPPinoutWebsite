@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { ESP12F_PINS, ESP12F_LAYOUT, ESP12F_SYMBOL } from '../src/data/chips/generated'
+import { enrichPins } from '../src/data/chips/enrich'
 
 describe('ESP-12F generated data', () => {
   const byGpio = (n: number) => ESP12F_PINS.find(p => p.gpio === n)
@@ -54,5 +55,32 @@ describe('ESP-12F generated data', () => {
     expect(pads).toHaveLength(22)
     expect(new Set(pads.map(p => p.pinNumber)).size).toBe(22)
     expect(ESP12F_SYMBOL.left.length + ESP12F_SYMBOL.right.length).toBeGreaterThan(10)
+  })
+})
+
+describe('ESP8266 enrichment overlay', () => {
+  const enriched = enrichPins('esp8266', ESP12F_PINS)
+  const byGpio = (n: number) => enriched.find(p => p.gpio === n)!
+
+  it('names the HSPI pins', () => {
+    expect(byGpio(14).names).toContain('HSPICLK')
+    expect(byGpio(12).names).toContain('HSPIQ')
+    expect(byGpio(13).names).toContain('HSPID')
+    expect(byGpio(15).names).toContain('HSPICS')
+    for (const n of [12, 13, 14, 15]) expect(byGpio(n).capabilities).toContain('spi')
+  })
+
+  it('names UART0 and the UART1 debug TX', () => {
+    expect(byGpio(1).names).toContain('U0TXD')
+    expect(byGpio(3).names).toContain('U0RXD')
+    expect(byGpio(2).names).toContain('U1TXD')
+  })
+
+  it('names the deep-sleep wake pin', () => {
+    expect(byGpio(16).names).toContain('WAKE')
+  })
+
+  it('never adds an i2c capability', () => {
+    expect(enriched.some(p => p.capabilities.includes('i2c'))).toBe(false)
   })
 })
