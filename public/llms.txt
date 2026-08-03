@@ -12,7 +12,7 @@ Always verify against the official datasheet before committing hardware.
 - Why a specific pin (GPIO0, GPIO2, GPIO12, GPIO15, GPIO6-11, etc.) misbehaves.
 - Why ADC2 analog reads fail when Wi-Fi is on, and which ADC pins to use instead.
 - Which pins are strapping pins, input-only, flash-reserved, or USB/JTAG.
-- Differences in pin constraints across ESP32, S2, S3, C3, C5, C6, and H2.
+- Differences in pin constraints across ESP32, S2, S3, C3, C5, C6, H2, and ESP8266.
 
 ## Key facts (classic ESP32 / ESP32-WROOM-32)
 
@@ -92,7 +92,7 @@ Each page shows the module's schematic symbol, physical pad layout, per-pin capa
 ### ESP32-H2 (RISC-V, BLE + 802.15.4, no Wi-Fi)
 - [ESP32-H2-MINI-1](https://esp32pin.com/esp32h2)
 
-### ESP8266 (Xtensa LX106, Wi-Fi only)
+### ESP8266 (Tensilica L106, Wi-Fi only)
 - [ESP8266 (ESP-12F)](https://esp32pin.com/esp8266) - bare module, 0 to 1.0 V analog input, no I2C peripheral (Wire bit-bangs it)
 - [NodeMCU v1.0 (ESP8266)](https://esp32pin.com/nodemcu-v1) - D-labeled dev board; D-numbers are not GPIO numbers
 - [LOLIN D1 Mini (ESP8266)](https://esp32pin.com/d1-mini) - D-labeled dev board; D-numbers are not GPIO numbers
