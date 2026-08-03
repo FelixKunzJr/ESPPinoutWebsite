@@ -1,13 +1,19 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { detectConflicts } from '../utils/detectConflicts'
-import type { PinAssignment } from '../types/chip'
+import type { Pin, PinAssignment } from '../types/chip'
 
 const ROLES: PinAssignment['role'][] = [
   'LED','Button','I2C_SDA','I2C_SCL',
   'SPI_MOSI','SPI_MISO','SPI_SCK','SPI_CS',
   'UART_TX','UART_RX','PWM','ADC','DAC','Touch','Custom',
 ]
+
+// A pin whose capabilities omit 'gpio' is not a real GPIO (currently only the
+// ESP8266's synthetic id 17 for the A0/TOUT analog input). Its own name is
+// the honest label - "GPIO17" does not exist on real hardware and must never
+// be shown to a user, the same signal resolveBoard.ts uses for override notes.
+const pinLabel = (p: Pin) => (p.capabilities.includes('gpio') ? `GPIO${p.gpio}` : p.names[0])
 
 export function MappingBuilder() {
   const { chip, mapping, assignPin, unassignPin, clearMapping } = useApp()
@@ -46,7 +52,7 @@ export function MappingBuilder() {
             className="bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-green-500"
           >
             {usablePins.map(p => (
-              <option key={p.gpio} value={p.gpio}>GPIO{p.gpio}</option>
+              <option key={p.gpio} value={p.gpio}>{pinLabel(p)}</option>
             ))}
           </select>
         </div>
@@ -110,7 +116,7 @@ export function MappingBuilder() {
                   hasConflict ? 'border-yellow-700 bg-yellow-950/20' : 'border-gray-700 bg-gray-800/40'
                 }`}
               >
-                <span className="font-mono text-green-400 w-16">GPIO{a.gpio}</span>
+                <span className="font-mono text-green-400 w-16">{pin ? pinLabel(pin) : `GPIO${a.gpio}`}</span>
                 <span className="text-blue-300 w-24">{a.role}</span>
                 <span className="text-gray-300 flex-1">{a.label}</span>
                 {pin?.names[1] && <span className="text-gray-500 mr-2 font-mono">{pin.names[1]}</span>}
