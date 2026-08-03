@@ -143,6 +143,21 @@ const FAMILIES: Record<string, Family> = {
       'No DAC, no capacitive touch, no classic Bluetooth.',
     ],
   },
+  esp8266: {
+    family: 'ESP8266', cores: 1, hasWifi: true, hasBle: false, hasBluetooth: false,
+    arch: 'Single-core Tensilica L106', radios: 'Wi-Fi 4 only', accent: '#6366f1', totalGpio: 17,
+    datasheetUrl: 'https://www.espressif.com/sites/default/files/documentation/0a-esp8266ex_datasheet_en.pdf',
+    notes: [
+      'Not an ESP32. Single-core Tensilica L106 at 80 or 160 MHz, Wi-Fi 4 only, no Bluetooth of any kind.',
+      'GPIO6-11 drive the SPI flash. 6, 7, 8 and 11 are never usable. 9 and 10 are broken out and work only when the flash runs in DIO mode.',
+      'GPIO15 must be LOW at boot, GPIO2 must be HIGH at boot, and GPIO0 selects the mode: HIGH runs your sketch, LOW enters the flasher.',
+      'GPIO16 is the odd one out: no interrupt, no PWM, and an internal pull-down instead of a pull-up. Tie it to RST to wake from deep sleep.',
+      'The analog input is 0 to 1.0 V on a bare module, not 0 to 3.3 V. NodeMCU and D1 mini fit a divider.',
+      'There is no I2C peripheral. Wire bit-bangs I2C on any two usable pins and defaults to SDA on GPIO4, SCL on GPIO5.',
+      'PWM is software-driven, so analogWrite works on any usable pin except GPIO16.',
+      'No DAC, no capacitive touch, no second ADC, and no native USB. Flashing and the boot log go over UART0.',
+    ],
+  },
 }
 
 interface ModuleSpec {
@@ -187,6 +202,10 @@ const MODULES: ModuleSpec[] = [
   // ESP32-C2
   { id: 'esp8684wroom02c', fam: 'c2', name: 'ESP8684-WROOM-02C', form: 'wroom', pcb: 'black', prefix: 'ESP8684_WROOM_02C',
     notes: ['Same naming trap as the ESP8685: "The ESP8684 chip series belongs to the ESP32-C2 group" (ESP8684 datasheet). ESP86xx is Espressif\'s numbering for RISC-V parts with in-package flash, not ESP8266 lineage.'] },
+  // ESP8266. Named for the chip rather than the module: /esp8266 is what people
+  // search for, matching how the classic ESP32 entry uses id 'esp32' for what is
+  // specifically an ESP-WROOM-32.
+  { id: 'esp8266', fam: 'esp8266', name: 'ESP8266 (ESP-12F)', form: 'wroom', pcb: 'black', prefix: 'ESP12F' },
   // Development boards
   // esp32devkitc is built from a contrib board spec below (rich WROOM-32 base),
   // not from the sparse KiCad-generated ESP32_DEVKITC_* set.
@@ -308,6 +327,7 @@ export const CHIPS: Chip[] = [
   byId('esp32c5mini1'),
   byId('esp32h2'),
   byId('esp8684wroom02c'),
+  byId('esp8266'),
   // Dev boards
   esp32Devkitc,
   esp32DevkitV1,

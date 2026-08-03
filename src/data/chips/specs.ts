@@ -52,6 +52,11 @@ export const FAMILY_SPECS: Record<string, ChipSpecs> = {
     flash: 'Up to 4 MB (module SKU)', psram: 'None',
     notable: ['No Wi-Fi', '802.15.4 + BLE 5 (Zigbee/Thread/Matter)'],
   },
+  'ESP8266': {
+    cores: 1, arch: 'Single-core Tensilica L106', cpuMaxMhz: 160, sramKb: 160, romKb: 64,
+    flash: 'External SPI flash, commonly 1 to 16 MB (module dependent)', psram: 'None',
+    notable: ['Not an ESP32 - no Bluetooth of any kind', 'Wi-Fi 4 only', 'No native USB - UART0 only'],
+  },
 }
 
 // Per-module SKU overrides where flash/PSRAM differ from the family default.

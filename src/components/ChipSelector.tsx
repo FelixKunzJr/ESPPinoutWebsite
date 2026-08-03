@@ -13,6 +13,7 @@ const FAMILY_ACCENT: Record<string, string> = {
   'ESP32-C5': '#14b8a6',
   'ESP32-H2': '#ec4899',
   'ESP32-C2': '#ef4444',
+  'ESP8266':  '#6366f1',
 }
 // One shade darker per family for light mode - the dark-tuned accents (the
 // C3 yellow especially) wash out as a filled tab with white text on white.
@@ -25,6 +26,7 @@ const LIGHT_ACCENT: Record<string, string> = {
   '#14b8a6': '#0d9488',
   '#ec4899': '#db2777',
   '#ef4444': '#dc2626',
+  '#6366f1': '#4f46e5',
   '#94a3b8': '#64748b',
 }
 const BOARDS = 'Boards'
@@ -75,7 +77,12 @@ export function ChipSelector() {
 
   const shortLabel = (c: Chip) => {
     if (isBoard(c)) return c.name.replace(/^ESP32-/, '')
-    return (c.name.startsWith(c.family) ? c.name.slice(c.family.length).replace(/^-/, '') : c.name) || c.name
+    // Strip the family prefix, then any separator it left behind: a hyphen for
+    // 'ESP32-S3-WROOM-1', or the wrapping parens of 'ESP8266 (ESP-12F)'.
+    const rest = c.name.startsWith(c.family)
+      ? c.name.slice(c.family.length).trim().replace(/^-/, '').replace(/^\((.*)\)$/, '$1')
+      : c.name
+    return rest || c.name
   }
 
   if (isPhone) {

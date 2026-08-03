@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { ESP12F_PINS, ESP12F_LAYOUT, ESP12F_SYMBOL } from '../src/data/chips/generated'
 import { enrichPins } from '../src/data/chips/enrich'
+import { getChip } from '../src/data/chips/catalog'
 
 describe('ESP-12F generated data', () => {
   const byGpio = (n: number) => ESP12F_PINS.find(p => p.gpio === n)
@@ -97,5 +98,24 @@ describe('ESP8266 enrichment overlay', () => {
     expect(byGpio(7).capabilities).not.toContain('uart')
     expect(byGpio(11).names).not.toContain('U1RTS')
     expect(byGpio(11).capabilities).not.toContain('uart')
+  })
+})
+
+describe('ESP8266 catalog entry', () => {
+  it('is registered under the searchable id', () => {
+    const chip = getChip('esp8266')!
+    expect(chip).toBeDefined()
+    expect(chip.name).toBe('ESP8266 (ESP-12F)')
+    expect(chip.family).toBe('ESP8266')
+    expect(chip.hasBle).toBe(false)
+    expect(chip.hasBluetooth).toBe(false)
+    expect(chip.cores).toBe(1)
+    expect(chip.symbolLayout).toBeDefined()
+  })
+
+  it('carries the boot-level rules in its notes', () => {
+    const notes = getChip('esp8266')!.notes.join(' ')
+    expect(notes).toMatch(/GPIO15 must be LOW at boot/)
+    expect(notes).toMatch(/GPIO2 must be HIGH at boot/)
   })
 })
