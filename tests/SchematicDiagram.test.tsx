@@ -52,6 +52,25 @@ describe('SchematicDiagram flash-bus danger badges on the bare ESP-12F module', 
   })
 })
 
+describe('SchematicDiagram KiCad overbar stripping', () => {
+  // ESP12F_SYMBOL keeps the verbatim KiCad pin name '~{RST}' (its overbar
+  // notation for an active-low signal) - that fidelity is deliberate and the
+  // data must not be changed to work around it. The display layer has to
+  // strip it instead, everywhere the raw symbol name reaches the screen
+  // (the body text via rowName(), and the row tooltip via rowTitle()), or
+  // the literal KiCad markup shows up on the flagship /esp8266 page.
+  it('renders the ESP-12F reset pad as RST, never the literal ~{RST} markup', () => {
+    const { container } = renderSchematic('esp8266')
+    const text = container.textContent ?? ''
+    // Adjacent SVG <text>/<tspan> elements concatenate with no separator in
+    // textContent (e.g. the pad-number "1" runs straight into the pad name),
+    // so a \b-anchored check would false-negative here - a plain substring
+    // check is the right tool.
+    expect(text).toContain('RST')
+    expect(text).not.toContain('~{')
+  })
+})
+
 describe('SchematicDiagram bare-pin annotation (round 2 residual 2b)', () => {
   // A bare pin with no other annotation (GPIO4/GPIO5 on the ESP-12F) used to
   // say "routes any peripheral" regardless of family - false for the ESP8266,

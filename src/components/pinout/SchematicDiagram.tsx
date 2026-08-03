@@ -175,12 +175,19 @@ function rowSegments(row: SchemRow, family: string, mappingLabel?: string): Seg[
 const segW = (s: Seg) => s.text.length * 6.1 + (s.chipFill ? 16 : 9)
 const segsW = (segs: Seg[]) => segs.reduce((a, s) => a + segW(s), 0)
 
+// KiCad's overbar notation for an active-low signal, e.g. '~{RST}'. The
+// generated data keeps this verbatim (source fidelity, and it leaves the
+// door open to rendering a real overbar later), so it has to be stripped
+// here at render time instead - everywhere a symbol pin's raw `name` reaches
+// the screen.
+const stripOverbar = (name: string): string => name.replace(/~\{([^}]*)\}/g, '$1')
+
 // Name shown inside the body. For official symbol pins this is the verbatim
 // Espressif name up to and including the GPIO token ('SENSOR_VP/GPIO36');
 // the remaining function tokens stay outside as annotations.
 function rowName(row: SchemRow): string {
   if (row.name) {
-    const toks = row.name.split('/')
+    const toks = stripOverbar(row.name).split('/')
     const gi = toks.findIndex(t => /^(GPIO|IO)\d+$/i.test(t))
     return gi > 0 ? toks.slice(0, gi + 1).join('/') : toks[0]
   }
@@ -293,9 +300,10 @@ export function SchematicDiagram() {
         + (row.solderPad ? ' - solder pad only, no header pin' : '')
         + (row.pin.constraints.length ? ' - ' + row.pin.constraints.map(c => c.title).join(' · ') : '')
     }
-    const label = row.name ?? row.label
+    const name = row.name ? stripOverbar(row.name) : undefined
+    const label = name ?? row.label
     if (row.pinNums.length > 1) return `${label} - pads ${row.pinNums.join(', ')}`
-    if (row.name && row.name !== row.label) return `${row.name} - pad ${row.pinNums[0]}`
+    if (name && name !== row.label) return `${name} - pad ${row.pinNums[0]}`
     return null
   }
 
