@@ -17,6 +17,8 @@ export const ESPHOME_BOARD: Record<string, string> = {
   'xiao-esp32c3': 'seeed_xiao_esp32c3',
   'xiao-esp32s3': 'seeed_xiao_esp32s3',
   'xiao-esp32c6': 'seeed_xiao_esp32c6',
+  'nodemcu-v1': 'nodemcuv2',
+  'd1-mini': 'd1_mini',
 }
 
 // ESPHome chip variant per family. A board without a verified board: key falls
@@ -60,14 +62,18 @@ export function generateEsphomeConfig(chip: Chip, mapping: PinAssignment[]): str
   // Verified board key when we have one; otherwise the generic chip variant.
   const platformLine = boardKey ? `  board: ${boardKey}` : `  variant: ${variant}`
 
+  const esp8266 = chip.family === 'ESP8266'
+  // ESPHome's esp8266 platform takes a board key only: no variant fallback and
+  // no framework block (it is Arduino-only there).
+  if (esp8266 && !boardKey) return null
+
   const out: string[] = [
     'esphome:',
     '  name: my-device',
     '',
-    'esp32:',
-    platformLine,
-    '  framework:',
-    '    type: esp-idf',
+    ...(esp8266
+      ? ['esp8266:', `  board: ${boardKey}`]
+      : ['esp32:', platformLine, '  framework:', '    type: esp-idf']),
   ]
 
   if (mapping.length === 0) {
@@ -88,36 +94,40 @@ export function generateEsphomeConfig(chip: Chip, mapping: PinAssignment[]): str
     out.push('', '# Heads-up - some mapped pins carry constraints (check the pinout):', ...warnings)
   }
 
+  // The ESP8266's analog input is not a GPIO. It ships as synthetic gpio 17 in
+  // our data, but ESPHome only accepts the literal pin name A0.
+  const pinName = (gpio: number) => (esp8266 && gpio === 17 ? 'A0' : `GPIO${gpio}`)
+
   const sda = first(mapping, 'I2C_SDA'), scl = first(mapping, 'I2C_SCL')
-  if (sda && scl) out.push('', 'i2c:', `  sda: GPIO${sda.gpio}`, `  scl: GPIO${scl.gpio}`, '  scan: true')
+  if (sda && scl) out.push('', 'i2c:', `  sda: ${pinName(sda.gpio)}`, `  scl: ${pinName(scl.gpio)}`, '  scan: true')
 
   const mosi = first(mapping, 'SPI_MOSI'), miso = first(mapping, 'SPI_MISO'), sck = first(mapping, 'SPI_SCK')
   if (mosi || miso || sck) {
     out.push('', 'spi:')
-    if (sck) out.push(`  clk_pin: GPIO${sck.gpio}`)
-    if (mosi) out.push(`  mosi_pin: GPIO${mosi.gpio}`)
-    if (miso) out.push(`  miso_pin: GPIO${miso.gpio}`)
+    if (sck) out.push(`  clk_pin: ${pinName(sck.gpio)}`)
+    if (mosi) out.push(`  mosi_pin: ${pinName(mosi.gpio)}`)
+    if (miso) out.push(`  miso_pin: ${pinName(miso.gpio)}`)
   }
 
   const tx = first(mapping, 'UART_TX'), rx = first(mapping, 'UART_RX')
   if (tx || rx) {
     out.push('', 'uart:', '  baud_rate: 115200')
-    if (tx) out.push(`  tx_pin: GPIO${tx.gpio}`)
-    if (rx) out.push(`  rx_pin: GPIO${rx.gpio}`)
+    if (tx) out.push(`  tx_pin: ${pinName(tx.gpio)}`)
+    if (rx) out.push(`  rx_pin: ${pinName(rx.gpio)}`)
   }
 
   const buttons = pick(mapping, 'Button')
   if (buttons.length) {
     out.push('', 'binary_sensor:')
-    for (const b of buttons) out.push('  - platform: gpio', `    pin: GPIO${b.gpio}`, `    name: "${b.label}"`)
+    for (const b of buttons) out.push('  - platform: gpio', `    pin: ${pinName(b.gpio)}`, `    name: "${b.label}"`)
   }
 
   const leds = pick(mapping, 'LED')
   const pwms = pick(mapping, 'PWM')
   if (leds.length || pwms.length) {
     out.push('', 'output:')
-    for (const l of leds) out.push('  - platform: gpio', `    pin: GPIO${l.gpio}`, `    id: ${slug(l.label, l.gpio)}`)
-    for (const p of pwms) out.push('  - platform: ledc', `    pin: GPIO${p.gpio}`, `    id: ${slug(p.label, p.gpio)}`)
+    for (const l of leds) out.push('  - platform: gpio', `    pin: ${pinName(l.gpio)}`, `    id: ${slug(l.label, l.gpio)}`)
+    for (const p of pwms) out.push(`  - platform: ${esp8266 ? 'esp8266_pwm' : 'ledc'}`, `    pin: ${pinName(p.gpio)}`, `    id: ${slug(p.label, p.gpio)}`)
   }
   if (leds.length) {
     out.push('', 'light:')
@@ -127,7 +137,7 @@ export function generateEsphomeConfig(chip: Chip, mapping: PinAssignment[]): str
   const adcs = pick(mapping, 'ADC')
   if (adcs.length) {
     out.push('', 'sensor:')
-    for (const a of adcs) out.push('  - platform: adc', `    pin: GPIO${a.gpio}`, `    name: "${a.label}"`)
+    for (const a of adcs) out.push('  - platform: adc', `    pin: ${pinName(a.gpio)}`, `    name: "${a.label}"`)
   }
 
   // Roles without a first-class ESPHome mapping here are listed as a hint so the

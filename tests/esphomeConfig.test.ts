@@ -75,3 +75,43 @@ describe('generateEsphomeConfig', () => {
     }
   })
 })
+
+describe('ESP8266 ESPHome config', () => {
+  const nodemcu = getChip('nodemcu-v1')!
+  const d1 = getChip('d1-mini')!
+
+  it('emits the esp8266 platform with the verified board key', () => {
+    const yaml = generateEsphomeConfig(nodemcu, [])!
+    expect(yaml).toContain('esp8266:')
+    expect(yaml).toContain('  board: nodemcuv2')
+    expect(yaml).not.toContain('esp32:')
+    expect(yaml).not.toContain('variant:')
+    expect(yaml).not.toContain('esp-idf')
+  })
+
+  it('uses the d1_mini board key', () => {
+    expect(generateEsphomeConfig(d1, [])!).toContain('  board: d1_mini')
+  })
+
+  it('uses esp8266_pwm rather than ledc', () => {
+    const yaml = generateEsphomeConfig(d1, [{ gpio: 14, role: 'PWM', label: 'fan' }])!
+    expect(yaml).toContain('platform: esp8266_pwm')
+    expect(yaml).not.toContain('platform: ledc')
+  })
+
+  it('spells the analog pin A0, not GPIO17', () => {
+    const yaml = generateEsphomeConfig(d1, [{ gpio: 17, role: 'ADC', label: 'batt' }])!
+    expect(yaml).toContain('pin: A0')
+    // GPIO17 legitimately still appears in the warnings comment (prose describing
+    // our own pin numbering for the constraint heads-up, not a YAML pin value) -
+    // see the "Heads-up" block below. What must never appear is GPIO17 as the
+    // actual YAML pin value, which is what ESPHome would reject.
+    expect(yaml).not.toContain('pin: GPIO17')
+  })
+
+  it('still emits an esp32 block for ESP32 boards', () => {
+    const yaml = generateEsphomeConfig(getChip('esp32devkitc')!, [])!
+    expect(yaml).toContain('esp32:')
+    expect(yaml).toContain('    type: esp-idf')
+  })
+})
