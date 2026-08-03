@@ -62,12 +62,21 @@ describe('ESP-12F generated data', () => {
   // overbar notation for an active-low signal). specialLabel() used to match
   // only the bare 'RST' pattern, so this fell through to the raw name and
   // both the module and schematic views rendered the literal string
-  // '~{RST}' instead of resolving to the EN/RST label every other module
-  // uses. Pad 8 (named plain 'VCC' by KiCad) is covered in the same pass:
-  // every other module in the catalog renders '3V3' for the supply pad.
-  it('resolves the KiCad overbar reset pad to EN, and the VCC pad to 3V3, not the literal KiCad strings', () => {
+  // '~{RST}' instead of resolving to a label. Stripping the overbar alone is
+  // not enough, though: pad 1 (RST) and pad 3 (EN/CH_PD) are two physically
+  // different pads on the ESP-12F, and the shared RST/EN rule that correctly
+  // collapses both spellings to 'EN' on every other module (which only ever
+  // has one reset-class pin) would collide them here, leaving two pads
+  // labelled EN and none labelled RST. FAM.esp8266's padLabel override pins
+  // pad 1 to 'RST' specifically, without touching the shared rule other
+  // modules rely on. Pad 8 (named plain 'VCC' by KiCad) is covered in the
+  // same pass: every other module in the catalog renders '3V3' for the
+  // supply pad.
+  it('gives the ESP-12F a separate RST pad (1) and EN pad (3), and resolves the VCC pad to 3V3', () => {
     const resetPad = ESP12F_LAYOUT.left.find(p => p.pinNumber === 1)
-    expect(resetPad?.label).toBe('EN')
+    expect(resetPad?.label).toBe('RST')
+    const enPad = ESP12F_LAYOUT.left.find(p => p.pinNumber === 3)
+    expect(enPad?.label).toBe('EN')
     const supplyPad = ESP12F_LAYOUT.top?.find(p => p.pinNumber === 8) ?? ESP12F_LAYOUT.left.find(p => p.pinNumber === 8)
     expect(supplyPad?.label).toBe('3V3')
 
@@ -84,6 +93,24 @@ describe('ESP-12F generated data', () => {
     ].map(p => p.label).filter(Boolean)
     expect(allSymbolLabels).not.toContain('~{RST}')
     expect(allSymbolLabels).not.toContain('VCC')
+  })
+
+  // Regression: the overbar fix above initially made the RST pad resolve to
+  // 'EN' (the shared RST/EN rule), which silently collided it with the real
+  // EN pad (3) - both the module and schematic views showed two pads
+  // labelled EN and none labelled RST. This is the general shape of that
+  // defect: any two distinct pads sharing a label (other than GND/NC, which
+  // legitimately repeat) means one of them is mislabeled. Written to fail
+  // against the regressed output (pad 1 and pad 3 both 'EN').
+  it('never assigns the same label to two different pads, except GND and NC', () => {
+    const allLayoutLabels = [
+      ...ESP12F_LAYOUT.left, ...ESP12F_LAYOUT.right,
+      ...ESP12F_LAYOUT.bottom, ...(ESP12F_LAYOUT.top ?? []),
+    ].map(p => p.label).filter((l): l is string => l !== undefined)
+    const counts = new Map<string, number>()
+    for (const label of allLayoutLabels) counts.set(label, (counts.get(label) ?? 0) + 1)
+    const dupes = [...counts.entries()].filter(([label, n]) => n > 1 && label !== 'GND' && label !== 'NC')
+    expect(dupes, `duplicate non-GND/NC pad labels: ${JSON.stringify(dupes)}`).toEqual([])
   })
 
   it('lays out all 22 pads and carries the official symbol', () => {

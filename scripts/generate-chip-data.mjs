@@ -64,6 +64,23 @@ function overrideGpio(nums, fam) {
   }
   return undefined
 }
+// A pad number may carry a padLabel override (see FAM), for the rare case
+// where the shared specialLabel() rule is right for every module that has
+// only one reset-class pin but wrong for one that breaks out two: the
+// ESP-12F has both a dedicated RST pad and a separate EN (CH_PD) pad, and
+// KiCad's own symbol names the first one '~{RST}', which - once the overbar
+// is stripped for display - matches specialLabel()'s generic RST/EN pattern
+// and would otherwise collide with the real EN pad. Resolved from the pad
+// number, the same way overrideGpio() is, so it works whether the pin was
+// found via the pad layout (one number) or the symbol geometry (a merged
+// group of numbers).
+function overridePadLabel(nums, fam) {
+  if (!fam || !fam.padLabel) return undefined
+  for (const n of nums) {
+    if (Object.prototype.hasOwnProperty.call(fam.padLabel, n)) return fam.padLabel[n]
+  }
+  return undefined
+}
 // The symbol's own pin geometry: which body side each pin sits on, in drawn
 // order. angle 0 = points right (LEFT side), 180 = RIGHT, 90 = BOTTOM, 270 = TOP.
 // Pins stacked at the same coordinate (hidden duplicate power pins) are merged.
@@ -95,7 +112,7 @@ function symbolGeometry(r, fam) {
     const ov = overrideGpio(pin.nums, fam)
     return ov !== undefined
       ? { pins: pin.nums, gpio: ov, name: pin.name }
-      : { pins: pin.nums, label: specialLabel(pin.name), name: pin.name }
+      : { pins: pin.nums, label: overridePadLabel(pin.nums, fam) ?? specialLabel(pin.name), name: pin.name }
   }
   return {
     left: sides.left.map(sp), right: sides.right.map(sp),
@@ -189,7 +206,7 @@ function caps(toks, inputOnly) {
   const order = ['gpio', 'adc1', 'adc2', 'dac', 'touch', 'pwm', 'i2c', 'spi', 'uart', 'i2s', 'rtc', 'usb', 'jtag']
   return order.filter(o => c.has(o))
 }
-function buildLayout(pins, pads) {
+function buildLayout(pins, pads, fam) {
   // Every drawn instance of every numbered pad. A pad number can appear more
   // than once: the thermal/EPAD ground is a whole array of lands, and a signal
   // pad may pair its edge castellation with an underside land (ESP8685-WROOM-06
@@ -221,7 +238,9 @@ function buildLayout(pins, pads) {
   const lp = c => {
     const raw = pins[String(c.num)] || ''
     const g = raw.toUpperCase().match(/GPIO(\d+)/)
-    return g ? { pinNumber: c.num, gpio: +g[1] } : { pinNumber: c.num, label: specialLabel(raw) }
+    return g
+      ? { pinNumber: c.num, gpio: +g[1] }
+      : { pinNumber: c.num, label: overridePadLabel([c.num], fam) ?? specialLabel(raw) }
   }
   return { left: L.map(lp), bottom: B.map(lp), right: R.map(lp), top: T.map(lp) }
 }
@@ -285,7 +304,7 @@ function buildModule(mod, fam) {
   // (WROOM-DA's courtyard includes the dual-antenna keep-out region).
   const bodyMm = mod.mm ? { w: mod.mm[0], h: mod.mm[1] } : fpBodyMm(dir, mod.fp)
   const antennaMm = fpAntennaMm(dir, mod.fp, pads, bodyMm)
-  return { pins: pinObjs, layout: { name: mod.name, ...buildLayout(pins, pads), bodyMm, antennaMm } }
+  return { pins: pinObjs, layout: { name: mod.name, ...buildLayout(pins, pads, fam), bodyMm, antennaMm } }
 }
 
 // Per-family boot/strapping rules (the lore KiCad doesn't encode).
@@ -313,6 +332,13 @@ const FAM = {
     // filters and export all handle it; GPIO17 does not exist on the ESP8266,
     // so the number cannot collide.
     analog: { pad: 2, gpio: 17, names: ['A0', 'TOUT'] },
+    // Pad 1 is KiCad's '~{RST}' pin - a real, physically separate reset pad
+    // from pad 3's EN (CH_PD). Stripped of its overbar it matches
+    // specialLabel()'s shared RST/EN pattern (correct for every other module
+    // in the catalog, which only ever has one reset-class pin), which would
+    // relabel it 'EN' and collide with the real EN pad. Pin the label here
+    // instead of touching the shared rule.
+    padLabel: { 1: 'RST' },
   },
 }
 
