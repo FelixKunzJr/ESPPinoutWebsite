@@ -59,6 +59,20 @@ describe('ESP-12F generated data', () => {
     expect(new Set(pads.map(p => p.pinNumber)).size).toBe(22)
     expect(ESP12F_SYMBOL.left.length + ESP12F_SYMBOL.right.length).toBeGreaterThan(10)
   })
+
+  // Regression for the bare module's schematic view showing no danger badge at
+  // all on the flash bus: KiCad names these symbol pins by SPI role (CS0,
+  // MISO, MOSI, SCLK) with no GPIO token, so symbolGeometry() must resolve the
+  // gpio field from the pad number (via the same padGpio/analog overrides
+  // buildModule applies to the pin list), not from the symbol pin name.
+  it('carries gpio numbers on the symbol pins KiCad names by SPI role, so the flash-bus badges have a pin to find', () => {
+    const symPin = (pad: number) => [...ESP12F_SYMBOL.left, ...ESP12F_SYMBOL.right].find(p => p.pins.includes(pad))
+    expect(symPin(9)?.gpio, 'pad 9 (CS0)').toBe(11)
+    expect(symPin(10)?.gpio, 'pad 10 (MISO)').toBe(7)
+    expect(symPin(13)?.gpio, 'pad 13 (MOSI)').toBe(8)
+    expect(symPin(14)?.gpio, 'pad 14 (SCLK)').toBe(6)
+    expect(symPin(2)?.gpio, 'pad 2 (ADC)').toBe(17)
+  })
 })
 
 describe('ESP8266 enrichment overlay', () => {

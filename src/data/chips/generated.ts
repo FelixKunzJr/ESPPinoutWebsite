@@ -930,7 +930,7 @@ export const ESP12F_LAYOUT: PackageLayout = {
 }
 
 export const ESP12F_SYMBOL: SymbolLayout = {
-  left: [{ pins: [1], label: '~{RST}', name: "~{RST}" }, { pins: [3], label: 'EN', name: "EN" }, { pins: [2], label: 'ADC', name: "ADC" }, { pins: [9], label: 'CS0', name: "CS0" }, { pins: [10], label: 'MISO', name: "MISO" }, { pins: [11], gpio: 9, name: "GPIO9" }, { pins: [12], gpio: 10, name: "GPIO10" }, { pins: [13], label: 'MOSI', name: "MOSI" }, { pins: [14], label: 'SCLK', name: "SCLK" }],
+  left: [{ pins: [1], label: '~{RST}', name: "~{RST}" }, { pins: [3], label: 'EN', name: "EN" }, { pins: [2], gpio: 17, name: "ADC" }, { pins: [9], gpio: 11, name: "CS0" }, { pins: [10], gpio: 7, name: "MISO" }, { pins: [11], gpio: 9, name: "GPIO9" }, { pins: [12], gpio: 10, name: "GPIO10" }, { pins: [13], gpio: 8, name: "MOSI" }, { pins: [14], gpio: 6, name: "SCLK" }],
   right: [{ pins: [18], gpio: 0, name: "GPIO0" }, { pins: [22], gpio: 1, name: "GPIO1/TXD" }, { pins: [17], gpio: 2, name: "GPIO2" }, { pins: [21], gpio: 3, name: "GPIO3/RXD" }, { pins: [19], gpio: 4, name: "GPIO4" }, { pins: [20], gpio: 5, name: "GPIO5" }, { pins: [6], gpio: 12, name: "GPIO12" }, { pins: [7], gpio: 13, name: "GPIO13" }, { pins: [5], gpio: 14, name: "GPIO14" }, { pins: [16], gpio: 15, name: "GPIO15" }, { pins: [4], gpio: 16, name: "GPIO16" }],
   bottom: [{ pins: [15], label: 'GND', name: "GND" }],
   top: [{ pins: [8], label: 'VCC', name: "VCC" }],

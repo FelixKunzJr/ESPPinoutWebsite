@@ -52,10 +52,22 @@ function symbolPins(r) {
   return o
 }
 
+// A symbol pin's pad numbers may carry a padGpio/analog override (see FAM),
+// the same overrides buildModule applies to the pin list. KiCad names some
+// pads by SPI role with no GPIO token at all (the ESP-12F flash bus), so the
+// override must be resolved from the pad number, not the name.
+function overrideGpio(nums, fam) {
+  if (!fam) return undefined
+  for (const n of nums) {
+    if (fam.padGpio && Object.prototype.hasOwnProperty.call(fam.padGpio, n)) return fam.padGpio[n]
+    if (fam.analog && fam.analog.pad === n) return fam.analog.gpio
+  }
+  return undefined
+}
 // The symbol's own pin geometry: which body side each pin sits on, in drawn
 // order. angle 0 = points right (LEFT side), 180 = RIGHT, 90 = BOTTOM, 270 = TOP.
 // Pins stacked at the same coordinate (hidden duplicate power pins) are merged.
-function symbolGeometry(r) {
+function symbolGeometry(r, fam) {
   const p = new RegExp(PIN_RE.source, 'g')
   const byPos = new Map()
   let x
@@ -77,8 +89,12 @@ function symbolGeometry(r) {
   const sp = pin => {
     const g = pin.name.toUpperCase().match(/GPIO(\d+)|(?:^|\/)IO(\d+)/)
     pin.nums.sort((a, b) => a - b)
-    return g
-      ? { pins: pin.nums, gpio: +(g[1] ?? g[2]), name: pin.name }
+    if (g) return { pins: pin.nums, gpio: +(g[1] ?? g[2]), name: pin.name }
+    // Keep the KiCad name visible as the label text; only the gpio field is
+    // added, so the constraint badges (flash bus etc.) have a pin to find.
+    const ov = overrideGpio(pin.nums, fam)
+    return ov !== undefined
+      ? { pins: pin.nums, gpio: ov, name: pin.name }
       : { pins: pin.nums, label: specialLabel(pin.name), name: pin.name }
   }
   return {
@@ -366,7 +382,7 @@ out += `const ADC_RANGE = { id: 'adc_input_range' as const, severity: 'warning' 
 
 const keys = []
 for (const mod of MODULES) {
-  const sym = symbolGeometry(symBody(mod))
+  const sym = symbolGeometry(symBody(mod), FAM[mod.fam])
   if (!mod.symOnly) {
     const { pins, layout } = buildModule(mod, FAM[mod.fam])
     out += `export const ${mod.prefix}_PINS: Pin[] = [\n${pins.map(fmtPin).join(',\n')},\n]\n\n`
