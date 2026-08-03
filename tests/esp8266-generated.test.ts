@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { ESP12F_PINS, ESP12F_LAYOUT, ESP12F_SYMBOL } from '../src/data/chips/generated'
 import { enrichPins } from '../src/data/chips/enrich'
 import { getChip } from '../src/data/chips/catalog'
+import { familyFlashing } from '../src/data/info/flashing'
+import { FAMILY_SPECS } from '../src/data/chips/specs'
 
 describe('ESP-12F generated data', () => {
   const byGpio = (n: number) => ESP12F_PINS.find(p => p.gpio === n)
@@ -117,5 +119,27 @@ describe('ESP8266 catalog entry', () => {
     const notes = getChip('esp8266')!.notes.join(' ')
     expect(notes).toMatch(/GPIO15 must be LOW at boot/)
     expect(notes).toMatch(/GPIO2 must be HIGH at boot/)
+  })
+})
+
+describe('ESP8266 specs and flashing', () => {
+  it('has a specs entry', () => {
+    const s = FAMILY_SPECS['ESP8266']
+    expect(s).toBeDefined()
+    expect(s.cores).toBe(1)
+    expect(s.psram).toBe('None')
+  })
+
+  it('describes a UART-only flashing procedure for the bare module', () => {
+    const info = familyFlashing(getChip('esp8266')!)
+    expect(info).not.toBeNull()
+    const text = JSON.stringify(info)
+    expect(text).toMatch(/GPIO0/)
+    expect(text).not.toMatch(/USB Serial\/JTAG|USB-OTG/)
+  })
+
+  it('returns no bare-module procedure for the boards', () => {
+    expect(familyFlashing(getChip('nodemcu-v1')!)).toBeNull()
+    expect(familyFlashing(getChip('d1-mini')!)).toBeNull()
   })
 })

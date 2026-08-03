@@ -11,6 +11,7 @@ const BOOT_PIN: Record<string, number> = {
   'ESP32-C3': 9,
   'ESP32-C6': 9,
   'ESP32-H2': 9,
+  'ESP8266': 0,
 }
 
 // Families with a native USB path that can flash without an external adapter.
