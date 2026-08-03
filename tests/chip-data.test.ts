@@ -26,6 +26,18 @@ describe('chip data schema validation', () => {
         })
       })
 
+      // Regression: enrichPins() used to union its overlay capabilities back
+      // onto a pin regardless of usability, so e.g. the ESP8266's flash pins
+      // (isUsable: false) ended up advertising "SPI"/"UART" badges in
+      // PinTable while simultaneously being marked "never usable". Written
+      // over the whole catalog, not just the ESP8266, so it guards future
+      // chips and overlays too.
+      it('never advertises a capability on a pin marked isUsable: false', () => {
+        chip.pins.filter(p => !p.isUsable).forEach(pin => {
+          expect(pin.capabilities, `GPIO${pin.gpio} isUsable=false but capabilities=${JSON.stringify(pin.capabilities)}`).toEqual([])
+        })
+      })
+
       it('every constraint has all required fields', () => {
         chip.pins.forEach(pin => {
           pin.constraints.forEach(c => {
@@ -113,5 +125,27 @@ describe('filterPins', () => {
   it('free returns pins with zero constraints', () => {
     const result = filterPins(esp32.pins, 'free')
     result.forEach(p => expect(p.constraints).toHaveLength(0))
+  })
+
+  // Regression: TOUT/A0 has no output driver at all. filterPins('safe_output')
+  // is the site's direct answer to "which pin can I drive?" - recommending the
+  // analog input there is the exact class of mistake this site exists to
+  // prevent. Covers the bare module and both boards that break the pin out.
+  it('safe_output never recommends the ESP8266 analog input (A0/TOUT)', () => {
+    for (const id of ['esp8266', 'nodemcu-v1', 'd1-mini']) {
+      const chip = CHIPS.find(c => c.id === id)!
+      expect(chip, id).toBeDefined()
+      const result = filterPins(chip.pins, 'safe_output')
+      expect(result.some(p => p.gpio === 17), `${id}: safe_output should exclude GPIO17 (A0)`).toBe(false)
+    }
+  })
+
+  it('safe_output still returns the expected set for an existing ESP32 chip', () => {
+    const result = filterPins(esp32.pins, 'safe_output')
+    // GPIO2 is a normal, unrestricted GPIO on the classic ESP32 and must stay included.
+    expect(result.some(p => p.gpio === 2)).toBe(true)
+    // GPIO34 is input-only; GPIO6 is flash-reserved. Neither is a safe output.
+    expect(result.some(p => p.gpio === 34)).toBe(false)
+    expect(result.some(p => p.gpio === 6)).toBe(false)
   })
 })

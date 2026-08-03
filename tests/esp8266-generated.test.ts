@@ -46,8 +46,44 @@ describe('ESP-12F generated data', () => {
     expect(p.constraints.some(c => c.id === 'adc_input_range')).toBe(true)
   })
 
+  // Finding 1 (critical): TOUT has no output driver whatsoever. Without an
+  // input_only constraint, filterPins('safe_output') - the site's direct
+  // answer to "which pin can I drive?" - recommended it as a safe output.
+  it('marks the analog input input_only, so it can never be recommended as a safe output', () => {
+    const p = byGpio(17)!
+    expect(p.constraints.some(c => c.id === 'input_only')).toBe(true)
+  })
+
   it('tags no pin with i2c, because ESP8266 I2C is bit-banged', () => {
     expect(ESP12F_PINS.some(p => p.capabilities.includes('i2c'))).toBe(false)
+  })
+
+  // Regression: KiCad's ESP-12E symbol names the reset pad '~{RST}' (its
+  // overbar notation for an active-low signal). specialLabel() used to match
+  // only the bare 'RST' pattern, so this fell through to the raw name and
+  // both the module and schematic views rendered the literal string
+  // '~{RST}' instead of resolving to the EN/RST label every other module
+  // uses. Pad 8 (named plain 'VCC' by KiCad) is covered in the same pass:
+  // every other module in the catalog renders '3V3' for the supply pad.
+  it('resolves the KiCad overbar reset pad to EN, and the VCC pad to 3V3, not the literal KiCad strings', () => {
+    const resetPad = ESP12F_LAYOUT.left.find(p => p.pinNumber === 1)
+    expect(resetPad?.label).toBe('EN')
+    const supplyPad = ESP12F_LAYOUT.top?.find(p => p.pinNumber === 8) ?? ESP12F_LAYOUT.left.find(p => p.pinNumber === 8)
+    expect(supplyPad?.label).toBe('3V3')
+
+    const allLayoutLabels = [
+      ...ESP12F_LAYOUT.left, ...ESP12F_LAYOUT.right,
+      ...ESP12F_LAYOUT.bottom, ...(ESP12F_LAYOUT.top ?? []),
+    ].map(p => p.label)
+    expect(allLayoutLabels).not.toContain('~{RST}')
+    expect(allLayoutLabels).not.toContain('VCC')
+
+    const allSymbolLabels = [
+      ...ESP12F_SYMBOL.left, ...ESP12F_SYMBOL.right,
+      ...(ESP12F_SYMBOL.bottom ?? []), ...(ESP12F_SYMBOL.top ?? []),
+    ].map(p => p.label).filter(Boolean)
+    expect(allSymbolLabels).not.toContain('~{RST}')
+    expect(allSymbolLabels).not.toContain('VCC')
   })
 
   it('lays out all 22 pads and carries the official symbol', () => {

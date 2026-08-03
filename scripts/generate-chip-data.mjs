@@ -146,15 +146,22 @@ function fpAntennaMm(dir, f, pads, bodyMm) {
   const gap = Math.min(...ys) - o.y0 - (o.h - bodyMm.h)
   return gap > 2 ? +gap.toFixed(2) : undefined
 }
+// KiCad writes an active-low signal as ~{NAME} (overbar notation). Strip that
+// wrapper before matching so e.g. the ESP-12F's reset pad (~{RST}) resolves to
+// the same EN/RST label every other module uses, instead of falling through
+// to the raw '~{RST}' string. General on purpose: any symbol in either library
+// that names a pin this way (RST, WP, HOLD, ...) gets the same treatment.
+const stripOverbar = name => (name || '').replace(/~\{([^}]*)\}/g, '$1')
 const specialLabel = name => {
-  const u = (name || '').toUpperCase()
+  const clean = stripOverbar(name)
+  const u = clean.toUpperCase()
   if (/CHIP[_/]?PU|RESET|^EN$|^RST$/.test(u)) return 'EN'
-  if (/3V3|3\.3V|VDD3P3/.test(u)) return '3V3'
+  if (/3V3|3\.3V|VDD3P3|^VCC$/.test(u)) return '3V3'
   if (/VBUS|^5V|^VIN/.test(u)) return '5V'
   if (/VBAT/.test(u)) return 'VBAT'
   if (/GND|VSS/.test(u)) return 'GND'
   if (/^NC$|^$/.test(u)) return 'NC'
-  return (name || 'NC').split('/')[0]
+  return (clean || 'NC').split('/')[0]
 }
 function nameTokens(raw) {
   let toks = raw.split('/').map(s => s.trim()).filter(Boolean)
@@ -245,7 +252,11 @@ function buildModule(mod, fam) {
   const fullFlashBus = fam.flashBus && seen.has(6)
   const pinObjs = [...seen.entries()].sort((a, b) => a[0] - b[0]).map(([gpio, raw]) => {
     const toks = nameTokens(raw)
-    const inputOnly = fam.inputOnly?.includes(gpio)
+    const isAnalog = fam.analog?.gpio === gpio
+    // The synthetic analog pin (ESP8266 A0/TOUT) has no output driver at all -
+    // it must carry INPUT_ONLY the same as a real input-only GPIO, or the
+    // "safe output" filter recommends wiring an output to it.
+    const inputOnly = fam.inputOnly?.includes(gpio) || isAnalog
     const flashDanger = fam.flashDanger
       ? fam.flashDanger.includes(gpio)
       : fam.flashBus && ([6, 7, 8, 11].includes(gpio) || (fullFlashBus && [9, 10].includes(gpio)))
@@ -259,10 +270,9 @@ function buildModule(mod, fam) {
     if (fam.strapping?.includes(gpio)) cs.push('STRAP')
     if (fam.serialConsole?.includes(gpio)) cs.push('SERIAL')
     if (fam.noInterrupt?.includes(gpio)) cs.push('NO_INT', 'NO_PULLUP')
-    if (fam.analog?.gpio === gpio) cs.push('ADC_RANGE')
+    if (isAnalog) cs.push('ADC_RANGE')
     if (fam.adc2Wifi && toks.some(t => /^ADC2/i.test(t))) cs.push('ADC2_WIFI')
     if (toks.some(t => /USB_D/i.test(t))) cs.push('USB')
-    const isAnalog = fam.analog?.gpio === gpio
     return {
       gpio,
       names: isAnalog ? fam.analog.names : toks,
@@ -367,7 +377,7 @@ function fmtArr(a) {
   return '[' + a.map(p => p.gpio !== undefined ? `{ pinNumber: ${p.pinNumber}, gpio: ${p.gpio} }` : `{ pinNumber: ${p.pinNumber}, label: '${p.label}' }`).join(', ') + ']'
 }
 
-let out = `// AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints).\n// Do NOT edit by hand - run: KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs\n// Pin names and physical pad layout are authoritative (datasheet-equivalent).\nimport type { Capability, Pin, PackageLayout, SymbolLayout } from '../../types/chip'\n\n`
+let out = `// AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints),\n// and for the ESP8266 (no Espressif KiCad data exists) from KiCad's own stock\n// RF_Module library instead.\n// Do NOT edit by hand - run: KICAD_LIB=./kicad-libraries KICAD_STOCK=./kicad-symbols KICAD_STOCK_FP=./kicad-footprints node scripts/generate-chip-data.mjs\n// Pin names and physical pad layout are authoritative (datasheet-equivalent).\nimport type { Capability, Pin, PackageLayout, SymbolLayout } from '../../types/chip'\n\n`
 out += `const INPUT_ONLY = { id: 'input_only' as const, severity: 'warning' as const, title: 'Input only', description: 'This pin has no output driver or internal pull resistors. Use only as a digital/analog input.' }\n`
 out += `const STRAP = { id: 'strapping_pin' as const, severity: 'warning' as const, title: 'Strapping pin', description: 'Sampled at boot to set boot mode / configuration. Avoid driving it at reset unless you know the required level.' }\n`
 out += `const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, title: 'ADC2 unusable with Wi-Fi', description: 'ADC2 is claimed by the Wi-Fi driver; analogRead() on this pin fails while Wi-Fi is active. Prefer ADC1 pins.' }\n`

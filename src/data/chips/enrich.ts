@@ -84,6 +84,12 @@ export function enrichPins(chipId: string, pins: Pin[]): Pin[] {
     const e = table[p.gpio]
     if (!e) return p
     const names = [...p.names, ...(e.names ?? []).filter(n => !p.names.includes(n))]
+    // Names are informative and harmless even on a pin that can never be used
+    // (e.g. the ESP8266 flash pins) - worth showing which SPI/UART role a pad
+    // carries. Capabilities are a different story: PinTable renders them as
+    // "you can do this" badges, so merging them onto an isUsable: false pin
+    // would advertise a peripheral on a pin the chip itself marks off-limits.
+    if (!p.isUsable) return { ...p, names }
     const capSet = new Set<Capability>([...p.capabilities, ...(e.caps ?? [])])
     const capabilities = CAP_ORDER.filter(c => capSet.has(c))
     return { ...p, names, capabilities }

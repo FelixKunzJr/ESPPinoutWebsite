@@ -1,5 +1,7 @@
-// AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints).
-// Do NOT edit by hand - run: KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs
+// AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints),
+// and for the ESP8266 (no Espressif KiCad data exists) from KiCad's own stock
+// RF_Module library instead.
+// Do NOT edit by hand - run: KICAD_LIB=./kicad-libraries KICAD_STOCK=./kicad-symbols KICAD_STOCK_FP=./kicad-footprints node scripts/generate-chip-data.mjs
 // Pin names and physical pad layout are authoritative (datasheet-equivalent).
 import type { Capability, Pin, PackageLayout, SymbolLayout } from '../../types/chip'
 
@@ -917,12 +919,12 @@ export const ESP12F_PINS: Pin[] = [
   { gpio: 14, names: ["GPIO14"], capabilities: ["gpio","pwm"] as Capability[], constraints: [], isUsable: true },
   { gpio: 15, names: ["GPIO15"], capabilities: ["gpio","pwm"] as Capability[], constraints: [STRAP], isUsable: true },
   { gpio: 16, names: ["GPIO16"], capabilities: ["gpio"] as Capability[], constraints: [NO_INT, NO_PULLUP], isUsable: true },
-  { gpio: 17, names: ["A0","TOUT"], capabilities: ["adc1"] as Capability[], constraints: [ADC_RANGE], isUsable: true },
+  { gpio: 17, names: ["A0","TOUT"], capabilities: ["adc1"] as Capability[], constraints: [INPUT_ONLY, ADC_RANGE], isUsable: true },
 ]
 
 export const ESP12F_LAYOUT: PackageLayout = {
   name: 'ESP-12F',
-  left: [{ pinNumber: 1, label: '~{RST}' }, { pinNumber: 2, gpio: 17 }, { pinNumber: 3, label: 'EN' }, { pinNumber: 4, gpio: 16 }, { pinNumber: 5, gpio: 14 }, { pinNumber: 6, gpio: 12 }, { pinNumber: 7, gpio: 13 }, { pinNumber: 8, label: 'VCC' }],
+  left: [{ pinNumber: 1, label: 'EN' }, { pinNumber: 2, gpio: 17 }, { pinNumber: 3, label: 'EN' }, { pinNumber: 4, gpio: 16 }, { pinNumber: 5, gpio: 14 }, { pinNumber: 6, gpio: 12 }, { pinNumber: 7, gpio: 13 }, { pinNumber: 8, label: '3V3' }],
   bottom: [{ pinNumber: 9, gpio: 11 }, { pinNumber: 10, gpio: 7 }, { pinNumber: 11, gpio: 9 }, { pinNumber: 12, gpio: 10 }, { pinNumber: 13, gpio: 8 }, { pinNumber: 14, gpio: 6 }],
   right: [{ pinNumber: 22, gpio: 1 }, { pinNumber: 21, gpio: 3 }, { pinNumber: 20, gpio: 5 }, { pinNumber: 19, gpio: 4 }, { pinNumber: 18, gpio: 0 }, { pinNumber: 17, gpio: 2 }, { pinNumber: 16, gpio: 15 }, { pinNumber: 15, label: 'GND' }],
   bodyMm: { w: 18.1, h: 25.3 },
@@ -930,10 +932,10 @@ export const ESP12F_LAYOUT: PackageLayout = {
 }
 
 export const ESP12F_SYMBOL: SymbolLayout = {
-  left: [{ pins: [1], label: '~{RST}', name: "~{RST}" }, { pins: [3], label: 'EN', name: "EN" }, { pins: [2], gpio: 17, name: "ADC" }, { pins: [9], gpio: 11, name: "CS0" }, { pins: [10], gpio: 7, name: "MISO" }, { pins: [11], gpio: 9, name: "GPIO9" }, { pins: [12], gpio: 10, name: "GPIO10" }, { pins: [13], gpio: 8, name: "MOSI" }, { pins: [14], gpio: 6, name: "SCLK" }],
+  left: [{ pins: [1], label: 'EN', name: "~{RST}" }, { pins: [3], label: 'EN', name: "EN" }, { pins: [2], gpio: 17, name: "ADC" }, { pins: [9], gpio: 11, name: "CS0" }, { pins: [10], gpio: 7, name: "MISO" }, { pins: [11], gpio: 9, name: "GPIO9" }, { pins: [12], gpio: 10, name: "GPIO10" }, { pins: [13], gpio: 8, name: "MOSI" }, { pins: [14], gpio: 6, name: "SCLK" }],
   right: [{ pins: [18], gpio: 0, name: "GPIO0" }, { pins: [22], gpio: 1, name: "GPIO1/TXD" }, { pins: [17], gpio: 2, name: "GPIO2" }, { pins: [21], gpio: 3, name: "GPIO3/RXD" }, { pins: [19], gpio: 4, name: "GPIO4" }, { pins: [20], gpio: 5, name: "GPIO5" }, { pins: [6], gpio: 12, name: "GPIO12" }, { pins: [7], gpio: 13, name: "GPIO13" }, { pins: [5], gpio: 14, name: "GPIO14" }, { pins: [16], gpio: 15, name: "GPIO15" }, { pins: [4], gpio: 16, name: "GPIO16" }],
   bottom: [{ pins: [15], label: 'GND', name: "GND" }],
-  top: [{ pins: [8], label: 'VCC', name: "VCC" }],
+  top: [{ pins: [8], label: '3V3', name: "VCC" }],
 }
 
 export const ESP32_DEVKITC_PINS: Pin[] = [

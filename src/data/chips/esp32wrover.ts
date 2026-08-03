@@ -48,7 +48,11 @@ export const esp32wrover: Chip = {
   },
   pins: ESP32_BASE_PINS.map(pin => {
     if (pin.gpio === 16 || pin.gpio === 17) {
-      return { ...pin, constraints: [PSRAM_RESERVED], isUsable: false }
+      // Same principle as the generator's flash-reserved pins and enrichPins:
+      // a pin marked isUsable: false must not carry capabilities, or PinTable
+      // renders "you can do this" badges (PWM/UART, inherited from the base
+      // ESP32's U2RXD/U2TXD pins) on a pad that is hard-wired to PSRAM.
+      return { ...pin, capabilities: [], constraints: [PSRAM_RESERVED], isUsable: false }
     }
     return pin
   }),
