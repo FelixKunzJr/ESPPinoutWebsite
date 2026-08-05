@@ -3,6 +3,18 @@ import type { Chip, PinAssignment } from '../types/chip'
 
 export type DiagramView = 'schematic' | 'module'
 
+// The export container holds more than the schematic sheet: the diagram
+// header carries a "Report mistake" link whose warning glyph is itself an
+// <svg>, and it comes first in document order. Selecting a bare
+// `#pinout-diagram-export svg` therefore picked up that 12px exclamation
+// triangle, so both downloads shipped a giant warning sign instead of the
+// pinout (issue #18). Match the sheet by its explicit marker attribute.
+const SHEET_SELECTOR = '#pinout-diagram-export svg[data-diagram-sheet="schematic"]'
+
+export function schematicSheet(): SVGSVGElement | null {
+  return document.querySelector<SVGSVGElement>(SHEET_SELECTOR)
+}
+
 async function drawWatermark(canvas: HTMLCanvasElement, scale: number) {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
@@ -64,7 +76,7 @@ export async function exportPng(chip: Chip, view: DiagramView) {
     // The schematic is a self-contained SVG sheet - rasterize it directly.
     // Full sheet regardless of zoom/scroll, no UI chrome, crisp at 2x, and
     // the sheet's own title block already carries the site credit.
-    const svg = document.querySelector<SVGSVGElement>('#pinout-diagram-export svg')
+    const svg = schematicSheet()
     if (!svg) return
     const vb = svg.viewBox.baseVal
     const w = vb?.width || svg.clientWidth
@@ -125,7 +137,7 @@ export function openPrintSheet(chip: Chip, view: DiagramView, mapping: PinAssign
   let diagramHtml: string
   let moduleCss = ''
   if (view === 'schematic') {
-    const svg = document.querySelector<SVGSVGElement>('#pinout-diagram-export svg')
+    const svg = schematicSheet()
     if (!svg) { w.close(); return }
     const clone = deinteractivize(svg.cloneNode(true) as SVGSVGElement)
     clone.removeAttribute('width')

@@ -464,6 +464,11 @@ export function SchematicDiagram() {
       </div>
       <div ref={scrollRef} className="px-4 pb-3 pt-2 overflow-x-auto">
       <svg
+        // Marks this element as THE sheet for the PNG/PDF exporters. The
+        // export container also holds small icon <svg>s (the header's
+        // "Report mistake" warning glyph), and those come first in document
+        // order - see exportDiagram.ts.
+        data-diagram-sheet="schematic"
         width={fit ? '100%' : svgW}
         height={fit ? undefined : svgH}
         viewBox={`0 0 ${svgW} ${svgH}`}
