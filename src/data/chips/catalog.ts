@@ -67,7 +67,7 @@ const FAMILIES: Record<string, Family> = {
       'No Bluetooth - Wi-Fi only.',
       'Native USB (USB OTG) on GPIO19/20 - do not use as plain GPIO while USB is connected.',
       'GPIO46 is input-only (no output, no pull-up/down).',
-      'ADC2 has the same Wi-Fi conflict as the classic ESP32.',
+      'ADC2 (GPIO11-20) is shared with Wi-Fi: reads may fail while Wi-Fi is active, and analogRead() does not report it. Prefer ADC1 (GPIO1-10).',
       'GPIO0/45/46 are strapping pins sampled at boot.',
     ],
   },
@@ -76,7 +76,8 @@ const FAMILIES: Record<string, Family> = {
     arch: 'Dual-core Xtensa LX7', radios: 'Wi-Fi 4 · BLE 5', accent: '#22c55e', totalGpio: 45,
     datasheetUrl: 'https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf',
     notes: [
-      'No ADC2/Wi-Fi conflict - the S3 redesigned the ADC/Wi-Fi arbitration.',
+      'ADC2 (GPIO11-20) is shared with Wi-Fi: reads may fail while Wi-Fi is active, and analogRead() does not report it. Prefer ADC1 (GPIO1-10).',
+      'ESP-IDF does not support ADC2 in continuous (DMA) mode on the S3 (errata ADC-183: all current revisions, v0.0-v0.2, no fix scheduled).',
       'GPIO19/20 are USB Serial/JTAG D−/D+. Do not use as GPIO while USB is connected.',
       'GPIO0 is a strapping pin (HIGH = normal boot, LOW = download mode).',
       'GPIO3/45/46 are strapping pins - avoid driving them at boot.',
@@ -90,7 +91,7 @@ const FAMILIES: Record<string, Family> = {
     datasheetUrl: 'https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf',
     notes: [
       'RISC-V single-core. No classic Bluetooth.',
-      'No ADC2 (all ADC channels are ADC1) - no ADC/Wi-Fi conflict.',
+      'GPIO5 is ADC2, which ESP-IDF no longer supports on the C3 (hardware limitation, unstable results). Use ADC1 (GPIO0-4) for analog reads.',
       'GPIO18/19 are USB Serial/JTAG D−/D+.',
       'GPIO2, 8, 9 are strapping pins.',
       'No touch sensor, no DAC.',

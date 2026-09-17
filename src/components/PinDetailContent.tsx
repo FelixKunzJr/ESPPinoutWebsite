@@ -3,6 +3,7 @@ import { ConstraintBadge } from './ConstraintBadge'
 import { reportMistakeUrl } from '../utils/github'
 import { IconWarning } from './icons'
 import { specialInterfaces, matrixPeripherals, hasGpioMatrix } from '../data/routing'
+import { adc2Description } from '../data/adc2'
 import type { Pin } from '../types/chip'
 
 // The pin detail content, independent of how it is presented. Three shells
@@ -10,8 +11,8 @@ import type { Pin } from '../types/chip'
 // and the drill-down inside the phone pin-table sheet.
 
 const CAP_DETAILS: Record<string, { label: string; desc: string }> = {
-  adc1:  { label: 'ADC1',  desc: 'Analog-to-digital converter, channel 1. Safe to use while WiFi is active.' },
-  adc2:  { label: 'ADC2',  desc: 'Analog-to-digital converter, channel 2. Shared with WiFi driver - readings fail while WiFi is on.' },
+  adc1:  { label: 'ADC1',  desc: 'Analog-to-digital converter, unit 1. Safe to use while WiFi is active.' },
+  adc2:  { label: 'ADC2',  desc: '' }, // family-specific, see adc2Description()
   dac:   { label: 'DAC',   desc: 'Digital-to-analog converter. True analog output (not PWM).' },
   touch: { label: 'Touch', desc: 'Capacitive touch sensor input.' },
   pwm:   { label: 'PWM',   desc: 'Pulse-width modulation via LEDC or MCPWM. Can drive LEDs, servos, buzzers.' },
@@ -76,7 +77,12 @@ export function PinDetailBody({ pin }: { pin: Pin }) {
 
   const capEntries = pin.capabilities
     .filter(c => c !== 'gpio')
-    .map(c => ({ cap: c, detail: CAP_DETAILS[c] ?? { label: c.toUpperCase(), desc: '' } }))
+    .map(c => ({
+      cap: c,
+      detail: c === 'adc2'
+        ? { label: 'ADC2', desc: adc2Description(chip.family) }
+        : CAP_DETAILS[c] ?? { label: c.toUpperCase(), desc: '' },
+    }))
 
   return (
   <div className="p-4 space-y-5">

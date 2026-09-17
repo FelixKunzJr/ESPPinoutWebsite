@@ -290,7 +290,6 @@ function buildModule(mod, fam) {
     if (fam.serialConsole?.includes(gpio)) cs.push('SERIAL')
     if (fam.noInterrupt?.includes(gpio)) cs.push('NO_INT', 'NO_PULLUP')
     if (isAnalog) cs.push('ADC_RANGE')
-    if (fam.adc2Wifi && toks.some(t => /^ADC2/i.test(t))) cs.push('ADC2_WIFI')
     if (toks.some(t => /USB_D/i.test(t))) cs.push('USB')
     return {
       gpio,
@@ -307,21 +306,23 @@ function buildModule(mod, fam) {
   return { pins: pinObjs, layout: { name: mod.name, ...buildLayout(pins, pads, fam), bodyMm, antennaMm } }
 }
 
-// Per-family boot/strapping rules (the lore KiCad doesn't encode).
+// Per-family boot/strapping rules (the lore KiCad doesn't encode). ADC2 rules
+// are not here: applyEspressif() attaches them from src/data/adc2.ts, because
+// some dev-board symbols do not name the ADC2 function at all.
 const FAM = {
-  esp32: { strapping: [0, 2, 5, 12, 15], inputOnly: [34, 35, 36, 37, 38, 39], adc2Wifi: true, flashBus: true },
-  s2:    { strapping: [0, 45, 46], inputOnly: [46], adc2Wifi: true },
-  s3:    { strapping: [0, 3, 45, 46], inputOnly: [], adc2Wifi: false },
-  c3:    { strapping: [2, 8, 9], inputOnly: [], adc2Wifi: false },
-  c6:    { strapping: [8, 9, 15], inputOnly: [], adc2Wifi: false },
-  h2:    { strapping: [2, 3, 8, 9], inputOnly: [], adc2Wifi: false },
-  c5:    { strapping: [7, 25, 26, 27, 28], inputOnly: [], adc2Wifi: false },
-  c2:    { strapping: [8, 9], inputOnly: [], adc2Wifi: false },
+  esp32: { strapping: [0, 2, 5, 12, 15], inputOnly: [34, 35, 36, 37, 38, 39], flashBus: true },
+  s2:    { strapping: [0, 45, 46], inputOnly: [46] },
+  s3:    { strapping: [0, 3, 45, 46], inputOnly: [] },
+  c3:    { strapping: [2, 8, 9], inputOnly: [] },
+  c6:    { strapping: [8, 9, 15], inputOnly: [] },
+  h2:    { strapping: [2, 3, 8, 9], inputOnly: [] },
+  c5:    { strapping: [7, 25, 26, 27, 28], inputOnly: [] },
+  c2:    { strapping: [8, 9], inputOnly: [] },
   // ESP8266: GPIO6-11 are the SPI flash bus. Unlike the ESP32 modules, an
   // ESP-12F breaks out 9 and 10, and they do work when the flash runs in DIO
   // mode, so those two are a warning rather than a hard danger.
   esp8266: {
-    strapping: [0, 2, 15], inputOnly: [], adc2Wifi: false,
+    strapping: [0, 2, 15], inputOnly: [],
     flashBus: true, flashDanger: [6, 7, 8, 11], flashWarn: [9, 10],
     serialConsole: [1, 3], noInterrupt: [16], softI2c: true,
     // KiCad's ESP-12E symbol names these pads by SPI role with no GPIO number,
@@ -406,7 +407,6 @@ function fmtArr(a) {
 let out = `// AUTO-GENERATED from Espressif's official KiCad libraries (symbols + footprints),\n// and for the ESP8266 (no Espressif KiCad data exists) from KiCad's own stock\n// RF_Module library instead.\n// Do NOT edit by hand - run: KICAD_LIB=./kicad-libraries KICAD_STOCK=./kicad-symbols KICAD_STOCK_FP=./kicad-footprints node scripts/generate-chip-data.mjs\n// Pin names and physical pad layout are authoritative (datasheet-equivalent).\nimport type { Capability, Pin, PackageLayout, SymbolLayout } from '../../types/chip'\n\n`
 out += `const INPUT_ONLY = { id: 'input_only' as const, severity: 'warning' as const, title: 'Input only', description: 'This pin has no output driver or internal pull resistors. Use only as a digital/analog input.' }\n`
 out += `const STRAP = { id: 'strapping_pin' as const, severity: 'warning' as const, title: 'Strapping pin', description: 'Sampled at boot to set boot mode / configuration. Avoid driving it at reset unless you know the required level.' }\n`
-out += `const ADC2_WIFI = { id: 'adc2_no_wifi' as const, severity: 'warning' as const, title: 'ADC2 unusable with Wi-Fi', description: 'ADC2 is claimed by the Wi-Fi driver; analogRead() on this pin fails while Wi-Fi is active. Prefer ADC1 pins.' }\n`
 out += `const USB = { id: 'usb_jtag' as const, severity: 'warning' as const, title: 'USB / Serial-JTAG', description: 'Part of the native USB (Serial/JTAG) interface. Avoid repurposing while USB is in use.' }\n`
 out += `const FLASH = { id: 'flash_reserved' as const, severity: 'danger' as const, title: 'Reserved for flash', description: 'Wired to the SPI flash of the module. Using it for anything else will crash the chip.' }\n`
 out += `const OSPI = { id: 'ospi_reserved' as const, severity: 'warning' as const, title: 'OSPI PSRAM', description: 'On modules with Octal SPI PSRAM (ESP32-S3R8 / R16V based, e.g. N8R8/N16R8 variants), IO35, IO36 and IO37 are connected to the PSRAM and are not available for other uses. Free on quad-PSRAM and no-PSRAM variants.' }\n`

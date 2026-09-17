@@ -8,6 +8,7 @@ export type Capability =
 
 export type ConstraintId =
   | 'adc2_no_wifi'
+  | 'adc2_unsupported'
   | 'input_only'
   | 'strapping_pin'
   | 'flash_reserved'

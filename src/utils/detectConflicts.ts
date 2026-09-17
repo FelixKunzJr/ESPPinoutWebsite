@@ -1,4 +1,5 @@
 import type { PinAssignment, Chip } from '../types/chip'
+import { adc2ConflictMessage } from '../data/adc2'
 
 export interface Conflict {
   gpio: number
@@ -25,9 +26,10 @@ export function detectConflicts(chip: Chip, mapping: PinAssignment[]): Conflict[
       conflicts.push({ gpio: pin.gpio, severity: 'danger', message: `GPIO${pin.gpio} is input-only but assigned as ${assignment.role}.` })
     }
 
-    // ADC2 while WiFi in use
-    if (chipHasWifi && pin.capabilities.includes('adc2') && assignment.role === 'ADC') {
-      conflicts.push({ gpio: pin.gpio, severity: 'warning', message: `GPIO${pin.gpio} uses ADC2 - readings will fail while WiFi is active. Use an ADC1 pin instead.` })
+    // ADC2: blocked or unreliable with Wi-Fi, or unsupported, depending on the family
+    if (pin.capabilities.includes('adc2') && assignment.role === 'ADC') {
+      const message = adc2ConflictMessage(chip.family, chipHasWifi, pin.gpio)
+      if (message) conflicts.push({ gpio: pin.gpio, severity: 'warning', message })
     }
 
     // Strapping pin used as button (pulled to GND)

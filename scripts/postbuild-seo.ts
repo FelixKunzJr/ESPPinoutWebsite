@@ -7,6 +7,7 @@ import { join } from 'node:path'
 import sharp from 'sharp'
 import { CHIPS } from '../src/data/chips'
 import { hasGpioMatrix } from '../src/data/routing'
+import { adc2Label } from '../src/data/adc2'
 import type { Chip } from '../src/types/chip'
 
 const DIST = join(import.meta.dirname, '..', 'dist')
@@ -103,7 +104,7 @@ function capLabel(cap: string, family: string): string {
   switch (cap) {
     case 'gpio':  return 'Digital input/output'
     case 'adc1':  return 'ADC1 analog input (works while Wi-Fi is active)'
-    case 'adc2':  return 'ADC2 analog input (unusable while Wi-Fi is active)'
+    case 'adc2':  return adc2Label(family)
     case 'dac':   return 'DAC analog output'
     case 'touch': return 'Capacitive touch sensing'
     case 'pwm':   return matrix ? 'PWM output (LEDC)' : 'PWM output (software)'

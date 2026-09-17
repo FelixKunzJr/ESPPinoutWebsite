@@ -1,5 +1,6 @@
 import type { Capability, Pin } from '../../types/chip'
 import { ESPRESSIF_GPIO } from './espressifGpio'
+import { adc2Constraint } from '../adc2'
 
 // Supplemental pin functions for chips whose Espressif KiCad symbol shipped with
 // sparse pin names, so the generator could not extract the analog / JTAG / crystal
@@ -159,6 +160,12 @@ export function applyEspressif(target: string | undefined, pins: Pin[]): Pin[] {
         title: 'Strapping pin',
         description: `Sampled at reset: ${up.strap.toLowerCase().startsWith('has') ? up.strap.charAt(0).toLowerCase() + up.strap.slice(1) : up.strap}. Avoid external loads that change its level at boot.`,
       }]
+    }
+    const adc2 = adc2Constraint(target!)
+    if (adc2 && capSet.has('adc2') && !constraints.some(c => c.id === adc2.id)) {
+      // Ahead of the USB warning, matching how the badges read left to right.
+      const usb = constraints.findIndex(c => c.id === 'usb_jtag')
+      constraints = usb < 0 ? [...constraints, adc2] : [...constraints.slice(0, usb), adc2, ...constraints.slice(usb)]
     }
     const ordered = CAP_ORDER.filter(c => capSet.has(c))
     const extra = [...capSet].filter(c => !CAP_ORDER.includes(c))

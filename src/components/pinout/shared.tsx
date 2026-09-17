@@ -142,6 +142,7 @@ export function SpecialBadge({ label }: { label: string }) {
 // One-word summary of what each constraint affects.
 export const AFFECTED_WORD: Record<ConstraintId, string> = {
   adc2_no_wifi:    'ADC2',
+  adc2_unsupported: 'ADC2',
   input_only:      'In-only',
   strapping_pin:   'Boot',
   flash_reserved:  'Flash',
@@ -160,7 +161,7 @@ export const AFFECTED_WORD: Record<ConstraintId, string> = {
 
 // Constraints whose ⚠ is pinned onto the specific function badge it concerns
 // (e.g. the ADC2/USB badge) rather than shown as a separate word chip.
-const ATTACHED_IDS = new Set<ConstraintId>(['adc2_no_wifi', 'usb_jtag'])
+const ATTACHED_IDS = new Set<ConstraintId>(['adc2_no_wifi', 'adc2_unsupported', 'usb_jtag'])
 
 export function sevStyle(sev: Severity) {
   return sev === 'danger'
@@ -171,7 +172,7 @@ export function sevStyle(sev: Severity) {
 // If a constraint attaches to this badge name, return its severity (else null).
 function attachedSeverity(pin: Pin, name: string): Severity | null {
   for (const c of pin.constraints) {
-    if (c.id === 'adc2_no_wifi' && /^ADC2/.test(name)) return c.severity
+    if ((c.id === 'adc2_no_wifi' || c.id === 'adc2_unsupported') && /^ADC2/.test(name)) return c.severity
     if (c.id === 'usb_jtag' && /USB/i.test(name)) return c.severity
   }
   return null
@@ -306,7 +307,7 @@ export function legendFor(view: 'schematic' | 'module'): LegendItem[] {
     { bg: C.power, text: '#fff',     label: 'Power' },
     { bg: C.gnd,   text: '#9ca3af',  label: 'GND' },
     { bg: C.adc1,  text: '#fff',     label: 'ADC1 (WiFi-safe)' },
-    { bg: C.adc2,  text: '#fff',     label: 'ADC2 (WiFi conflict)' },
+    { bg: C.adc2,  text: '#fff',     label: 'ADC2 (restricted)' },
     { bg: C.dac,   text: '#fff',     label: 'DAC' },
     { bg: C.touch, text: '#fff',     label: 'Touch' },
     { bg: C.gpio,  text: '#fff',     label: 'GPIO' },

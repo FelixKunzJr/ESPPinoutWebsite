@@ -27,7 +27,7 @@ git clone --depth 1 https://github.com/espressif/kicad-libraries
 KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs
 ```
 
-`src/data/chips/generated.ts` is the output; do not edit it by hand. Family-level lore KiCad doesn't encode (strapping pins, boot modes, ADC2/Wi-Fi arbitration, flash-bus rules) lives in the generator's `FAM` table and in `src/data/chips/catalog.ts`.
+`src/data/chips/generated.ts` is the output; do not edit it by hand. Family-level lore KiCad doesn't encode (strapping pins, boot modes, flash-bus rules) lives in the generator's `FAM` table and in `src/data/chips/catalog.ts`; ADC2 behavior per family lives in `src/data/adc2.ts`.
 
 On top of that, per-GPIO alternate functions, RTC/low-power domain flags, and strapping roles are merged from the dataset of Espressif's official [esp-gpio-tool](https://github.com/espressif/esp-gpio-tool) (Apache-2.0, vendored in `vendor/esp-gpio-tool/`, regenerated with `node scripts/import-esp-gpio-tool.mjs`). The test suite (`tests/espressif-crosscheck.test.ts`) cross-validates the entire catalog against that dataset on every run, so the site can never silently drift from Espressif's own pin data.
 

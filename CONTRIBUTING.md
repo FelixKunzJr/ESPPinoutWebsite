@@ -22,7 +22,7 @@ The most valuable thing you can give us is a **gotcha**: the "GPIO12 as a button
 - **Verbatim Espressif names.** Pin names match the official symbol exactly (`SENSOR_VP/GPIO36/ADC1_CH0`), not a cleaned-up version.
 - **Plain hyphens only.** No en dashes or em dashes anywhere in UI text or data.
 - **Constraints are plain English.** A warning says what breaks and how to avoid it, e.g. "GPIO0 must be HIGH/floating at boot to boot from flash; LOW enters download mode."
-- **Severity is honest.** `danger` = it will break your project (flash pins, ADC2 read while Wi-Fi is on). `warning` = it can bite you (strapping pins, USB/JTAG lines).
+- **Severity is honest.** `danger` = it will break your project (flash pins, an output on an input-only pin). `warning` = it can bite you (strapping pins, USB/JTAG lines, ADC2 with Wi-Fi).
 
 ## How the data is built
 
@@ -34,7 +34,7 @@ KICAD_LIB=./kicad-libraries node scripts/generate-chip-data.mjs
 ```
 
 - `src/data/chips/generated.ts` is the **output — never hand-edit it.** A hand edit is overwritten on the next regenerate, and hand-copied datasheet data is exactly the drift we're avoiding.
-- Family-level lore KiCad doesn't encode (strapping pins, boot modes, ADC2/Wi-Fi arbitration, flash-bus rules) lives in the generator's `FAM` table in `scripts/generate-chip-data.mjs` and in `src/data/chips/catalog.ts`.
+- Family-level lore KiCad doesn't encode (strapping pins, boot modes, flash-bus rules) lives in the generator's `FAM` table in `scripts/generate-chip-data.mjs` and in `src/data/chips/catalog.ts`. ADC2 behavior per family (Wi-Fi conflict, driver support) lives in `src/data/adc2.ts`, with its sources.
 - The two original hand-authored chips, `src/data/chips/esp32.ts` and `esp32wrover.ts`, are the exception; everything else flows through the generator.
 - Espressif does not publish KiCad data for the ESP8266, so the ESP-12F is generated from [KiCad's own stock symbol and footprint libraries](https://gitlab.com/kicad/libraries) instead, licensed CC-BY-SA 4.0 with the KiCad library exception.
 

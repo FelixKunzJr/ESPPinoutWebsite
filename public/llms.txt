@@ -26,9 +26,9 @@ Always verify against the official datasheet before committing hardware.
 
 ## Family differences (constraints that change per chip)
 
-- ESP32-S2: single-core, Wi-Fi only (no Bluetooth). Native USB OTG on GPIO19/20. GPIO46 input-only. GPIO0/45/46 are strapping pins. ADC2 has the same Wi-Fi conflict as the classic ESP32.
-- ESP32-S3: dual-core, Wi-Fi + BLE 5. No ADC2/Wi-Fi conflict (arbitration redesigned). GPIO19/20 are USB Serial/JTAG. GPIO0/3/45/46 are strapping pins. No DAC.
-- ESP32-C3: single-core RISC-V, Wi-Fi + BLE 5. All ADC is ADC1 (no ADC2/Wi-Fi conflict). GPIO18/19 are USB Serial/JTAG. GPIO2/8/9 are strapping pins. No touch, no DAC.
+- ESP32-S2: single-core, Wi-Fi only (no Bluetooth). Native USB OTG on GPIO19/20. GPIO46 input-only. GPIO0/45/46 are strapping pins. ADC2 (GPIO11-20) is shared with Wi-Fi: reads may fail while Wi-Fi is active (softer than the classic ESP32, where they always fail). Prefer ADC1 (GPIO1-10).
+- ESP32-S3: dual-core, Wi-Fi + BLE 5. ADC2 (GPIO11-20) is shared with Wi-Fi: reads may fail while Wi-Fi is active, and ESP-IDF does not support ADC2 in continuous (DMA) mode (errata ADC-183). Prefer ADC1 (GPIO1-10). GPIO19/20 are USB Serial/JTAG. GPIO0/3/45/46 are strapping pins. No DAC.
+- ESP32-C3: single-core RISC-V, Wi-Fi + BLE 5. GPIO5 is ADC2, which ESP-IDF no longer supports on the C3; use ADC1 (GPIO0-4). GPIO18/19 are USB Serial/JTAG. GPIO2/8/9 are strapping pins. No touch, no DAC.
 - ESP32-C6: single-core RISC-V, Wi-Fi 6 + BLE 5 + 802.15.4 (Zigbee/Thread/Matter).
 - ESP32-C5: RISC-V, dual-band Wi-Fi 6.
 - ESP32-H2: RISC-V, BLE 5 + 802.15.4, no Wi-Fi.
